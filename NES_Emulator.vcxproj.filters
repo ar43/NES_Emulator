@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\Logger">
+      <UniqueIdentifier>{79434a22-eff6-47e5-89b3-60b5be0af173}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Logger">
+      <UniqueIdentifier>{2a774ab0-8388-47a4-9ce2-c5ef464153af}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Machine">
+      <UniqueIdentifier>{f7e2a867-03c0-4773-a407-a95e14cb7e1a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Machine\CPU">
+      <UniqueIdentifier>{191a6a73-d118-4f88-a99c-6ef0f3f74faf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Machine">
+      <UniqueIdentifier>{c627030d-351b-46f4-94b0-93f34a24d314}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Machine\CPU">
+      <UniqueIdentifier>{77367788-a295-4e50-871f-332c167d545e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Machine\Memory">
+      <UniqueIdentifier>{30c103df-325b-4594-bbb5-c461ceb56027}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Machine\Memory">
+      <UniqueIdentifier>{1f53001b-9049-4fa2-ac7f-8090dd434f0c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\logger\logger.cpp">
+      <Filter>Source Files\Logger</Filter>
+    </ClCompile>
+    <ClCompile Include="src\machine\machine.cpp">
+      <Filter>Source Files\Machine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\machine\cpu\cpu.cpp">
+      <Filter>Source Files\Machine\CPU</Filter>
+    </ClCompile>
+    <ClCompile Include="src\machine\memory\memory.cpp">
+      <Filter>Source Files\Machine\Memory</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\logger\logger.h">
+      <Filter>Header Files\Logger</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machine\machine.h">
+      <Filter>Header Files\Machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machine\cpu\cpu.h">
+      <Filter>Header Files\Machine\CPU</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machine\cpu\register.h">
+      <Filter>Header Files\Machine\CPU</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machine\memory\memory.h">
+      <Filter>Header Files\Machine\Memory</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
