@@ -10,7 +10,7 @@ namespace flags
 		I,
 		D,
 		B,
-		O,
+		V,
 		N,
 		NUM_FLAGS
 	};

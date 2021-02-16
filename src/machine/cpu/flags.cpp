@@ -16,8 +16,8 @@ namespace flags
 			return "D";
 		case Flags::B:
 			return "B";
-		case Flags::O:
-			return "O";
+		case Flags::V:
+			return "V";
 		case Flags::N:
 			return "N";
 		default:

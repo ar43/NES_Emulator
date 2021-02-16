@@ -17,6 +17,8 @@ public:
 	
 private:
 	
+	int GetFlagsValue();
+
 	std::map<uint8_t, Instruction*> instruction_set;
 
 	void AddInstruction(std::string name, uint8_t opcode, AddressingMode mode, uint8_t bytes, uint8_t cycles, std::function<void(Cpu*,Memory*,int)> f, bool extra_cycle = false);

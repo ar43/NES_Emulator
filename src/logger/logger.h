@@ -3,6 +3,8 @@
 
 namespace logger
 {
+	constexpr bool CPU_TEST_MODE = true;
+
 	enum class LogType
 	{
 		INFO,
@@ -13,4 +15,5 @@ namespace logger
 
 	void PrintLine(LogType logType, std::string msg);
 	void Print(LogType logType, std::string msg);
+	void WriteToFile(std::string msg);
 }

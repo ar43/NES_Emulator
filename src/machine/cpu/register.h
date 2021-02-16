@@ -5,7 +5,7 @@
 enum class RegId
 {
 	PC,
-	SR,
+	SP,
 	A,
 	X,
 	Y,
@@ -61,8 +61,8 @@ public:
 		{
 		case RegId::PC:
 			return "PC";
-		case RegId::SR:
-			return "SR";
+		case RegId::SP:
+			return "SP";
 		case RegId::A:
 			return "A ";
 		case RegId::X:

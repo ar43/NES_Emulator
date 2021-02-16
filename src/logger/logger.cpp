@@ -7,6 +7,14 @@
 
 namespace logger
 {
+	void WriteToFile(std::string msg)
+	{
+		if (CPU_TEST_MODE)
+		{
+			//...
+		}
+	}
+
 	std::string TypeToString(LogType logType)
 	{
 		switch (logType)
