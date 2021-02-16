@@ -1,5 +1,6 @@
 #pragma once
 #include <cassert>
+#include <string>
 
 enum class RegId
 {
@@ -31,5 +32,24 @@ public:
 	int get()
 	{
 		return this->value;
+	}
+
+	static std::string to_string(RegId id)
+	{
+		switch (id)
+		{
+		case RegId::PC:
+			return "PC";
+		case RegId::SR:
+			return "SR";
+		case RegId::A:
+			return "A";
+		case RegId::X:
+			return "X";
+		case RegId::Y:
+			return "Y";
+		default:
+			return "ERROR REGISTER";
+		}
 	}
 };

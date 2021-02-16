@@ -142,16 +142,22 @@
   <ItemGroup>
     <ClCompile Include="src\logger\logger.cpp" />
     <ClCompile Include="src\machine\cpu\cpu.cpp" />
+    <ClCompile Include="src\machine\cpu\flags.cpp" />
     <ClCompile Include="src\machine\machine.cpp" />
     <ClCompile Include="src\machine\memory\memory.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\utility\utility.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\logger\logger.h" />
+    <ClInclude Include="src\machine\cpu\addressingmode.h" />
     <ClInclude Include="src\machine\cpu\cpu.h" />
+    <ClInclude Include="src\machine\cpu\flags.h" />
     <ClInclude Include="src\machine\cpu\register.h" />
     <ClInclude Include="src\machine\machine.h" />
     <ClInclude Include="src\machine\memory\memory.h" />
+    <ClInclude Include="src\machine\misc\instruction.h" />
+    <ClInclude Include="src\utility\utility.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
