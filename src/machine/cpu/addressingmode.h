@@ -6,12 +6,12 @@ enum class AddressingMode
 	IMMEDIATE,
 	ZERO_PAGE,
 	ZERO_PAGE_X,
-	ZERO_PAGE_Y,
-	RELATIVE,
-	ABSOLUTE,
-	ABSOLUTE_X,
-	ABSOLUTE_Y,
-	INDIRECT,
-	INDEXED_INDIRECT,
-	INDIRECT_INDEXED
+	ZERO_PAGE_Y, 
+	RELATIVE, //Relative (offset from following instruction)
+	ABSOLUTE, //Absolute
+	ABSOLUTE_X, //Absolute,X
+	ABSOLUTE_Y, //Absolute,Y
+	INDIRECT, ///(Indirect)
+	INDEXED_INDIRECT, //(Indirect,X)
+	INDIRECT_INDEXED  //(Indirect),Y
 };

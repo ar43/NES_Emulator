@@ -143,6 +143,7 @@
     <ClCompile Include="src\logger\logger.cpp" />
     <ClCompile Include="src\machine\cpu\cpu.cpp" />
     <ClCompile Include="src\machine\cpu\flags.cpp" />
+    <ClCompile Include="src\machine\cpu\is_load.cpp" />
     <ClCompile Include="src\machine\cpu\opcodes.cpp" />
     <ClCompile Include="src\machine\machine.cpp" />
     <ClCompile Include="src\machine\memory\memory.cpp" />
