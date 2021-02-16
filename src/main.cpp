@@ -9,7 +9,8 @@ int main()
 
 	auto *machine = new Machine();
 	
-	machine->cpu.DumpRegisters();
+	machine->cpu.RunTest(&machine->memory);
+	
 
 	return 0;
 }
