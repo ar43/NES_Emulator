@@ -7,35 +7,38 @@ namespace opcodes
 {
 	void LDA(Cpu* cpu, Memory *mem, int value)
 	{
-		if (value == 0)
+		int new_val = mem->Read(value);
+		cpu->registers[static_cast<size_t>(RegId::A)]->set(new_val);
+
+		if (new_val == 0)
 			cpu->flags[static_cast<size_t>(flags::Flags::Z)] = true;
 
-		if(utility::IsBitSet(value,7))
+		if(utility::IsBitSet(new_val,7))
 			cpu->flags[static_cast<size_t>(flags::Flags::N)] = true;
-
-		cpu->registers[static_cast<size_t>(RegId::A)]->set(value);
 	}
 
 	void LDX(Cpu* cpu, Memory *mem, int value)
 	{
-		if (value == 0)
+		int new_val = mem->Read(value);
+		cpu->registers[static_cast<size_t>(RegId::X)]->set(new_val);
+
+		if (new_val == 0)
 			cpu->flags[static_cast<size_t>(flags::Flags::Z)] = true;
 
-		if(utility::IsBitSet(value,7))
+		if(utility::IsBitSet(new_val,7))
 			cpu->flags[static_cast<size_t>(flags::Flags::N)] = true;
-
-		cpu->registers[static_cast<size_t>(RegId::X)]->set(value);
 	}
 
 	void LDY(Cpu* cpu, Memory *mem, int value)
 	{
-		if (value == 0)
+		int new_val = mem->Read(value);
+		cpu->registers[static_cast<size_t>(RegId::Y)]->set(new_val);
+
+		if (new_val == 0)
 			cpu->flags[static_cast<size_t>(flags::Flags::Z)] = true;
 
-		if(utility::IsBitSet(value,7))
+		if(utility::IsBitSet(new_val,7))
 			cpu->flags[static_cast<size_t>(flags::Flags::N)] = true;
-
-		cpu->registers[static_cast<size_t>(RegId::Y)]->set(value);
 	}
 
 	void STA(Cpu* cpu, Memory *mem, int value)
@@ -55,4 +58,53 @@ namespace opcodes
 		size_t addr = static_cast<size_t>(value);
 		mem->Write(addr, cpu->registers[static_cast<size_t>(RegId::Y)]->get());
 	}
+
+	void TAX(Cpu* cpu, Memory *mem, int value)
+	{
+		auto a = cpu->registers[(size_t)RegId::A]->get();
+		cpu->registers[(size_t)RegId::X]->set(a);
+
+		if (a == 0)
+			cpu->flags[static_cast<size_t>(flags::Flags::Z)] = true;
+
+		if(utility::IsBitSet(a,7))
+			cpu->flags[static_cast<size_t>(flags::Flags::N)] = true;
+	}
+
+	void TAY(Cpu* cpu, Memory *mem, int value)
+	{
+		auto a = cpu->registers[(size_t)RegId::A]->get();
+		cpu->registers[(size_t)RegId::Y]->set(a);
+
+		if (a == 0)
+			cpu->flags[static_cast<size_t>(flags::Flags::Z)] = true;
+
+		if(utility::IsBitSet(a,7))
+			cpu->flags[static_cast<size_t>(flags::Flags::N)] = true;
+	}
+
+	void TXA(Cpu* cpu, Memory *mem, int value)
+	{
+		auto x = cpu->registers[(size_t)RegId::X]->get();
+		cpu->registers[(size_t)RegId::A]->set(x);
+
+		if (x == 0)
+			cpu->flags[static_cast<size_t>(flags::Flags::Z)] = true;
+
+		if(utility::IsBitSet(x,7))
+			cpu->flags[static_cast<size_t>(flags::Flags::N)] = true;
+	}
+
+	void TYA(Cpu* cpu, Memory *mem, int value)
+	{
+		auto y = cpu->registers[(size_t)RegId::Y]->get();
+		cpu->registers[(size_t)RegId::A]->set(y);
+
+		if (y == 0)
+			cpu->flags[static_cast<size_t>(flags::Flags::Z)] = true;
+
+		if(utility::IsBitSet(y,7))
+			cpu->flags[static_cast<size_t>(flags::Flags::N)] = true;
+	}
+
 }

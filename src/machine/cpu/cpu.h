@@ -27,6 +27,15 @@ private:
 	void LoadInstructionSet();
 	void LoadLSOperations();
 	void LoadRTOperations();
+	void LoadStackOperations();
+	void LoadLogicalOperations();
+	void LoadArithmeticOperations();
+	void LoadIDOperations();
+	void LoadShiftsOperations();
+	void LoadJCOperations();
+	void LoadBranchesOperations();
+	void LoadStatusFlagOperations();
+	void LoadSystemFunctionOperations();
 
 	void InitRegisters();
 
