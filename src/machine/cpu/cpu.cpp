@@ -42,8 +42,7 @@ int Cpu::ResolveAddressing(Memory* mem, AddressingMode mode, bool extra_cycle)
 	case AddressingMode::ACCUMULATOR:
 	{
 		//special case, beware!
-		//have to take care of this on opcode level, remove this error msg when done
-		logger::PrintLine(logger::LogType::ERROR, "Unsupported addressing - ACCUMULATOR");
+		//have to take care of this on opcode level
 		return 0;
 	}
 	case AddressingMode::IMMEDIATE:

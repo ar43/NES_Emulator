@@ -476,4 +476,117 @@ namespace opcodes
 		p->set_flag(flags::Flags::Z, y->get() == 0);
 		p->set_flag(flags::Flags::N, utility::IsBitSet(y->get(),7));
 	}
+
+	void ASL(Cpu* cpu, Memory* mem, int value, AddressingMode mode)
+	{
+		auto p = cpu->registers[(size_t)RegId::P];
+		auto a = cpu->registers[(size_t)RegId::A];
+		int m = 0;
+
+		if (mode == AddressingMode::ACCUMULATOR)
+		{
+			m = a->get();
+			p->set_flag(flags::Flags::C, utility::IsBitSet(m, 7));
+			m = (m << 1) & 0xFF;
+			a->set(m);
+		}
+		else
+		{
+			int addr = value;
+			m = mem->Read(addr);
+			p->set_flag(flags::Flags::C, utility::IsBitSet(m, 7));
+			m = (m << 1) & 0xFF;
+			mem->Write(addr,m);
+		}
+
+		p->set_flag(flags::Flags::Z, a->get() == 0);
+		p->set_flag(flags::Flags::C, utility::IsBitSet(m, 7));
+	}
+
+	void LSR(Cpu* cpu, Memory* mem, int value, AddressingMode mode)
+	{
+		auto p = cpu->registers[(size_t)RegId::P];
+		auto a = cpu->registers[(size_t)RegId::A];
+		int m = 0;
+
+		if (mode == AddressingMode::ACCUMULATOR)
+		{
+			m = a->get();
+			p->set_flag(flags::Flags::C, utility::IsBitSet(m, 0));
+			m = (m >> 1) & 0xFF;
+			a->set(m);
+		}
+		else
+		{
+			int addr = value;
+			m = mem->Read(addr);
+			p->set_flag(flags::Flags::C, utility::IsBitSet(m, 0));
+			m = (m >> 1) & 0xFF;
+			mem->Write(addr,m);
+		}
+
+		p->set_flag(flags::Flags::Z, a->get() == 0);
+		p->set_flag(flags::Flags::C, utility::IsBitSet(m, 7));
+	}
+
+	void ROL(Cpu* cpu, Memory* mem, int value, AddressingMode mode)
+	{
+		auto p = cpu->registers[(size_t)RegId::P];
+		auto a = cpu->registers[(size_t)RegId::A];
+		int m = 0;
+
+		if (mode == AddressingMode::ACCUMULATOR)
+		{
+			m = a->get();
+			bool old_carry = p->get_flag(flags::Flags::C);
+			p->set_flag(flags::Flags::C, utility::IsBitSet(m, 7));
+			m = (m << 1) & 0xFF;
+			utility::SetBit(&m, 0, old_carry);
+			a->set(m);
+		}
+		else
+		{
+			int addr = value;
+			m = mem->Read(addr);
+			bool old_carry = p->get_flag(flags::Flags::C);
+			p->set_flag(flags::Flags::C, utility::IsBitSet(m, 7));
+			m = (m << 1) & 0xFF;
+			utility::SetBit(&m, 0, old_carry);
+			mem->Write(addr,m);
+		}
+
+		p->set_flag(flags::Flags::Z, a->get() == 0);
+		p->set_flag(flags::Flags::C, utility::IsBitSet(m, 7));
+	}
+
+	void ROR(Cpu* cpu, Memory* mem, int value, AddressingMode mode)
+	{
+		auto p = cpu->registers[(size_t)RegId::P];
+		auto a = cpu->registers[(size_t)RegId::A];
+		int m = 0;
+
+		if (mode == AddressingMode::ACCUMULATOR)
+		{
+			m = a->get();
+			bool old_carry = p->get_flag(flags::Flags::C);
+			p->set_flag(flags::Flags::C, utility::IsBitSet(m, 0));
+			m = (m >> 1) & 0xFF;
+			utility::SetBit(&m, 7, old_carry);
+			a->set(m);
+		}
+		else
+		{
+			int addr = value;
+			m = mem->Read(addr);
+			bool old_carry = p->get_flag(flags::Flags::C);
+			p->set_flag(flags::Flags::C, utility::IsBitSet(m, 0));
+			m = (m >> 1) & 0xFF;
+			utility::SetBit(&m, 7, old_carry);
+			mem->Write(addr,m);
+		}
+
+		p->set_flag(flags::Flags::Z, a->get() == 0);
+		p->set_flag(flags::Flags::C, utility::IsBitSet(m, 7));
+	}
+
 }

@@ -24,4 +24,18 @@ namespace utility
         assert(pos >= 0);
         return (value & (1 << pos)) != 0;
     }
+
+    void SetBit(int *value, int pos, bool which)
+    {
+        assert(pos >= 0);
+
+        if (which)
+        {
+            *value |= 1 << pos;
+        }
+        else
+        {
+            *value &= ~(1 << pos);
+        }
+    }
 }
