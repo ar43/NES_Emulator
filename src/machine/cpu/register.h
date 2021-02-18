@@ -1,4 +1,5 @@
 #pragma once
+#include "flags.h"
 #include <cassert>
 #include <string>
 
@@ -9,13 +10,15 @@ enum class RegId
 	A,
 	X,
 	Y,
+	P,
 	NUM_REGISTERS
 };
 
 enum class RegType
 {
 	BIT8,
-	BIT16
+	BIT16,
+	FLAG
 };
 
 class Register
@@ -31,29 +34,16 @@ public:
 		this->type = type;
 	}
 
-	void set(int value)
-	{
-		if(type == RegType::BIT8)
-			assert(value >= 0 && value <= 0xFF);
-		else
-			assert(value >= 0 && value <= 0xFFFF);
-		this->value = value;
-	}
+	void set(int value);
+	int get();
 
-	int get()
-	{
-		return this->value;
-	}
+	void increment();
+	void decrement();
 
-	void increment()
-	{
-		value++;
-
-		if(type == RegType::BIT8)
-			assert(value >= 0 && value <= 0xFF);
-		else
-			assert(value >= 0 && value <= 0xFFFF);
-	}
+	void set_flag(flags::Flags flag);
+	void reset_flag(flags::Flags flag);
+	void toggle_flag(flags::Flags flag);
+	bool get_flag(flags::Flags flag);
 
 	static std::string to_string(RegId id)
 	{
@@ -69,6 +59,8 @@ public:
 			return "X ";
 		case RegId::Y:
 			return "Y ";
+		case RegId::P:
+			return "P ";
 		default:
 			return "ERROR REGISTER";
 		}

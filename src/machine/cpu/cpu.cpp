@@ -4,13 +4,8 @@
 #include "../memory/memory.h"
 #include <iostream>
 
-
 Cpu::Cpu()
 {
-	std::fill(std::begin(flags), std::end(flags), false);
-	flags[(size_t)flags::Flags::B] = true;
-	flags[(size_t)flags::Flags::I] = true;
-	logger::PrintLine(logger::LogType::INFO, "P=" + utility::int_to_hex(GetFlagsValue()));
 	InitRegisters();
 	LoadInstructionSet();
 }
@@ -200,11 +195,6 @@ void Cpu::AddCycles(uint8_t num)
 	cycle_counter += num;
 }
 
-int Cpu::GetFlagsValue()
-{
-	return (int)flags[0] | (int)flags[1] << 1 | (int)flags[2] << 2 | (int)flags[3] << 3 | (int)flags[4] << 5 | (int)flags[5] << 6 | (int)flags[6] << 7;
-}
-
 void Cpu::InitRegisters()
 {
 	for (size_t i = 0; i < registers.size();i++)
@@ -213,6 +203,10 @@ void Cpu::InitRegisters()
 		{
 			registers[i] = new Register(RegType::BIT16);
 		}
+		else if ((RegId)i == RegId::P)
+		{
+			registers[i] = new Register(RegType::FLAG);
+		}
 		else
 		{
 			registers[i] = new Register(RegType::BIT8);
@@ -220,6 +214,8 @@ void Cpu::InitRegisters()
 	}
 
 	registers[(size_t)RegId::SP]->set(0xFD);
+	registers[(size_t)RegId::P]->set_flag(flags::Flags::B);
+	registers[(size_t)RegId::P]->set_flag(flags::Flags::I);
 }
 
 void Cpu::AddInstruction(std::string name, uint8_t opcode, AddressingMode mode, uint8_t bytes, uint8_t cycles, std::function<void(Cpu*,Memory*,int)> f, bool extra_cycle)
@@ -258,10 +254,10 @@ void Cpu::DumpRegisters()
 		std::cout << name << " = " << utility::int_to_hex(registers[i]->get()) << " (" << std::to_string(registers[i]->get()) << ")"<< std::endl;
 	}
 
-	logger::PrintLine(logger::LogType::INFO, "Dumping flags:");
+	/*logger::PrintLine(logger::LogType::INFO, "Dumping flags:");
 	for (size_t i = 0; i < flags.size();i++)
 	{
 		std::string name = flags::to_string((flags::Flags)i);
 		std::cout << name << " = " << std::to_string(flags[i]) << std::endl;
-	}
+	}*/
 }

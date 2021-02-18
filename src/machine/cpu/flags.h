@@ -9,6 +9,7 @@ namespace flags
 		Z,
 		I,
 		D,
+		UNUSED,
 		B,
 		V,
 		N,

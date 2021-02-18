@@ -1,9 +1,10 @@
 #pragma once
 #include "register.h"
-#include "flags.h"
 #include "../../machine/misc/instruction.h"
 #include <array>
 #include <map>
+
+constexpr size_t STACK_OFFSET = 0x100;
 
 class Cpu
 {
@@ -13,11 +14,11 @@ public:
 	void RunTest(Memory *mem);
 
 	std::array<Register*, static_cast<size_t>(RegId::NUM_REGISTERS)> registers;
-	std::array<bool, static_cast<size_t>(flags::Flags::NUM_FLAGS)> flags;
+	
 	
 private:
 	
-	int GetFlagsValue();
+	
 
 	std::map<uint8_t, Instruction*> instruction_set;
 
