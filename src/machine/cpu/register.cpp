@@ -27,8 +27,8 @@ void Register::increment()
 
 	value++;
 
-	if(type == RegType::BIT8)
-		assert(value >= 0 && value <= 0xFF);
+	if (type == RegType::BIT8)
+		value = value % 0x100;
 	else
 		assert(value >= 0 && value <= 0xFFFF);
 }
@@ -39,8 +39,9 @@ void Register::decrement()
 
 	value--;
 
-	if(type == RegType::BIT8)
-		assert(value >= 0 && value <= 0xFF);
+	if (type == RegType::BIT8)
+		if (value < 0)
+			value += 256;
 	else
 		assert(value >= 0 && value <= 0xFFFF);
 }

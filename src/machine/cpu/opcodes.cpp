@@ -405,4 +405,75 @@ namespace opcodes
 
 		p->set_flag(flags::Flags::N, utility::IsBitSet(zero_check, 7));
 	}
+
+	void INC(Cpu* cpu, Memory* mem, int value, AddressingMode mode)
+	{
+		auto p = cpu->registers[(size_t)RegId::P];
+
+		uint8_t m = mem->Read(value);
+		m++;
+		m = m % 0x100;
+		mem->Write(value, m);
+
+		p->set_flag(flags::Flags::Z, m == 0);
+		p->set_flag(flags::Flags::N, utility::IsBitSet(m,7));
+	}
+
+	void INX(Cpu* cpu, Memory* mem, int value, AddressingMode mode)
+	{
+		auto p = cpu->registers[(size_t)RegId::P];
+		auto x = cpu->registers[(size_t)RegId::X];
+
+		x->increment();
+
+		p->set_flag(flags::Flags::Z, x->get() == 0);
+		p->set_flag(flags::Flags::N, utility::IsBitSet(x->get(),7));
+	}
+
+	void INY(Cpu* cpu, Memory* mem, int value, AddressingMode mode)
+	{
+		auto p = cpu->registers[(size_t)RegId::P];
+		auto y = cpu->registers[(size_t)RegId::Y];
+
+		y->increment();
+
+		p->set_flag(flags::Flags::Z, y->get() == 0);
+		p->set_flag(flags::Flags::N, utility::IsBitSet(y->get(),7));
+	}
+
+	void DEC(Cpu* cpu, Memory* mem, int value, AddressingMode mode)
+	{
+		auto p = cpu->registers[(size_t)RegId::P];
+
+		int m = mem->Read(value);
+		m--;
+		if (m < 0)
+			m += 0x100;
+		mem->Write(value, m);
+
+		p->set_flag(flags::Flags::Z, m == 0);
+		p->set_flag(flags::Flags::N, utility::IsBitSet(m,7));
+	}
+
+	void DEX(Cpu* cpu, Memory* mem, int value, AddressingMode mode)
+	{
+		auto p = cpu->registers[(size_t)RegId::P];
+		auto x = cpu->registers[(size_t)RegId::X];
+
+		x->decrement();
+
+		p->set_flag(flags::Flags::Z, x->get() == 0);
+		p->set_flag(flags::Flags::N, utility::IsBitSet(x->get(),7));
+	}
+
+	void DEY(Cpu* cpu, Memory* mem, int value, AddressingMode mode)
+	{
+		auto p = cpu->registers[(size_t)RegId::P];
+		auto y = cpu->registers[(size_t)RegId::Y];
+
+		y->decrement();
+
+		p->set_flag(flags::Flags::Z, y->get() == 0);
+		p->set_flag(flags::Flags::N, utility::IsBitSet(y->get(),7));
+	}
 }
