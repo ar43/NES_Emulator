@@ -22,7 +22,7 @@ private:
 
 	std::map<uint8_t, Instruction*> instruction_set;
 
-	void AddInstruction(std::string name, uint8_t opcode, AddressingMode mode, uint8_t bytes, uint8_t cycles, std::function<void(Cpu*,Memory*,int)> f, bool extra_cycle = false);
+	void AddInstruction(std::string name, uint8_t opcode, AddressingMode mode, uint8_t bytes, uint8_t cycles, std::function<void(Cpu*,Memory*,int, AddressingMode mode)> f, bool extra_cycle = false);
 	Instruction* GetInstruction(uint8_t opcode);
 
 	void LoadInstructionSet();

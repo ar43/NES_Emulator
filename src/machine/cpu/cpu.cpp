@@ -13,7 +13,7 @@ Cpu::Cpu()
 void Cpu::RunTest(Memory* mem)
 {
 	auto ins = GetInstruction(0xA9);
-	ins->func(this, mem, 0);
+	ins->func(this, mem, 0, ins->mode);
 	DumpRegisters();
 
 	int a = 0;
@@ -21,8 +21,6 @@ void Cpu::RunTest(Memory* mem)
 	uint8_t ls = 0x34;
 	a = (ms << 8) | ls;
 	std::cout << utility::int_to_hex(a);
-
-
 }
 
 uint8_t Cpu::Fetch(Memory* mem)
@@ -44,8 +42,7 @@ int Cpu::ResolveAddressing(Memory* mem, AddressingMode mode, bool extra_cycle)
 	case AddressingMode::ACCUMULATOR:
 	{
 		//special case, beware!
-		//todo: set some special flag on cpu to perform stuff directly on A
-		//and make sure that the relevant functions in "opcodes" check that
+		//have to take care of this on opcode level, remove this error msg when done
 		logger::PrintLine(logger::LogType::ERROR, "Unsupported addressing - ACCUMULATOR");
 		return 0;
 	}
@@ -65,7 +62,7 @@ int Cpu::ResolveAddressing(Memory* mem, AddressingMode mode, bool extra_cycle)
 		int x = registers[(size_t)RegId::X]->get();
 		int addr = fetched + x;
 		if (addr > 0xFF)
-			addr -= 0xFF;
+			addr = addr % 0x100;
 		return addr;
 	}
 	case AddressingMode::ZERO_PAGE_Y:
@@ -74,7 +71,7 @@ int Cpu::ResolveAddressing(Memory* mem, AddressingMode mode, bool extra_cycle)
 		int y = registers[(size_t)RegId::Y]->get();
 		int addr = fetched + y;
 		if (addr > 0xFF)
-			addr -= 0xFF;
+			addr = addr % 0x100;
 		return addr;
 	}
 	case AddressingMode::RELATIVE:
@@ -144,7 +141,7 @@ int Cpu::ResolveAddressing(Memory* mem, AddressingMode mode, bool extra_cycle)
 		int x = registers[(size_t)RegId::X]->get();
 		int addr = fetched + x;
 		if (addr > 0xFF)
-			addr -= 0xFF;
+			addr = addr % 0x100;
 
 		assert(fetched < 0xFF);
 		uint8_t ls_lookup = mem->Read(addr);
@@ -164,8 +161,8 @@ int Cpu::ResolveAddressing(Memory* mem, AddressingMode mode, bool extra_cycle)
 		int y = registers[(size_t)RegId::Y]->get();
 		int second = first + y;
 
-		int first_page = first % 256;
-		int second_page = second % 256;
+		int first_page = first / 256;
+		int second_page = second / 256;
 
 		if (extra_cycle && first_page != second_page)
 			AddCycles(1);
@@ -186,7 +183,11 @@ void Cpu::ExecuteInstruction(Memory *mem)
 	uint8_t opcode = Fetch(mem);
 	auto instruction = GetInstruction(opcode);
 	int value = ResolveAddressing(mem, instruction->mode, instruction->extra_cycle);
-	instruction->func(this, mem, value);
+
+	if (instruction->mode != AddressingMode::RELATIVE)
+		assert(value >= 0);
+	instruction->func(this, mem, value, instruction->mode);
+
 	AddCycles(instruction->cycles);
 }
 
@@ -218,7 +219,7 @@ void Cpu::InitRegisters()
 	registers[(size_t)RegId::P]->set_flag(flags::Flags::I);
 }
 
-void Cpu::AddInstruction(std::string name, uint8_t opcode, AddressingMode mode, uint8_t bytes, uint8_t cycles, std::function<void(Cpu*,Memory*,int)> f, bool extra_cycle)
+void Cpu::AddInstruction(std::string name, uint8_t opcode, AddressingMode mode, uint8_t bytes, uint8_t cycles, std::function<void(Cpu*,Memory*,int, AddressingMode mode)> f, bool extra_cycle)
 {
 	auto it = instruction_set.find(opcode);
 	if (it != instruction_set.end())

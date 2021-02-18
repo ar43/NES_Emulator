@@ -41,6 +41,7 @@ public:
 	void decrement();
 
 	void set_flag(flags::Flags flag);
+	void set_flag(flags::Flags flag, bool condition);
 	void reset_flag(flags::Flags flag);
 	void toggle_flag(flags::Flags flag);
 	bool get_flag(flags::Flags flag);

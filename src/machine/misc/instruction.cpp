@@ -1,6 +1,6 @@
 #include "instruction.h"
 
-Instruction::Instruction(uint8_t opcode, std::string name, AddressingMode mode,uint8_t bytes, uint8_t cycles, std::function<void(Cpu*,Memory*,int)> f, bool extra_cycle)
+Instruction::Instruction(uint8_t opcode, std::string name, AddressingMode mode,uint8_t bytes, uint8_t cycles, std::function<void(Cpu*,Memory*,int, AddressingMode mode)> f, bool extra_cycle)
 {
 	this->opcode = opcode;
 	this->name = name;
