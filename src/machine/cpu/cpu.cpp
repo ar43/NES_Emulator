@@ -8,6 +8,7 @@ Cpu::Cpu()
 {
 	InitRegisters();
 	LoadInstructionSet();
+	cycle_counter = 7; // to account for boot or something, nestest.log starts with CYC 7, according to nesdev it doesnt matter at which number you start
 }
 
 void Cpu::RunTest(Memory* mem)

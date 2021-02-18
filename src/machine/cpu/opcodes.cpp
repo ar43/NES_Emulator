@@ -589,4 +589,43 @@ namespace opcodes
 		p->set_flag(flags::Flags::C, utility::IsBitSet(m, 7));
 	}
 
+	void JMP(Cpu* cpu, Memory* mem, int value, AddressingMode mode)
+	{
+		auto pc = cpu->registers[(size_t)RegId::PC];
+		pc->set(value);
+	}
+
+	void JSR(Cpu* cpu, Memory* mem, int value, AddressingMode mode)
+	{
+		auto pc = cpu->registers[(size_t)RegId::PC];
+		auto sp = cpu->registers[(size_t)RegId::SP];
+		int to_push = pc->get() - 1;
+		assert(to_push >= 0 && to_push <= 0xFFFF);
+		uint8_t ls = to_push & 0xFF;
+		uint8_t ms = (to_push >> 8) & 0xFF;
+
+		mem->Write(sp->get(), ls);
+		sp->decrement();
+		mem->Write(sp->get(), ms);
+		sp->decrement();
+
+		pc->set(value);
+	}
+
+	void RTS(Cpu* cpu, Memory* mem, int value, AddressingMode mode)
+	{
+		auto pc = cpu->registers[(size_t)RegId::PC];
+		auto sp = cpu->registers[(size_t)RegId::SP];
+		
+		sp->increment();
+		uint8_t ms = mem->Read(sp->get());
+		sp->increment();
+		uint8_t ls = mem->Read(sp->get());
+
+		int new_pc = (ms << 8) | ls;
+
+		pc->set(value);
+
+	}
+
 }
