@@ -16,7 +16,7 @@ public:
 	std::string CYCToString();
 	std::string GetFetchBuffer();
 
-	void RunTest(Memory *mem, int start, int count);
+	void RunTest(Memory *mem, int count);
 
 	std::array<Register*, static_cast<size_t>(RegId::NUM_REGISTERS)> registers;
 	

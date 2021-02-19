@@ -13,4 +13,5 @@ public:
 	std::unique_ptr<NesData> nes_data;
 
 	bool LoadNES(std::string path);
+	void RunCPUTest(int instruction_count);
 };

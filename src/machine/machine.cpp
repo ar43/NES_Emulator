@@ -1,5 +1,6 @@
 #include "machine.h"
 #include "../logger/logger.h"
+#include "../utility/utility.h"
 #include <fstream>
 #include <memory>
 
@@ -8,6 +9,19 @@
 Machine::Machine()
 {
 	logger::PrintLine(logger::LogType::INFO, "Created machine");
+}
+
+void Machine::RunCPUTest(int instruction_count)
+{
+	logger::CPU_TEST_MODE = true;
+	if (LoadNES("cpu_testing/nestest.nes"))
+	{
+		if (memory.LoadNES(nes_data.get()))
+		{
+			cpu.RunTest(&memory, instruction_count);
+		}
+	}
+	logger::CPU_TEST_MODE = false;
 }
 
 bool Machine::LoadNES(std::string path)
@@ -47,6 +61,7 @@ bool Machine::LoadNES(std::string path)
 	nes_data->header.flags8 = (uint8_t)header[8];
 	nes_data->header.flags9 = (uint8_t)header[9];
 	nes_data->header.flags10 = (uint8_t)header[10];
+
 	if ((nes_data->header.flags7 & 24) == 24)
 	{
 		nes_data->header.nes2 = true;
@@ -54,6 +69,19 @@ bool Machine::LoadNES(std::string path)
 
 	nes_data->header.mapper_num = HI_NIBBLE(nes_data->header.flags7) * 16 + HI_NIBBLE(nes_data->header.flags6);
 	assert(nes_data->header.mapper_num >= 0 && nes_data->header.mapper_num <= 255);
+
+	if (utility::IsBitSet(nes_data->header.flags6, (int)Flags6::TRAINER))
+	{
+		logger::PrintLine(logger::LogType::WARNING, "iNES file has TRAINER bit enabled.");
+		ifs.read(nes_data->trainer_data.data(), nes_data->trainer_data.size());
+		if (!ifs)
+		{
+			logger::PrintLine(logger::LogType::ERROR, "Bad file format! File too short.");
+			ifs.close();
+			return false;
+		}
+
+	}
 
 	for (int i = 0; i < nes_data->header.PRG_ROM_size;i++)
 	{

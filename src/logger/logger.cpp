@@ -9,6 +9,7 @@
 namespace logger
 {
 	std::vector<std::string> cpu_test_buffer;
+	bool CPU_TEST_MODE = false;
 
 	void WriteToFile(std::string msg)
 	{
@@ -17,12 +18,15 @@ namespace logger
 
 	void WriteTestToFile()
 	{
-		std::ofstream out("cpu_testing/cpu_test.log", std::ofstream::out | std::ofstream::trunc);
-		for (auto& str : cpu_test_buffer)
+		if(CPU_TEST_MODE)
 		{
-			out << str;
+			std::ofstream out("cpu_testing/cpu_test.log", std::ofstream::out | std::ofstream::trunc);
+			for (auto& str : cpu_test_buffer)
+			{
+				out << str;
+			}
+			out.close();
 		}
-		out.close();
 	}
 
 	std::string TypeToString(LogType logType)
@@ -58,11 +62,8 @@ namespace logger
 #ifdef _DEBUG
 		if (logType == LogType::FATAL_ERROR)
 		{
-			if (CPU_TEST_MODE)
-			{
-				WriteTestToFile();
-			}
-			std::raise(SIGINT);
+			WriteTestToFile();
+			__asm{int 3}
 		}
 			
 #endif
@@ -73,7 +74,10 @@ namespace logger
 		std::cout << GetTimetamp() << " " << TypeToString(logType) << ": " << msg;
 #ifdef _DEBUG
 		if (logType == LogType::FATAL_ERROR)
-			std::raise(SIGINT);
+		{
+			WriteTestToFile();
+			__asm{int 3}
+		}
 #endif
 	}
 }

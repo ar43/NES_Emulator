@@ -15,7 +15,7 @@ Cpu::Cpu()
 	add_extra_cycle = false;
 }
 
-void Cpu::RunTest(Memory* mem, int start, int count)
+void Cpu::RunTest(Memory* mem, int count)
 {
 	logger::PrintLine(logger::LogType::INFO, "Running CPU Test");
 

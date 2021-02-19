@@ -4,7 +4,7 @@
 
 namespace logger
 {
-	constexpr bool CPU_TEST_MODE = true;
+	extern bool CPU_TEST_MODE;
 	extern std::vector<std::string> cpu_test_buffer;
 
 	enum class LogType
