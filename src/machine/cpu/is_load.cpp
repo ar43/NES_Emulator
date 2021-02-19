@@ -8,7 +8,7 @@ void Cpu::LoadInstructionSet()
 {
 	LoadLSOperations();
 	LoadRTOperations();
-	LoadStackOperations(); // <--- unimplemented below
+	LoadStackOperations();
 	LoadLogicalOperations();
 	LoadArithmeticOperations();
 	LoadIDOperations();

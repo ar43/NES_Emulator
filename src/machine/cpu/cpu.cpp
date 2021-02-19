@@ -19,7 +19,7 @@ void Cpu::RunTest(Memory* mem, int count)
 {
 	logger::PrintLine(logger::LogType::INFO, "Running CPU Test");
 
-	//int initial_pc = mem->Read(0xFFFD)*256 + mem->Read(0xFFFC); //normally we jump to this
+	//int initial_pc = mem->ReadCPU(0xFFFD)*256 + mem->ReadCPU(0xFFFC); //normally we jump to this
 	//registers[(size_t)RegId::PC]->set(initial_pc);
 
 	registers[(size_t)RegId::PC]->set(0xC000); //need to force nestest to load at this location or it wont work (not without PPU anyways)
@@ -34,7 +34,7 @@ void Cpu::RunTest(Memory* mem, int count)
 
 uint8_t Cpu::Fetch(Memory* mem)
 {
-	uint8_t ret = mem->Read(registers[(size_t)RegId::PC]->get());
+	uint8_t ret = mem->ReadCPU(registers[(size_t)RegId::PC]->get());
 	registers[(size_t)RegId::PC]->increment();
 
 	if (logger::CPU_TEST_MODE)
@@ -70,7 +70,7 @@ int Cpu::ResolveAddressing(Memory* mem, Instruction* ins, std::string & out)
 	case AddressingMode::ZERO_PAGE:
 	{
 		auto fetched = Fetch(mem);
-		out = "$" + utility::int_to_hex(fetched) + " = " + utility::int_to_hex(mem->Read(fetched));
+		out = "$" + utility::int_to_hex(fetched) + " = " + utility::int_to_hex(mem->ReadCPU(fetched));
 		return fetched;
 	}
 	case AddressingMode::ZERO_PAGE_X:
@@ -79,7 +79,7 @@ int Cpu::ResolveAddressing(Memory* mem, Instruction* ins, std::string & out)
 		int x = registers[(size_t)RegId::X]->get();
 		int addr = fetched + x;
 		addr = addr % 0x100;
-		out = "$" + utility::int_to_hex(fetched) + ",X @ " + utility::int_to_hex(addr) + " = " + utility::int_to_hex(mem->Read(addr));
+		out = "$" + utility::int_to_hex(fetched) + ",X @ " + utility::int_to_hex(addr) + " = " + utility::int_to_hex(mem->ReadCPU(addr));
 		return addr;
 	}
 	case AddressingMode::ZERO_PAGE_Y:
@@ -88,7 +88,7 @@ int Cpu::ResolveAddressing(Memory* mem, Instruction* ins, std::string & out)
 		int y = registers[(size_t)RegId::Y]->get();
 		int addr = fetched + y;
 		addr = addr % 0x100;
-		out = "$" + utility::int_to_hex(fetched) + ",Y @ " + utility::int_to_hex(addr) + " = " + utility::int_to_hex(mem->Read(addr));
+		out = "$" + utility::int_to_hex(fetched) + ",Y @ " + utility::int_to_hex(addr) + " = " + utility::int_to_hex(mem->ReadCPU(addr));
 		return addr;
 	}
 	case AddressingMode::RELATIVE:
@@ -105,7 +105,7 @@ int Cpu::ResolveAddressing(Memory* mem, Instruction* ins, std::string & out)
 		int ret = (ms << 8) | ls;
 
 		if(ins->name.compare("JMP") != 0 && ins->name.compare("JSR") != 0)
-			out = "$" + utility::int_to_hex(ret) + " = " + utility::int_to_hex(mem->Read(ret));
+			out = "$" + utility::int_to_hex(ret) + " = " + utility::int_to_hex(mem->ReadCPU(ret));
 		else
 			out = "$" + utility::int_to_hex(ret);
 
@@ -126,7 +126,7 @@ int Cpu::ResolveAddressing(Memory* mem, Instruction* ins, std::string & out)
 		if (ins->extra_cycle && first_page != second_page)
 			add_extra_cycle = true;
 
-		out = "$" + utility::int_to_hex(first) + ",X @ " + utility::int_to_hex(second) + " = " + utility::int_to_hex(mem->Read(second));
+		out = "$" + utility::int_to_hex(first) + ",X @ " + utility::int_to_hex(second) + " = " + utility::int_to_hex(mem->ReadCPU(second));
 		return second;
 	}
 	case AddressingMode::ABSOLUTE_Y: //extra cycle support
@@ -144,7 +144,7 @@ int Cpu::ResolveAddressing(Memory* mem, Instruction* ins, std::string & out)
 		if (ins->extra_cycle && first_page != second_page)
 			add_extra_cycle = true;
 
-		out = "$" + utility::int_to_hex(first) + ",Y @ " + utility::int_to_hex(second) + " = " + utility::int_to_hex(mem->Read(second));
+		out = "$" + utility::int_to_hex(first) + ",Y @ " + utility::int_to_hex(second) + " = " + utility::int_to_hex(mem->ReadCPU(second));
 		return second;
 	}
 	case AddressingMode::INDIRECT:
@@ -154,12 +154,12 @@ int Cpu::ResolveAddressing(Memory* mem, Instruction* ins, std::string & out)
 		size_t addr = (ms << 8) | ls;
 
 		assert(addr < 0xFFFF);
-		uint8_t ls_lookup = mem->Read(addr);
+		uint8_t ls_lookup = mem->ReadCPU(addr);
 		int old_addr = addr;
 		addr = addr + 1;
 		if (addr % 0x100 == 0)
 			addr -= 0x100;
-		uint8_t ms_lookup = mem->Read(addr);
+		uint8_t ms_lookup = mem->ReadCPU(addr);
 
 		int ret = (ms_lookup << 8) | ls_lookup;
 
@@ -175,14 +175,14 @@ int Cpu::ResolveAddressing(Memory* mem, Instruction* ins, std::string & out)
 		if (addr > 0xFF)
 			addr = addr % 0x100;
 
-		uint8_t ls_lookup = mem->Read(addr);
+		uint8_t ls_lookup = mem->ReadCPU(addr);
 		int old_addr = addr;
 		addr = (addr + 1) % 0x100;
-		uint8_t ms_lookup = mem->Read(addr);
+		uint8_t ms_lookup = mem->ReadCPU(addr);
 
 		int ret = (ms_lookup << 8) | ls_lookup;
 
-		out = "($" + utility::int_to_hex(fetched) + ",X) @ " + utility::int_to_hex(old_addr) + " = " + utility::int_to_hex(ret) + " = " + utility::int_to_hex(mem->Read(ret));
+		out = "($" + utility::int_to_hex(fetched) + ",X) @ " + utility::int_to_hex(old_addr) + " = " + utility::int_to_hex(ret) + " = " + utility::int_to_hex(mem->ReadCPU(ret));
 
 		return ret;
 	}
@@ -190,9 +190,9 @@ int Cpu::ResolveAddressing(Memory* mem, Instruction* ins, std::string & out)
 	{
 		uint8_t fetched = Fetch(mem);
 		int addr = fetched;
-		uint8_t ls_lookup = mem->Read(addr);
+		uint8_t ls_lookup = mem->ReadCPU(addr);
 		addr= (addr + 1) % 0x100;
-		uint8_t ms_lookup = mem->Read(addr);
+		uint8_t ms_lookup = mem->ReadCPU(addr);
 
 		int first = (ms_lookup << 8) | ls_lookup;
 		int y = registers[(size_t)RegId::Y]->get();
@@ -204,7 +204,7 @@ int Cpu::ResolveAddressing(Memory* mem, Instruction* ins, std::string & out)
 		if (ins->extra_cycle && first_page != second_page)
 			add_extra_cycle = true;
 
-		out = "($" + utility::int_to_hex(fetched) + "),Y = " + utility::int_to_hex(first) + " @ " + utility::int_to_hex(second) + " = " + utility::int_to_hex(mem->Read(second));
+		out = "($" + utility::int_to_hex(fetched) + "),Y = " + utility::int_to_hex(first) + " @ " + utility::int_to_hex(second) + " = " + utility::int_to_hex(mem->ReadCPU(second));
 
 		return second;
 	}

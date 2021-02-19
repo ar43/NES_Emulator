@@ -9,7 +9,7 @@ namespace opcodes
 	{
 		int new_val = value;
 		if(mode != AddressingMode::IMMEDIATE)
-			new_val = mem->Read(value);
+			new_val = mem->ReadCPU(value);
 
 		auto p = cpu->registers[(size_t)RegId::P];
 		cpu->registers[static_cast<size_t>(RegId::A)]->set(new_val);
@@ -22,7 +22,7 @@ namespace opcodes
 	{
 		int new_val = value;
 		if(mode != AddressingMode::IMMEDIATE)
-			new_val = mem->Read(value);
+			new_val = mem->ReadCPU(value);
 
 		auto p = cpu->registers[(size_t)RegId::P];
 		cpu->registers[static_cast<size_t>(RegId::X)]->set(new_val);
@@ -35,7 +35,7 @@ namespace opcodes
 	{
 		int new_val = value;
 		if(mode != AddressingMode::IMMEDIATE)
-			new_val = mem->Read(value);
+			new_val = mem->ReadCPU(value);
 
 		auto p = cpu->registers[(size_t)RegId::P];
 		cpu->registers[static_cast<size_t>(RegId::Y)]->set(new_val);
@@ -47,19 +47,19 @@ namespace opcodes
 	void STA(Cpu* cpu, Memory *mem, int value, AddressingMode mode)
 	{
 		size_t addr = static_cast<size_t>(value);
-		mem->Write(addr, cpu->registers[static_cast<size_t>(RegId::A)]->get());
+		mem->WriteCPU(addr, cpu->registers[static_cast<size_t>(RegId::A)]->get());
 	}
 
 	void STX(Cpu* cpu, Memory *mem, int value, AddressingMode mode)
 	{
 		size_t addr = static_cast<size_t>(value);
-		mem->Write(addr, cpu->registers[static_cast<size_t>(RegId::X)]->get());
+		mem->WriteCPU(addr, cpu->registers[static_cast<size_t>(RegId::X)]->get());
 	}
 
 	void STY(Cpu* cpu, Memory *mem, int value, AddressingMode mode)
 	{
 		size_t addr = static_cast<size_t>(value);
-		mem->Write(addr, cpu->registers[static_cast<size_t>(RegId::Y)]->get());
+		mem->WriteCPU(addr, cpu->registers[static_cast<size_t>(RegId::Y)]->get());
 	}
 
 	void TAX(Cpu* cpu, Memory *mem, int value, AddressingMode mode)
@@ -133,7 +133,7 @@ namespace opcodes
 		auto a = cpu->registers[(size_t)RegId::A];
 
 		addr += sp->get();
-		mem->Write(addr, a->get());
+		mem->WriteCPU(addr, a->get());
 
 		sp->decrement();
 	}
@@ -148,7 +148,7 @@ namespace opcodes
 		int to_write = p->get();
 		utility::SetBit(&to_write, 5, 1);
 		utility::SetBit(&to_write, 4, 1);
-		mem->Write(addr, to_write);
+		mem->WriteCPU(addr, to_write);
 
 		sp->decrement();
 	}
@@ -163,7 +163,7 @@ namespace opcodes
 		sp->increment();
 		addr += sp->get();
 
-		a->set(mem->Read(addr));
+		a->set(mem->ReadCPU(addr));
 
 		p->set_flag(flags::Flags::Z,a->get() == 0);
 		p->set_flag(flags::Flags::N, utility::IsBitSet(a->get(),7));
@@ -179,7 +179,7 @@ namespace opcodes
 		addr += sp->get();
 		bool save_4 = p->get_flag(flags::Flags::UNUSED);
 		bool save_5 = p->get_flag(flags::Flags::B);
-		p->set(mem->Read(addr));
+		p->set(mem->ReadCPU(addr));
 		p->set_flag(flags::Flags::UNUSED, save_4);
 		p->set_flag(flags::Flags::B, save_5);
 	}
@@ -187,7 +187,7 @@ namespace opcodes
 	void AND(Cpu* cpu, Memory* mem, int value, AddressingMode mode)
 	{
 		if (mode != AddressingMode::IMMEDIATE)
-			value = mem->Read(value);
+			value = mem->ReadCPU(value);
 
 		auto p = cpu->registers[(size_t)RegId::P];
 		auto a = cpu->registers[(size_t)RegId::A];
@@ -203,7 +203,7 @@ namespace opcodes
 	void EOR(Cpu* cpu, Memory* mem, int value, AddressingMode mode)
 	{
 		if (mode != AddressingMode::IMMEDIATE)
-			value = mem->Read(value);
+			value = mem->ReadCPU(value);
 
 		auto p = cpu->registers[(size_t)RegId::P];
 		auto a = cpu->registers[(size_t)RegId::A];
@@ -219,7 +219,7 @@ namespace opcodes
 	void ORA(Cpu* cpu, Memory* mem, int value, AddressingMode mode)
 	{
 		if (mode != AddressingMode::IMMEDIATE)
-			value = mem->Read(value);
+			value = mem->ReadCPU(value);
 
 		auto p = cpu->registers[(size_t)RegId::P];
 		auto a = cpu->registers[(size_t)RegId::A];
@@ -235,7 +235,7 @@ namespace opcodes
 	void BIT(Cpu* cpu, Memory* mem, int value, AddressingMode mode)
 	{
 		if (mode != AddressingMode::IMMEDIATE)
-			value = mem->Read(value);
+			value = mem->ReadCPU(value);
 
 		auto p = cpu->registers[(size_t)RegId::P];
 		auto a = cpu->registers[(size_t)RegId::A];
@@ -250,7 +250,7 @@ namespace opcodes
 	void ADC(Cpu* cpu, Memory* mem, int value, AddressingMode mode)
 	{
 		if (mode != AddressingMode::IMMEDIATE)
-			value = mem->Read(value);
+			value = mem->ReadCPU(value);
 
 		auto p = cpu->registers[(size_t)RegId::P];
 		auto a = cpu->registers[(size_t)RegId::A];
@@ -295,7 +295,7 @@ namespace opcodes
 	void SBC(Cpu* cpu, Memory* mem, int value, AddressingMode mode) //who knows if this works
 	{
 		if (mode != AddressingMode::IMMEDIATE)
-			value = mem->Read(value);
+			value = mem->ReadCPU(value);
 
 		auto p = cpu->registers[(size_t)RegId::P];
 		auto a = cpu->registers[(size_t)RegId::A];
@@ -344,7 +344,7 @@ namespace opcodes
 	void CMP(Cpu* cpu, Memory* mem, int value, AddressingMode mode)
 	{
 		if (mode != AddressingMode::IMMEDIATE)
-			value = mem->Read(value);
+			value = mem->ReadCPU(value);
 
 		auto p = cpu->registers[(size_t)RegId::P];
 		auto a = cpu->registers[(size_t)RegId::A];
@@ -365,7 +365,7 @@ namespace opcodes
 	void CPX(Cpu* cpu, Memory* mem, int value, AddressingMode mode)
 	{
 		if (mode != AddressingMode::IMMEDIATE)
-			value = mem->Read(value);
+			value = mem->ReadCPU(value);
 
 		auto p = cpu->registers[(size_t)RegId::P];
 		auto x = cpu->registers[(size_t)RegId::X];
@@ -386,7 +386,7 @@ namespace opcodes
 	void CPY(Cpu* cpu, Memory* mem, int value, AddressingMode mode)
 	{
 		if (mode != AddressingMode::IMMEDIATE)
-			value = mem->Read(value);
+			value = mem->ReadCPU(value);
 
 		auto p = cpu->registers[(size_t)RegId::P];
 		auto y = cpu->registers[(size_t)RegId::Y];
@@ -408,10 +408,10 @@ namespace opcodes
 	{
 		auto p = cpu->registers[(size_t)RegId::P];
 
-		uint8_t m = mem->Read(value);
+		uint8_t m = mem->ReadCPU(value);
 		m++;
 		m = m % 0x100;
-		mem->Write(value, m);
+		mem->WriteCPU(value, m);
 
 		p->set_flag(flags::Flags::Z, m == 0);
 		p->set_flag(flags::Flags::N, utility::IsBitSet(m,7));
@@ -443,11 +443,11 @@ namespace opcodes
 	{
 		auto p = cpu->registers[(size_t)RegId::P];
 
-		int m = mem->Read(value);
+		int m = mem->ReadCPU(value);
 		m--;
 		if (m < 0)
 			m += 0x100;
-		mem->Write(value, m);
+		mem->WriteCPU(value, m);
 
 		p->set_flag(flags::Flags::Z, m == 0);
 		p->set_flag(flags::Flags::N, utility::IsBitSet(m,7));
@@ -491,10 +491,10 @@ namespace opcodes
 		else
 		{
 			int addr = value;
-			m = mem->Read(addr);
+			m = mem->ReadCPU(addr);
 			p->set_flag(flags::Flags::C, utility::IsBitSet(m, 7));
 			m = (m << 1) & 0xFF;
-			mem->Write(addr,m);
+			mem->WriteCPU(addr,m);
 		}
 
 		p->set_flag(flags::Flags::Z, m == 0);
@@ -517,10 +517,10 @@ namespace opcodes
 		else
 		{
 			int addr = value;
-			m = mem->Read(addr);
+			m = mem->ReadCPU(addr);
 			p->set_flag(flags::Flags::C, utility::IsBitSet(m, 0));
 			m = (m >> 1) & 0xFF;
-			mem->Write(addr,m);
+			mem->WriteCPU(addr,m);
 		}
 
 		p->set_flag(flags::Flags::Z, m == 0);
@@ -545,12 +545,12 @@ namespace opcodes
 		else
 		{
 			int addr = value;
-			m = mem->Read(addr);
+			m = mem->ReadCPU(addr);
 			bool old_carry = p->get_flag(flags::Flags::C);
 			p->set_flag(flags::Flags::C, utility::IsBitSet(m, 7));
 			m = (m << 1) & 0xFF;
 			utility::SetBit(&m, 0, old_carry);
-			mem->Write(addr,m);
+			mem->WriteCPU(addr,m);
 		}
 
 		p->set_flag(flags::Flags::Z, m == 0);
@@ -575,12 +575,12 @@ namespace opcodes
 		else
 		{
 			int addr = value;
-			m = mem->Read(addr);
+			m = mem->ReadCPU(addr);
 			bool old_carry = p->get_flag(flags::Flags::C);
 			p->set_flag(flags::Flags::C, utility::IsBitSet(m, 0));
 			m = (m >> 1) & 0xFF;
 			utility::SetBit(&m, 7, old_carry);
-			mem->Write(addr,m);
+			mem->WriteCPU(addr,m);
 		}
 
 		p->set_flag(flags::Flags::Z, m == 0);
@@ -602,9 +602,9 @@ namespace opcodes
 		uint8_t ls = to_push & 0xFF;
 		uint8_t ms = (to_push >> 8) & 0xFF;
 
-		mem->Write(sp->get()+STACK_OFFSET, ms);
+		mem->WriteCPU(sp->get()+STACK_OFFSET, ms);
 		sp->decrement();
-		mem->Write(sp->get()+STACK_OFFSET, ls);
+		mem->WriteCPU(sp->get()+STACK_OFFSET, ls);
 		sp->decrement();
 
 		pc->set(value);
@@ -616,9 +616,9 @@ namespace opcodes
 		auto sp = cpu->registers[(size_t)RegId::SP];
 		
 		sp->increment();
-		uint8_t ls = mem->Read(sp->get()+STACK_OFFSET);
+		uint8_t ls = mem->ReadCPU(sp->get()+STACK_OFFSET);
 		sp->increment();
-		uint8_t ms = mem->Read(sp->get()+STACK_OFFSET);
+		uint8_t ms = mem->ReadCPU(sp->get()+STACK_OFFSET);
 
 		int new_pc = (ms << 8) | ls;
 
@@ -807,21 +807,21 @@ namespace opcodes
 		uint8_t ls = pc->get() & 0xFF;
 		
 		//push pc+1 on stack
-		mem->Write(sp->get()+STACK_OFFSET, ms);
+		mem->WriteCPU(sp->get()+STACK_OFFSET, ms);
 		sp->decrement();
-		mem->Write(sp->get()+STACK_OFFSET, ls);
+		mem->WriteCPU(sp->get()+STACK_OFFSET, ls);
 		sp->decrement();
 
 		//push flags on stack
 		int to_write = p->get();
 		utility::SetBit(&to_write, 5, 1);
 		utility::SetBit(&to_write, 4, 1);
-		mem->Write(sp->get()+STACK_OFFSET, to_write);
+		mem->WriteCPU(sp->get()+STACK_OFFSET, to_write);
 		sp->decrement();
 
 		//jump to IRQ addr
-		uint8_t new_ls = mem->Read(0xFFFE);
-		uint8_t new_ms = mem->Read(0xFFFF);
+		uint8_t new_ls = mem->ReadCPU(0xFFFE);
+		uint8_t new_ms = mem->ReadCPU(0xFFFF);
 		int new_pc = (new_ms << 8) | new_ls;
 		pc->set(new_pc);
 	}
@@ -836,15 +836,15 @@ namespace opcodes
 		sp->increment();
 		bool save_4 = p->get_flag(flags::Flags::UNUSED);
 		bool save_5 = p->get_flag(flags::Flags::B);
-		p->set(mem->Read(sp->get()+STACK_OFFSET));
+		p->set(mem->ReadCPU(sp->get()+STACK_OFFSET));
 		p->set_flag(flags::Flags::UNUSED, save_4);
 		p->set_flag(flags::Flags::B, save_5);
 
 		//pull pc
 		sp->increment();
-		uint8_t new_ls = mem->Read(sp->get()+STACK_OFFSET);
+		uint8_t new_ls = mem->ReadCPU(sp->get()+STACK_OFFSET);
 		sp->increment();
-		uint8_t new_ms = mem->Read(sp->get()+STACK_OFFSET);
+		uint8_t new_ms = mem->ReadCPU(sp->get()+STACK_OFFSET);
 
 		int new_pc = (new_ms << 8) | new_ls;
 		pc->set(new_pc);

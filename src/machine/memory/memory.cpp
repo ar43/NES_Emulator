@@ -4,11 +4,11 @@
 #include "../../utility/utility.h"
 #include <assert.h>
 
-void Memory::Write(size_t loc, uint8_t byte) //cpu
+void Memory::WriteCPU(size_t loc, uint8_t byte) //cpu
 {
-	if (loc < 0 || loc > cpu_data.size())
+	if (loc < 0 || loc >= cpu_data.size())
 	{ 
-		logger::PrintLine(logger::LogType::FATAL_ERROR, "Memory::Write - Tried to write out of bounds: " + std::to_string(loc));
+		logger::PrintLine(logger::LogType::FATAL_ERROR, "Memory::WriteCPU - Tried to write out of bounds: " + std::to_string(loc));
 		return;
 	}
 
@@ -25,11 +25,11 @@ void Memory::Write(size_t loc, uint8_t byte) //cpu
 	cpu_data[loc] = byte;
 }
 
-uint8_t Memory::Read(size_t loc) //cpu
+uint8_t Memory::ReadCPU(size_t loc) //cpu
 {
-	if (loc < 0 || loc > cpu_data.size())
+	if (loc < 0 || loc >= cpu_data.size())
 	{ 
-		logger::PrintLine(logger::LogType::FATAL_ERROR, "Memory::Read - Tried to read out of bounds: " + utility::int_to_hex(loc));
+		logger::PrintLine(logger::LogType::FATAL_ERROR, "Memory::ReadCPU - Tried to read out of bounds: " + utility::int_to_hex(loc));
 		return 0;
 	}
 

@@ -20,8 +20,8 @@ public:
 	}
 	static const size_t CPU_MEM_SIZE = 0x10000;
 
-	void Write(size_t loc, uint8_t byte);
-	uint8_t Read(size_t loc);
+	void WriteCPU(size_t loc, uint8_t byte);
+	uint8_t ReadCPU(size_t loc);
 
 	bool LoadNES(NesData *nes_data);
 
