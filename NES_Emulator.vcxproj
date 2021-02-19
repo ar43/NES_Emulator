@@ -162,6 +162,7 @@
     <ClInclude Include="src\machine\machine.h" />
     <ClInclude Include="src\machine\memory\memory.h" />
     <ClInclude Include="src\machine\misc\instruction.h" />
+    <ClInclude Include="src\machine\misc\nes_data.h" />
     <ClInclude Include="src\utility\utility.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

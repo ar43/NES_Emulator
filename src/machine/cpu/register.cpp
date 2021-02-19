@@ -50,8 +50,8 @@ void Register::set_flag(flags::Flags flag)
 {
 	assert(type == RegType::FLAG);
 
-	if (flag == flags::Flags::UNUSED)
-		logger::PrintLine(logger::LogType::WARNING, "Setting UNUSED flag!");
+	/*if (flag == flags::Flags::UNUSED)
+		logger::PrintLine(logger::LogType::WARNING, "Setting UNUSED flag!");*/
 
 	int n = (int)flag;
 	assert(n <= 7 && n >= 0);
@@ -63,8 +63,8 @@ void Register::set_flag(flags::Flags flag, bool condition)
 {
 	assert(type == RegType::FLAG);
 
-	if (flag == flags::Flags::UNUSED)
-		logger::PrintLine(logger::LogType::WARNING, "Setting UNUSED flag!");
+	/*if (flag == flags::Flags::UNUSED)
+		logger::PrintLine(logger::LogType::WARNING, "Setting UNUSED flag!");*/
 
 	if (condition)
 	{
@@ -90,8 +90,8 @@ void Register::toggle_flag(flags::Flags flag)
 {
 	assert(type == RegType::FLAG);
 
-	if (flag == flags::Flags::UNUSED)
-		logger::PrintLine(logger::LogType::WARNING, "Toggling UNUSED flag!");
+	/*if (flag == flags::Flags::UNUSED)
+		logger::PrintLine(logger::LogType::WARNING, "Toggling UNUSED flag!");*/
 
 	int n = (int)flag;
 	assert(n <= 7 && n >= 0);
@@ -103,8 +103,8 @@ bool Register::get_flag(flags::Flags flag)
 {
 	assert(type == RegType::FLAG);
 
-	if (flag == flags::Flags::UNUSED)
-		logger::PrintLine(logger::LogType::WARNING, "Getting UNUSED flag!");
+	/*if (flag == flags::Flags::UNUSED)
+		logger::PrintLine(logger::LogType::WARNING, "Getting UNUSED flag!");*/
 
 	int n = (int)flag;
 	assert(n <= 7 && n >= 0);

@@ -8,9 +8,14 @@ int main()
 	logger::PrintLine(logger::LogType::INFO, "Starting NES emulation");
 
 	auto *machine = new Machine();
+	if (machine->LoadNES("cpu_testing/nestest.nes"))
+	{
+		if (machine->memory.LoadNES(machine->nes_data.get()))
+		{
+			machine->cpu.RunTest(&machine->memory, 0, 5000);
+		}
+	}
 	
-	machine->cpu.RunTest(&machine->memory, 0xC000, 10);
-	
-
+	delete machine;
 	return 0;
 }

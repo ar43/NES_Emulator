@@ -17,7 +17,7 @@ namespace logger
 
 	void WriteTestToFile()
 	{
-		std::ofstream out("cpu_testing/cpu_test.log");
+		std::ofstream out("cpu_testing/cpu_test.log", std::ofstream::out | std::ofstream::trunc);
 		for (auto& str : cpu_test_buffer)
 		{
 			out << str;
@@ -35,6 +35,8 @@ namespace logger
 			return "(INFO)";
 		case LogType::WARNING:
 			return "(WARNING)";
+		case LogType::FATAL_ERROR:
+			return "(FATAL_ERROR)";
 		case LogType::ERROR:
 			return "(ERROR)";
 		default:
@@ -54,8 +56,15 @@ namespace logger
 	{
 		std::cout << GetTimetamp() << " " << TypeToString(logType) << ": " << msg << std::endl;
 #ifdef _DEBUG
-		if (logType == LogType::ERROR)
+		if (logType == LogType::FATAL_ERROR)
+		{
+			if (CPU_TEST_MODE)
+			{
+				WriteTestToFile();
+			}
 			std::raise(SIGINT);
+		}
+			
 #endif
 	}
 
@@ -63,7 +72,7 @@ namespace logger
 	{
 		std::cout << GetTimetamp() << " " << TypeToString(logType) << ": " << msg;
 #ifdef _DEBUG
-		if (logType == LogType::ERROR)
+		if (logType == LogType::FATAL_ERROR)
 			std::raise(SIGINT);
 #endif
 	}

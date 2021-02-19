@@ -18,8 +18,10 @@ void Cpu::RunTest(Memory* mem, int start, int count)
 {
 	logger::PrintLine(logger::LogType::INFO, "Running CPU Test");
 
+	//int initial_pc = mem->Read(0xFFFD)*256 + mem->Read(0xFFFC); //normally we jump to this
+	//registers[(size_t)RegId::PC]->set(initial_pc);
 
-	registers[(size_t)RegId::PC]->set(start);
+	registers[(size_t)RegId::PC]->set(0xC000); //need to force nestest to load at this location or it wont work (not without PPU anyways)
 
 	for (int i = 0; i < count; i++)
 	{
@@ -101,7 +103,7 @@ int Cpu::ResolveAddressing(Memory* mem, Instruction* ins, std::string & out)
 		uint8_t ms = Fetch(mem);
 		int ret = (ms << 8) | ls;
 
-		if(ins->name.compare("JMP") != 0)
+		if(ins->name.compare("JMP") != 0 && ins->name.compare("JSR") != 0)
 			out = "$" + utility::int_to_hex(ret) + " = " + utility::int_to_hex(mem->Read(ret));
 		else
 			out = "$" + utility::int_to_hex(ret);
@@ -168,7 +170,6 @@ int Cpu::ResolveAddressing(Memory* mem, Instruction* ins, std::string & out)
 		if (addr > 0xFF)
 			addr = addr % 0x100;
 
-		assert(fetched < 0xFF);
 		uint8_t ls_lookup = mem->Read(addr);
 		uint8_t ms_lookup = mem->Read(addr+1);
 
@@ -181,7 +182,6 @@ int Cpu::ResolveAddressing(Memory* mem, Instruction* ins, std::string & out)
 	case AddressingMode::INDIRECT_INDEXED: //extra cycle support
 	{
 		uint8_t fetched = Fetch(mem);
-		assert(fetched < 0xFF);
 		uint8_t ls_lookup = mem->Read(fetched);
 		uint8_t ms_lookup = mem->Read(fetched+1);
 
@@ -201,7 +201,7 @@ int Cpu::ResolveAddressing(Memory* mem, Instruction* ins, std::string & out)
 	}
 	default:
 	{
-		logger::PrintLine(logger::LogType::ERROR, "Unknown addressing " + std::to_string((size_t)ins->mode));
+		logger::PrintLine(logger::LogType::FATAL_ERROR, "Unknown addressing " + std::to_string((size_t)ins->mode));
 		return 0;
 	}
 
@@ -220,7 +220,7 @@ void Cpu::ExecuteInstruction(Memory *mem)
 	if (logger::CPU_TEST_MODE)
 	{
 		std::stringstream ss;
-		ss << utility::int_to_hex(old_pc) << "  " << std::setw(10) << GetFetchBuffer() << instruction->name << " " << std::setw(28) << val << RegistersToString() << " " << PPUCounterToString() << " " << CYCToString() << std::endl;
+		ss << utility::int_to_hex(old_pc) << "  " << std::setw(10) << std::left << GetFetchBuffer() << instruction->name << " " << std::setw(28) << std::left << val << RegistersToString() << PPUCounterToString() << " " << CYCToString() << std::endl;
 		logger::cpu_test_buffer.push_back(ss.str());
 	}
 
@@ -264,7 +264,7 @@ void Cpu::AddInstruction(std::string name, uint8_t opcode, AddressingMode mode, 
 	auto it = instruction_set.find(opcode);
 	if (it != instruction_set.end())
 	{
-		logger::PrintLine(logger::LogType::ERROR, "Cpu::AddInstruction - trying to add an instruction with same opcode (name: " + name + " | op: " + utility::int_to_hex(opcode) + ")");
+		logger::PrintLine(logger::LogType::FATAL_ERROR, "Cpu::AddInstruction - trying to add an instruction with same opcode (name: " + name + " | op: " + utility::int_to_hex(opcode) + ")");
 		return;
 	}
 
@@ -281,7 +281,7 @@ Instruction* Cpu::GetInstruction(uint8_t opcode)
 	}
 	else
 	{
-		logger::PrintLine(logger::LogType::ERROR, "Cpu::GetInstruction - unknown instruction (op: " + utility::int_to_hex(opcode) + ")");
+		logger::PrintLine(logger::LogType::FATAL_ERROR, "Cpu::GetInstruction - unknown instruction (op: " + utility::int_to_hex(opcode) + ")");
 		return nullptr;
 	}
 }

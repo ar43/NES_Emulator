@@ -213,14 +213,14 @@ void Cpu::LoadJCOperations()
 
 void Cpu::LoadBranchesOperations()
 {
-	AddInstruction("BCC", 0x90, AddressingMode::RELATIVE,	  2, 2, &opcodes::BCC); //todo: fix cycles!
-	AddInstruction("BCS", 0xB0, AddressingMode::RELATIVE,	  2, 2, &opcodes::BCS); //todo: fix cycles!
-	AddInstruction("BEQ", 0xF0, AddressingMode::RELATIVE,	  2, 2, &opcodes::BEQ); //todo: fix cycles!
-	AddInstruction("BMI", 0x30, AddressingMode::RELATIVE,	  2, 2, &opcodes::BMI); //todo: fix cycles!
-	AddInstruction("BNE", 0xD0, AddressingMode::RELATIVE,	  2, 2, &opcodes::BNE); //todo: fix cycles!
-	AddInstruction("BPL", 0x10, AddressingMode::RELATIVE,	  2, 2, &opcodes::BPL); //todo: fix cycles!
-	AddInstruction("BVC", 0x50, AddressingMode::RELATIVE,	  2, 2, &opcodes::BVC); //todo: fix cycles!
-	AddInstruction("BVS", 0x70, AddressingMode::RELATIVE,	  2, 2, &opcodes::BVS); //todo: fix cycles!
+	AddInstruction("BCC", 0x90, AddressingMode::RELATIVE,	  2, 2, &opcodes::BCC);
+	AddInstruction("BCS", 0xB0, AddressingMode::RELATIVE,	  2, 2, &opcodes::BCS);
+	AddInstruction("BEQ", 0xF0, AddressingMode::RELATIVE,	  2, 2, &opcodes::BEQ);
+	AddInstruction("BMI", 0x30, AddressingMode::RELATIVE,	  2, 2, &opcodes::BMI);
+	AddInstruction("BNE", 0xD0, AddressingMode::RELATIVE,	  2, 2, &opcodes::BNE);
+	AddInstruction("BPL", 0x10, AddressingMode::RELATIVE,	  2, 2, &opcodes::BPL);
+	AddInstruction("BVC", 0x50, AddressingMode::RELATIVE,	  2, 2, &opcodes::BVC);
+	AddInstruction("BVS", 0x70, AddressingMode::RELATIVE,	  2, 2, &opcodes::BVS);
 }
 
 void Cpu::LoadStatusFlagOperations()

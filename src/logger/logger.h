@@ -12,6 +12,7 @@ namespace logger
 		INFO,
 		DEBUG,
 		WARNING,
+		FATAL_ERROR,
 		ERROR
 	};
 

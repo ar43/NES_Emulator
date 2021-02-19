@@ -136,8 +136,6 @@ namespace opcodes
 		mem->Write(addr, a->get());
 
 		sp->decrement();
-
-		assert(sp->get() >= STACK_OFFSET && sp->get() <= STACK_OFFSET+0xFF);
 	}
 
 	void PHP(Cpu* cpu, Memory *mem, int value, AddressingMode mode)
@@ -147,11 +145,12 @@ namespace opcodes
 		auto p = cpu->registers[(size_t)RegId::P];
 
 		addr += sp->get();
-		mem->Write(addr, p->get());
+		int to_write = p->get();
+		utility::SetBit(&to_write, 5, 1);
+		utility::SetBit(&to_write, 4, 1);
+		mem->Write(addr, to_write);
 
 		sp->decrement();
-
-		assert(sp->get() >= STACK_OFFSET && sp->get() <= STACK_OFFSET+0xFF);
 	}
 
 	void PLA(Cpu* cpu, Memory* mem, int value, AddressingMode mode)
@@ -168,8 +167,6 @@ namespace opcodes
 
 		p->set_flag(flags::Flags::Z,a->get() == 0);
 		p->set_flag(flags::Flags::N, utility::IsBitSet(a->get(),7));
-
-		assert(sp->get() >= STACK_OFFSET && sp->get() <= STACK_OFFSET+0xFF);
 	}
 
 	void PLP(Cpu* cpu, Memory* mem, int value, AddressingMode mode)
@@ -180,10 +177,11 @@ namespace opcodes
 
 		sp->increment();
 		addr += sp->get();
-
+		bool save_4 = p->get_flag(flags::Flags::UNUSED);
+		bool save_5 = p->get_flag(flags::Flags::B);
 		p->set(mem->Read(addr));
-
-		assert(sp->get() >= STACK_OFFSET && sp->get() <= STACK_OFFSET+0xFF);
+		p->set_flag(flags::Flags::UNUSED, save_4);
+		p->set_flag(flags::Flags::B, save_5);
 	}
 
 	void AND(Cpu* cpu, Memory* mem, int value, AddressingMode mode)
@@ -604,9 +602,9 @@ namespace opcodes
 		uint8_t ls = to_push & 0xFF;
 		uint8_t ms = (to_push >> 8) & 0xFF;
 
-		mem->Write(sp->get(), ms);
+		mem->Write(sp->get()+STACK_OFFSET, ms);
 		sp->decrement();
-		mem->Write(sp->get(), ls);
+		mem->Write(sp->get()+STACK_OFFSET, ls);
 		sp->decrement();
 
 		pc->set(value);
@@ -618,13 +616,13 @@ namespace opcodes
 		auto sp = cpu->registers[(size_t)RegId::SP];
 		
 		sp->increment();
-		uint8_t ls = mem->Read(sp->get());
+		uint8_t ls = mem->Read(sp->get()+STACK_OFFSET);
 		sp->increment();
-		uint8_t ms = mem->Read(sp->get());
+		uint8_t ms = mem->Read(sp->get()+STACK_OFFSET);
 
 		int new_pc = (ms << 8) | ls;
 
-		pc->set(value);
+		pc->set(new_pc + 1);
 
 	}
 
@@ -635,7 +633,12 @@ namespace opcodes
 
 		if (!p->get_flag(flags::Flags::C))
 		{
+			int old_pc_page = pc->get() / 256;
 			pc->set(pc->get() + value);
+			int new_pc_page = pc->get() / 256;
+			cpu->AddCycles(1);
+			if (old_pc_page != new_pc_page)
+				cpu->AddCycles(1);
 		}
 	}
 
@@ -646,7 +649,12 @@ namespace opcodes
 
 		if (p->get_flag(flags::Flags::C))
 		{
+			int old_pc_page = pc->get() / 256;
 			pc->set(pc->get() + value);
+			int new_pc_page = pc->get() / 256;
+			cpu->AddCycles(1);
+			if (old_pc_page != new_pc_page)
+				cpu->AddCycles(1);
 		}
 	}
 
@@ -657,7 +665,12 @@ namespace opcodes
 
 		if (p->get_flag(flags::Flags::Z))
 		{
+			int old_pc_page = pc->get() / 256;
 			pc->set(pc->get() + value);
+			int new_pc_page = pc->get() / 256;
+			cpu->AddCycles(1);
+			if (old_pc_page != new_pc_page)
+				cpu->AddCycles(1);
 		}
 	}
 
@@ -668,7 +681,12 @@ namespace opcodes
 
 		if (p->get_flag(flags::Flags::N))
 		{
+			int old_pc_page = pc->get() / 256;
 			pc->set(pc->get() + value);
+			int new_pc_page = pc->get() / 256;
+			cpu->AddCycles(1);
+			if (old_pc_page != new_pc_page)
+				cpu->AddCycles(1);
 		}
 	}
 
@@ -679,7 +697,12 @@ namespace opcodes
 
 		if (!p->get_flag(flags::Flags::Z))
 		{
+			int old_pc_page = pc->get() / 256;
 			pc->set(pc->get() + value);
+			int new_pc_page = pc->get() / 256;
+			cpu->AddCycles(1);
+			if (old_pc_page != new_pc_page)
+				cpu->AddCycles(1);
 		}
 	}
 
@@ -690,7 +713,12 @@ namespace opcodes
 
 		if (!p->get_flag(flags::Flags::N))
 		{
+			int old_pc_page = pc->get() / 256;
 			pc->set(pc->get() + value);
+			int new_pc_page = pc->get() / 256;
+			cpu->AddCycles(1);
+			if (old_pc_page != new_pc_page)
+				cpu->AddCycles(1);
 		}
 	}
 
@@ -701,7 +729,12 @@ namespace opcodes
 
 		if (!p->get_flag(flags::Flags::V))
 		{
+			int old_pc_page = pc->get() / 256;
 			pc->set(pc->get() + value);
+			int new_pc_page = pc->get() / 256;
+			cpu->AddCycles(1);
+			if (old_pc_page != new_pc_page)
+				cpu->AddCycles(1);
 		}
 	}
 
@@ -712,7 +745,12 @@ namespace opcodes
 
 		if (p->get_flag(flags::Flags::V))
 		{
+			int old_pc_page = pc->get() / 256;
 			pc->set(pc->get() + value);
+			int new_pc_page = pc->get() / 256;
+			cpu->AddCycles(1);
+			if (old_pc_page != new_pc_page)
+				cpu->AddCycles(1);
 		}
 	}
 
@@ -725,7 +763,7 @@ namespace opcodes
 	void CLD(Cpu* cpu, Memory* mem, int value, AddressingMode mode)
 	{
 		auto p = cpu->registers[(size_t)RegId::P];
-		p->reset_flag(flags::Flags::C);
+		p->reset_flag(flags::Flags::D);
 	}
 
 	void CLI(Cpu* cpu, Memory* mem, int value, AddressingMode mode)
@@ -769,13 +807,16 @@ namespace opcodes
 		uint8_t ls = pc->get() & 0xFF;
 		
 		//push pc+1 on stack
-		mem->Write(sp->get(), ms);
+		mem->Write(sp->get()+STACK_OFFSET, ms);
 		sp->decrement();
-		mem->Write(sp->get(), ls);
+		mem->Write(sp->get()+STACK_OFFSET, ls);
 		sp->decrement();
 
 		//push flags on stack
-		mem->Write(sp->get(), p->get());
+		int to_write = p->get();
+		utility::SetBit(&to_write, 5, 1);
+		utility::SetBit(&to_write, 4, 1);
+		mem->Write(sp->get()+STACK_OFFSET, to_write);
 		sp->decrement();
 
 		//jump to IRQ addr
@@ -793,12 +834,17 @@ namespace opcodes
 		
 		//pull flags
 		sp->increment();
-		p->set(mem->Read(sp->get()));
+		bool save_4 = p->get_flag(flags::Flags::UNUSED);
+		bool save_5 = p->get_flag(flags::Flags::B);
+		p->set(mem->Read(sp->get()+STACK_OFFSET));
+		p->set_flag(flags::Flags::UNUSED, save_4);
+		p->set_flag(flags::Flags::B, save_5);
 
+		//pull pc
 		sp->increment();
-		uint8_t new_ls = mem->Read(sp->get());
+		uint8_t new_ls = mem->Read(sp->get()+STACK_OFFSET);
 		sp->increment();
-		uint8_t new_ms = mem->Read(sp->get());
+		uint8_t new_ms = mem->Read(sp->get()+STACK_OFFSET);
 
 		int new_pc = (new_ms << 8) | new_ls;
 		pc->set(new_pc);
