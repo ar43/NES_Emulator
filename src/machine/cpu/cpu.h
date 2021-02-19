@@ -50,5 +50,6 @@ private:
 	int ResolveAddressing(Memory* mem, Instruction* ins, std::string & out);
 
 	uint64_t cycle_counter = 0;
+	bool add_extra_cycle = false;
 	
 };

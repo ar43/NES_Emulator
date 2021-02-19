@@ -12,6 +12,7 @@ Cpu::Cpu()
 	LoadInstructionSet();
 	cycle_counter = 7; // to account for boot or something, nestest.log starts with CYC 7, according to nesdev it doesnt matter at which number you start
 	fetch_buffer = "";
+	add_extra_cycle = false;
 }
 
 void Cpu::RunTest(Memory* mem, int start, int count)
@@ -117,13 +118,13 @@ int Cpu::ResolveAddressing(Memory* mem, Instruction* ins, std::string & out)
 		int first = (ms << 8) | ls;
 
 		int x = registers[(size_t)RegId::X]->get();
-		int second = first + x;
+		int second = (first + x) % Memory::CPU_MEM_SIZE;
 
-		int first_page = first % 256;
-		int second_page = second % 256;
+		int first_page = first / 256;
+		int second_page = second / 256;
 
 		if (ins->extra_cycle && first_page != second_page)
-			AddCycles(1);
+			add_extra_cycle = true;
 
 		out = "$" + utility::int_to_hex(first) + ",X @ " + utility::int_to_hex(second) + " = " + utility::int_to_hex(mem->Read(second));
 		return second;
@@ -135,13 +136,13 @@ int Cpu::ResolveAddressing(Memory* mem, Instruction* ins, std::string & out)
 		int first = (ms << 8) | ls;
 
 		int y = registers[(size_t)RegId::Y]->get();
-		int second = first + y;
+		int second = (first + y) % Memory::CPU_MEM_SIZE;
 
-		int first_page = first % 256;
-		int second_page = second % 256;
+		int first_page = first / 256;
+		int second_page = second / 256;
 
 		if (ins->extra_cycle && first_page != second_page)
-			AddCycles(1);
+			add_extra_cycle = true;
 
 		out = "$" + utility::int_to_hex(first) + ",Y @ " + utility::int_to_hex(second) + " = " + utility::int_to_hex(mem->Read(second));
 		return second;
@@ -154,11 +155,15 @@ int Cpu::ResolveAddressing(Memory* mem, Instruction* ins, std::string & out)
 
 		assert(addr < 0xFFFF);
 		uint8_t ls_lookup = mem->Read(addr);
-		uint8_t ms_lookup = mem->Read(addr+1);
+		int old_addr = addr;
+		addr = addr + 1;
+		if (addr % 0x100 == 0)
+			addr -= 0x100;
+		uint8_t ms_lookup = mem->Read(addr);
 
 		int ret = (ms_lookup << 8) | ls_lookup;
 
-		out = "($" + utility::int_to_hex(addr) + ") = " + utility::int_to_hex(mem->Read(ret));
+		out = "($" + utility::int_to_hex(old_addr) + ") = " + utility::int_to_hex(ret);
 
 		return ret;
 	}
@@ -171,29 +176,33 @@ int Cpu::ResolveAddressing(Memory* mem, Instruction* ins, std::string & out)
 			addr = addr % 0x100;
 
 		uint8_t ls_lookup = mem->Read(addr);
-		uint8_t ms_lookup = mem->Read(addr+1);
+		int old_addr = addr;
+		addr = (addr + 1) % 0x100;
+		uint8_t ms_lookup = mem->Read(addr);
 
 		int ret = (ms_lookup << 8) | ls_lookup;
 
-		out = "($" + utility::int_to_hex(fetched) + ",X) @ " + utility::int_to_hex(addr) + " = " + utility::int_to_hex(ret) + " = " + utility::int_to_hex(mem->Read(ret));
+		out = "($" + utility::int_to_hex(fetched) + ",X) @ " + utility::int_to_hex(old_addr) + " = " + utility::int_to_hex(ret) + " = " + utility::int_to_hex(mem->Read(ret));
 
 		return ret;
 	}
 	case AddressingMode::INDIRECT_INDEXED: //extra cycle support
 	{
 		uint8_t fetched = Fetch(mem);
-		uint8_t ls_lookup = mem->Read(fetched);
-		uint8_t ms_lookup = mem->Read(fetched+1);
+		int addr = fetched;
+		uint8_t ls_lookup = mem->Read(addr);
+		addr= (addr + 1) % 0x100;
+		uint8_t ms_lookup = mem->Read(addr);
 
 		int first = (ms_lookup << 8) | ls_lookup;
 		int y = registers[(size_t)RegId::Y]->get();
-		int second = first + y;
+		int second = (first + y) % Memory::CPU_MEM_SIZE;
 
 		int first_page = first / 256;
 		int second_page = second / 256;
 
 		if (ins->extra_cycle && first_page != second_page)
-			AddCycles(1);
+			add_extra_cycle = true;
 
 		out = "($" + utility::int_to_hex(fetched) + "),Y = " + utility::int_to_hex(first) + " @ " + utility::int_to_hex(second) + " = " + utility::int_to_hex(mem->Read(second));
 
@@ -234,6 +243,11 @@ void Cpu::ExecuteInstruction(Memory *mem)
 void Cpu::AddCycles(uint8_t num)
 {
 	cycle_counter += num;
+	if (add_extra_cycle)
+	{ 
+		cycle_counter += 1;
+		add_extra_cycle = false;
+	}
 }
 
 void Cpu::InitRegisters()

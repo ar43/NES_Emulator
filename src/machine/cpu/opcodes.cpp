@@ -306,7 +306,7 @@ namespace opcodes
 		if (a->get() >= 0x80)
 			a_negative = true;
 
-		if (value >= 0x80)
+		if (value < 0x80)
 			value_negative = true;
 
 		int c = 0;
@@ -497,8 +497,8 @@ namespace opcodes
 			mem->Write(addr,m);
 		}
 
-		p->set_flag(flags::Flags::Z, a->get() == 0);
-		p->set_flag(flags::Flags::C, utility::IsBitSet(m, 7));
+		p->set_flag(flags::Flags::Z, m == 0);
+		p->set_flag(flags::Flags::N, utility::IsBitSet(m, 7));
 	}
 
 	void LSR(Cpu* cpu, Memory* mem, int value, AddressingMode mode)
@@ -523,8 +523,8 @@ namespace opcodes
 			mem->Write(addr,m);
 		}
 
-		p->set_flag(flags::Flags::Z, a->get() == 0);
-		p->set_flag(flags::Flags::C, utility::IsBitSet(m, 7));
+		p->set_flag(flags::Flags::Z, m == 0);
+		p->set_flag(flags::Flags::N, utility::IsBitSet(m, 7));
 	}
 
 	void ROL(Cpu* cpu, Memory* mem, int value, AddressingMode mode)
@@ -553,8 +553,8 @@ namespace opcodes
 			mem->Write(addr,m);
 		}
 
-		p->set_flag(flags::Flags::Z, a->get() == 0);
-		p->set_flag(flags::Flags::C, utility::IsBitSet(m, 7));
+		p->set_flag(flags::Flags::Z, m == 0);
+		p->set_flag(flags::Flags::N, utility::IsBitSet(m, 7));
 	}
 
 	void ROR(Cpu* cpu, Memory* mem, int value, AddressingMode mode)
@@ -583,8 +583,8 @@ namespace opcodes
 			mem->Write(addr,m);
 		}
 
-		p->set_flag(flags::Flags::Z, a->get() == 0);
-		p->set_flag(flags::Flags::C, utility::IsBitSet(m, 7));
+		p->set_flag(flags::Flags::Z, m == 0);
+		p->set_flag(flags::Flags::N, utility::IsBitSet(m, 7));
 	}
 
 	void JMP(Cpu* cpu, Memory* mem, int value, AddressingMode mode)
