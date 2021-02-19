@@ -3,16 +3,26 @@
 #include <csignal>
 #include <chrono>
 #include <ctime>
+#include <fstream>
 
 
 namespace logger
 {
+	std::vector<std::string> cpu_test_buffer;
+
 	void WriteToFile(std::string msg)
 	{
-		if (CPU_TEST_MODE)
+		PrintLine(LogType::INFO, "WriteToFile not implemented");
+	}
+
+	void WriteTestToFile()
+	{
+		std::ofstream out("cpu_testing/cpu_test.log");
+		for (auto& str : cpu_test_buffer)
 		{
-			//...
+			out << str;
 		}
+		out.close();
 	}
 
 	std::string TypeToString(LogType logType)

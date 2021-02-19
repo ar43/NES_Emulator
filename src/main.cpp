@@ -9,7 +9,7 @@ int main()
 
 	auto *machine = new Machine();
 	
-	machine->cpu.RunTest(&machine->memory);
+	machine->cpu.RunTest(&machine->memory, 0xC000, 10);
 	
 
 	return 0;

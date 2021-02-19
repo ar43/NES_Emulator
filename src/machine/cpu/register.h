@@ -5,12 +5,12 @@
 
 enum class RegId
 {
-	PC,
-	SP,
 	A,
 	X,
 	Y,
-	P,
+	P, //flag register
+	SP,
+	PC, //16bit register
 	NUM_REGISTERS
 };
 
@@ -55,13 +55,13 @@ public:
 		case RegId::SP:
 			return "SP";
 		case RegId::A:
-			return "A ";
+			return "A";
 		case RegId::X:
-			return "X ";
+			return "X";
 		case RegId::Y:
-			return "Y ";
+			return "Y";
 		case RegId::P:
-			return "P ";
+			return "P";
 		default:
 			return "ERROR REGISTER";
 		}

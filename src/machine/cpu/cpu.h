@@ -10,15 +10,18 @@ class Cpu
 {
 public:
 	Cpu();
-	void DumpRegisters();
-	void RunTest(Memory *mem);
+
+	std::string RegistersToString();
+	std::string PPUCounterToString();
+	std::string CYCToString();
+	std::string GetFetchBuffer();
+
+	void RunTest(Memory *mem, int start, int count);
 
 	std::array<Register*, static_cast<size_t>(RegId::NUM_REGISTERS)> registers;
 	
 	
 private:
-	
-	
 
 	std::map<uint8_t, Instruction*> instruction_set;
 
@@ -41,8 +44,9 @@ private:
 	void InitRegisters();
 
 	uint8_t Fetch(Memory *mem);
+	std::string fetch_buffer;
 	void ExecuteInstruction(Memory* mem);
-	int ResolveAddressing(Memory* mem, AddressingMode mode, bool extra_cycle);
+	int ResolveAddressing(Memory* mem, Instruction* ins, std::string & out);
 
 	uint64_t cycle_counter = 0;
 	void AddCycles(uint8_t num);

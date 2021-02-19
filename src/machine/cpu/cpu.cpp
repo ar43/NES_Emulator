@@ -3,37 +3,48 @@
 #include "../../utility/utility.h"
 #include "../memory/memory.h"
 #include <iostream>
+#include <sstream>
+#include <iomanip>
 
 Cpu::Cpu()
 {
 	InitRegisters();
 	LoadInstructionSet();
 	cycle_counter = 7; // to account for boot or something, nestest.log starts with CYC 7, according to nesdev it doesnt matter at which number you start
+	fetch_buffer = "";
 }
 
-void Cpu::RunTest(Memory* mem)
+void Cpu::RunTest(Memory* mem, int start, int count)
 {
-	auto ins = GetInstruction(0xA9);
-	ins->func(this, mem, 13, ins->mode);
-	DumpRegisters();
+	logger::PrintLine(logger::LogType::INFO, "Running CPU Test");
 
-	int a = 0;
-	uint8_t ms = 0x12;
-	uint8_t ls = 0x34;
-	a = (ms << 8) | ls;
-	std::cout << utility::int_to_hex(a);
+
+	registers[(size_t)RegId::PC]->set(start);
+
+	for (int i = 0; i < count; i++)
+	{
+		ExecuteInstruction(mem);
+	}
+	logger::WriteTestToFile();
+	logger::PrintLine(logger::LogType::INFO, "Finished CPU Test");
 }
 
 uint8_t Cpu::Fetch(Memory* mem)
 {
 	uint8_t ret = mem->Read(registers[(size_t)RegId::PC]->get());
 	registers[(size_t)RegId::PC]->increment();
+
+	if (logger::CPU_TEST_MODE)
+	{
+		fetch_buffer += utility::int_to_hex(ret) + " ";
+	}
+
 	return ret;
 }
 
-int Cpu::ResolveAddressing(Memory* mem, AddressingMode mode, bool extra_cycle)
+int Cpu::ResolveAddressing(Memory* mem, Instruction* ins, std::string & out)
 {
-	switch (mode)
+	switch (ins->mode)
 	{
 
 	case AddressingMode::IMPLICIT:
@@ -44,16 +55,19 @@ int Cpu::ResolveAddressing(Memory* mem, AddressingMode mode, bool extra_cycle)
 	{
 		//special case, beware!
 		//have to take care of this on opcode level
+		out = "A";
 		return 0;
 	}
 	case AddressingMode::IMMEDIATE:
 	{
 		auto fetched = Fetch(mem);
+		out = "#$" + utility::int_to_hex(fetched);
 		return fetched;
 	}
 	case AddressingMode::ZERO_PAGE:
 	{
 		auto fetched = Fetch(mem);
+		out = "$" + utility::int_to_hex(fetched) + " = " + utility::int_to_hex(mem->Read(fetched));
 		return fetched;
 	}
 	case AddressingMode::ZERO_PAGE_X:
@@ -61,8 +75,8 @@ int Cpu::ResolveAddressing(Memory* mem, AddressingMode mode, bool extra_cycle)
 		uint8_t fetched = Fetch(mem);
 		int x = registers[(size_t)RegId::X]->get();
 		int addr = fetched + x;
-		if (addr > 0xFF)
-			addr = addr % 0x100;
+		addr = addr % 0x100;
+		out = "$" + utility::int_to_hex(fetched) + ",X @ " + utility::int_to_hex(addr) + " = " + utility::int_to_hex(mem->Read(addr));
 		return addr;
 	}
 	case AddressingMode::ZERO_PAGE_Y:
@@ -70,14 +84,15 @@ int Cpu::ResolveAddressing(Memory* mem, AddressingMode mode, bool extra_cycle)
 		uint8_t fetched = Fetch(mem);
 		int y = registers[(size_t)RegId::Y]->get();
 		int addr = fetched + y;
-		if (addr > 0xFF)
-			addr = addr % 0x100;
+		addr = addr % 0x100;
+		out = "$" + utility::int_to_hex(fetched) + ",Y @ " + utility::int_to_hex(addr) + " = " + utility::int_to_hex(mem->Read(addr));
 		return addr;
 	}
 	case AddressingMode::RELATIVE:
 	{
 		uint8_t fetched = Fetch(mem);
 		int ret = (int8_t)fetched;
+		out = "$" + utility::int_to_hex(ret + registers[(size_t)RegId::PC]->get());
 		return ret;
 	}
 	case AddressingMode::ABSOLUTE:
@@ -85,6 +100,12 @@ int Cpu::ResolveAddressing(Memory* mem, AddressingMode mode, bool extra_cycle)
 		uint8_t ls = Fetch(mem);
 		uint8_t ms = Fetch(mem);
 		int ret = (ms << 8) | ls;
+
+		if(ins->name.compare("JMP") != 0)
+			out = "$" + utility::int_to_hex(ret) + " = " + utility::int_to_hex(mem->Read(ret));
+		else
+			out = "$" + utility::int_to_hex(ret);
+
 		return ret;
 	}
 	case AddressingMode::ABSOLUTE_X: //extra cycle support
@@ -99,9 +120,10 @@ int Cpu::ResolveAddressing(Memory* mem, AddressingMode mode, bool extra_cycle)
 		int first_page = first % 256;
 		int second_page = second % 256;
 
-		if (extra_cycle && first_page != second_page)
+		if (ins->extra_cycle && first_page != second_page)
 			AddCycles(1);
 
+		out = "$" + utility::int_to_hex(first) + ",X @ " + utility::int_to_hex(second) + " = " + utility::int_to_hex(mem->Read(second));
 		return second;
 	}
 	case AddressingMode::ABSOLUTE_Y: //extra cycle support
@@ -116,9 +138,10 @@ int Cpu::ResolveAddressing(Memory* mem, AddressingMode mode, bool extra_cycle)
 		int first_page = first % 256;
 		int second_page = second % 256;
 
-		if (extra_cycle && first_page != second_page)
+		if (ins->extra_cycle && first_page != second_page)
 			AddCycles(1);
 
+		out = "$" + utility::int_to_hex(first) + ",Y @ " + utility::int_to_hex(second) + " = " + utility::int_to_hex(mem->Read(second));
 		return second;
 	}
 	case AddressingMode::INDIRECT:
@@ -132,6 +155,8 @@ int Cpu::ResolveAddressing(Memory* mem, AddressingMode mode, bool extra_cycle)
 		uint8_t ms_lookup = mem->Read(addr+1);
 
 		int ret = (ms_lookup << 8) | ls_lookup;
+
+		out = "($" + utility::int_to_hex(addr) + ") = " + utility::int_to_hex(mem->Read(ret));
 
 		return ret;
 	}
@@ -148,6 +173,9 @@ int Cpu::ResolveAddressing(Memory* mem, AddressingMode mode, bool extra_cycle)
 		uint8_t ms_lookup = mem->Read(addr+1);
 
 		int ret = (ms_lookup << 8) | ls_lookup;
+
+		out = "($" + utility::int_to_hex(fetched) + ",X) @ " + utility::int_to_hex(addr) + " = " + utility::int_to_hex(ret) + " = " + utility::int_to_hex(mem->Read(ret));
+
 		return ret;
 	}
 	case AddressingMode::INDIRECT_INDEXED: //extra cycle support
@@ -164,14 +192,16 @@ int Cpu::ResolveAddressing(Memory* mem, AddressingMode mode, bool extra_cycle)
 		int first_page = first / 256;
 		int second_page = second / 256;
 
-		if (extra_cycle && first_page != second_page)
+		if (ins->extra_cycle && first_page != second_page)
 			AddCycles(1);
+
+		out = "($" + utility::int_to_hex(fetched) + "),Y = " + utility::int_to_hex(first) + " @ " + utility::int_to_hex(second) + " = " + utility::int_to_hex(mem->Read(second));
 
 		return second;
 	}
 	default:
 	{
-		logger::PrintLine(logger::LogType::ERROR, "Unknown addressing " + std::to_string((size_t)mode));
+		logger::PrintLine(logger::LogType::ERROR, "Unknown addressing " + std::to_string((size_t)ins->mode));
 		return 0;
 	}
 
@@ -180,9 +210,19 @@ int Cpu::ResolveAddressing(Memory* mem, AddressingMode mode, bool extra_cycle)
 
 void Cpu::ExecuteInstruction(Memory *mem)
 {
+	int old_pc = registers[(size_t)RegId::PC]->get();
+
 	uint8_t opcode = Fetch(mem);
 	auto instruction = GetInstruction(opcode);
-	int value = ResolveAddressing(mem, instruction->mode, instruction->extra_cycle);
+	std::string val = "";
+	int value = ResolveAddressing(mem, instruction, val);
+
+	if (logger::CPU_TEST_MODE)
+	{
+		std::stringstream ss;
+		ss << utility::int_to_hex(old_pc) << "  " << std::setw(10) << GetFetchBuffer() << instruction->name << " " << std::setw(28) << val << RegistersToString() << " " << PPUCounterToString() << " " << CYCToString() << std::endl;
+		logger::cpu_test_buffer.push_back(ss.str());
+	}
 
 	if (instruction->mode != AddressingMode::RELATIVE)
 		assert(value >= 0);
@@ -246,19 +286,36 @@ Instruction* Cpu::GetInstruction(uint8_t opcode)
 	}
 }
 
-void Cpu::DumpRegisters()
+std::string Cpu::RegistersToString()
 {
-	logger::PrintLine(logger::LogType::INFO, "Dumping registers:");
-	for (size_t i = 0; i < registers.size();i++)
+	std::string out = "";
+	for (size_t i = 0; i < (size_t)RegId::PC;i++)
 	{
 		std::string name = Register::to_string((RegId)i);
-		std::cout << name << " = " << utility::int_to_hex(registers[i]->get()) << " (" << std::to_string(registers[i]->get()) << ")"<< std::endl;
+		out += name + ":" + utility::int_to_hex(registers[i]->get(), false) + " ";
 	}
+	return out;
+}
 
-	/*logger::PrintLine(logger::LogType::INFO, "Dumping flags:");
-	for (size_t i = 0; i < flags.size();i++)
-	{
-		std::string name = flags::to_string((flags::Flags)i);
-		std::cout << name << " = " << std::to_string(flags[i]) << std::endl;
-	}*/
+std::string Cpu::PPUCounterToString()
+{
+	uint64_t first = (cycle_counter * 3) / 341;
+	uint64_t second = (cycle_counter * 3) % 341;
+	std::stringstream ss;
+	std::stringstream ss2;
+	ss << std::setw(3) << first;
+	ss2 << std::setw(3) << second;
+	return "PPU:" + ss.str() + "," + ss2.str();
+}
+
+std::string Cpu::CYCToString()
+{
+	return "CYC:" + std::to_string(cycle_counter);
+}
+
+std::string Cpu::GetFetchBuffer()
+{
+	std::string fb = fetch_buffer;
+	fetch_buffer = "";
+	return fb;
 }
