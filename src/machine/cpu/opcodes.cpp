@@ -604,9 +604,9 @@ namespace opcodes
 		uint8_t ls = to_push & 0xFF;
 		uint8_t ms = (to_push >> 8) & 0xFF;
 
-		mem->Write(sp->get(), ls);
-		sp->decrement();
 		mem->Write(sp->get(), ms);
+		sp->decrement();
+		mem->Write(sp->get(), ls);
 		sp->decrement();
 
 		pc->set(value);
@@ -618,14 +618,193 @@ namespace opcodes
 		auto sp = cpu->registers[(size_t)RegId::SP];
 		
 		sp->increment();
-		uint8_t ms = mem->Read(sp->get());
-		sp->increment();
 		uint8_t ls = mem->Read(sp->get());
+		sp->increment();
+		uint8_t ms = mem->Read(sp->get());
 
 		int new_pc = (ms << 8) | ls;
 
 		pc->set(value);
 
 	}
+
+	void BCC(Cpu* cpu, Memory* mem, int value, AddressingMode mode)
+	{
+		auto pc = cpu->registers[(size_t)RegId::PC];
+		auto p = cpu->registers[(size_t)RegId::P];
+
+		if (!p->get_flag(flags::Flags::C))
+		{
+			pc->set(pc->get() + value);
+		}
+	}
+
+	void BCS(Cpu* cpu, Memory* mem, int value, AddressingMode mode)
+	{
+		auto pc = cpu->registers[(size_t)RegId::PC];
+		auto p = cpu->registers[(size_t)RegId::P];
+
+		if (p->get_flag(flags::Flags::C))
+		{
+			pc->set(pc->get() + value);
+		}
+	}
+
+	void BEQ(Cpu* cpu, Memory* mem, int value, AddressingMode mode)
+	{
+		auto pc = cpu->registers[(size_t)RegId::PC];
+		auto p = cpu->registers[(size_t)RegId::P];
+
+		if (p->get_flag(flags::Flags::Z))
+		{
+			pc->set(pc->get() + value);
+		}
+	}
+
+	void BMI(Cpu* cpu, Memory* mem, int value, AddressingMode mode)
+	{
+		auto pc = cpu->registers[(size_t)RegId::PC];
+		auto p = cpu->registers[(size_t)RegId::P];
+
+		if (p->get_flag(flags::Flags::N))
+		{
+			pc->set(pc->get() + value);
+		}
+	}
+
+	void BNE(Cpu* cpu, Memory* mem, int value, AddressingMode mode)
+	{
+		auto pc = cpu->registers[(size_t)RegId::PC];
+		auto p = cpu->registers[(size_t)RegId::P];
+
+		if (!p->get_flag(flags::Flags::Z))
+		{
+			pc->set(pc->get() + value);
+		}
+	}
+
+	void BPL(Cpu* cpu, Memory* mem, int value, AddressingMode mode)
+	{
+		auto pc = cpu->registers[(size_t)RegId::PC];
+		auto p = cpu->registers[(size_t)RegId::P];
+
+		if (!p->get_flag(flags::Flags::N))
+		{
+			pc->set(pc->get() + value);
+		}
+	}
+
+	void BVC(Cpu* cpu, Memory* mem, int value, AddressingMode mode)
+	{
+		auto pc = cpu->registers[(size_t)RegId::PC];
+		auto p = cpu->registers[(size_t)RegId::P];
+
+		if (!p->get_flag(flags::Flags::V))
+		{
+			pc->set(pc->get() + value);
+		}
+	}
+
+	void BVS(Cpu* cpu, Memory* mem, int value, AddressingMode mode)
+	{
+		auto pc = cpu->registers[(size_t)RegId::PC];
+		auto p = cpu->registers[(size_t)RegId::P];
+
+		if (p->get_flag(flags::Flags::V))
+		{
+			pc->set(pc->get() + value);
+		}
+	}
+
+	void CLC(Cpu* cpu, Memory* mem, int value, AddressingMode mode)
+	{
+		auto p = cpu->registers[(size_t)RegId::P];
+		p->reset_flag(flags::Flags::C);
+	}
+
+	void CLD(Cpu* cpu, Memory* mem, int value, AddressingMode mode)
+	{
+		auto p = cpu->registers[(size_t)RegId::P];
+		p->reset_flag(flags::Flags::C);
+	}
+
+	void CLI(Cpu* cpu, Memory* mem, int value, AddressingMode mode)
+	{
+		auto p = cpu->registers[(size_t)RegId::P];
+		p->reset_flag(flags::Flags::I);
+	}
+
+	void CLV(Cpu* cpu, Memory* mem, int value, AddressingMode mode)
+	{
+		auto p = cpu->registers[(size_t)RegId::P];
+		p->reset_flag(flags::Flags::V);
+	}
+
+	void SEC(Cpu* cpu, Memory* mem, int value, AddressingMode mode)
+	{
+		auto p = cpu->registers[(size_t)RegId::P];
+		p->set_flag(flags::Flags::C);
+	}
+
+	void SED(Cpu* cpu, Memory* mem, int value, AddressingMode mode)
+	{
+		auto p = cpu->registers[(size_t)RegId::P];
+		p->set_flag(flags::Flags::D);
+	}
+
+	void SEI(Cpu* cpu, Memory* mem, int value, AddressingMode mode)
+	{
+		auto p = cpu->registers[(size_t)RegId::P];
+		p->set_flag(flags::Flags::I);
+	}
+
+	void BRK(Cpu* cpu, Memory* mem, int value, AddressingMode mode)
+	{
+		auto p = cpu->registers[(size_t)RegId::P];
+		auto sp = cpu->registers[(size_t)RegId::SP];
+		auto pc = cpu->registers[(size_t)RegId::PC];
+		p->set_flag(flags::Flags::B);
+		pc->increment();
+		uint8_t ms = (pc->get() >> 8) & 0xFF;
+		uint8_t ls = pc->get() & 0xFF;
+		
+		//push pc+1 on stack
+		mem->Write(sp->get(), ms);
+		sp->decrement();
+		mem->Write(sp->get(), ls);
+		sp->decrement();
+
+		//push flags on stack
+		mem->Write(sp->get(), p->get());
+		sp->decrement();
+
+		//jump to IRQ addr
+		uint8_t new_ls = mem->Read(0xFFFE);
+		uint8_t new_ms = mem->Read(0xFFFF);
+		int new_pc = (new_ms << 8) | new_ls;
+		pc->set(new_pc);
+	}
+
+	void RTI(Cpu* cpu, Memory* mem, int value, AddressingMode mode)
+	{
+		auto p = cpu->registers[(size_t)RegId::P];
+		auto sp = cpu->registers[(size_t)RegId::SP];
+		auto pc = cpu->registers[(size_t)RegId::PC];
+		
+		//pull flags
+		sp->increment();
+		p->set(mem->Read(sp->get()));
+
+		sp->increment();
+		uint8_t new_ls = mem->Read(sp->get());
+		sp->increment();
+		uint8_t new_ms = mem->Read(sp->get());
+
+		int new_pc = (new_ms << 8) | new_ls;
+		pc->set(new_pc);
+
+	}
+
+	void NOP(Cpu* cpu, Memory* mem, int value, AddressingMode mode) {}
 
 }

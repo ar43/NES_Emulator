@@ -14,7 +14,7 @@ Cpu::Cpu()
 void Cpu::RunTest(Memory* mem)
 {
 	auto ins = GetInstruction(0xA9);
-	ins->func(this, mem, 0, ins->mode);
+	ins->func(this, mem, 13, ins->mode);
 	DumpRegisters();
 
 	int a = 0;
