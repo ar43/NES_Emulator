@@ -22,7 +22,59 @@ void Memory::WriteCPU(size_t loc, uint8_t byte)
 		loc &= 0x2007;
 	}
 
+	if (loc == (size_t)ConstAddr::PPUADDR)
+	{
+		ppu_registers->ppuaddr.Write(byte);
+	}
+	else if (loc == (size_t)ConstAddr::PPUDATA)
+	{
+		logger::PrintLine(logger::LogType::WARNING, "Writing to PPUDATA! Who knows if this is correct?");
+		auto ppudata = ppu_registers->ppudata;
+		auto ppuaddr = ppu_registers->ppuaddr;
+		auto ppuctrl = ppu_registers->ppuctrl;
+		//WritePPU(ppuaddr.GetAddr(),ppudata.Get());
+		WritePPU(ppuaddr.GetAddr(), byte);
+		ppudata.Set(byte);
+		if (ppuctrl.IsBitSet(ControllerBits::VRAM_INC))
+			ppuaddr.Add(32);
+		else
+			ppuaddr.Add(1);
+	}
+	else if (loc == (size_t)ConstAddr::PPUCTRL)
+	{
+		ppu_registers->ppuctrl.Set(byte);
+	}
+	else if (loc == (size_t)ConstAddr::PPUMASK)
+	{
+		ppu_registers->ppumask.Set(byte);
+	}
+	else if (loc == (size_t)ConstAddr::OAMADDR)
+	{
+		ppu_registers->oamaddr = byte;
+	}
+	else if (loc == (size_t)ConstAddr::OAMDATA)
+	{
+		oam_data[ppu_registers->oamaddr] = byte;
+		ppu_registers->oamdata = byte;
+		ppu_registers->oamaddr++;
+	}
+	else if (loc == (size_t)ConstAddr::PPUSCROLL)
+	{
+		ppu_registers->ppuscroll.Write(byte);
+	}
+	else if (loc == (size_t)ConstAddr::OAMDMA)
+	{
+		ppu_registers->oamdma = byte;
+		int addr = byte << 8;
+		add_dma_cycles = true;
+		for (int i = 0; i < 256; i++)
+		{
+			oam_data[i] = cpu_data[addr + i];
+		}
+	}
+
 	cpu_data[loc] = byte;
+
 }
 
 uint8_t Memory::ReadCPU(size_t loc)
@@ -41,6 +93,41 @@ uint8_t Memory::ReadCPU(size_t loc)
 	else if (loc >= 0x2008 && loc <= 0x3FFF)
 	{
 		loc &= 0x2007;
+	}
+
+	if (loc == 0x2000 || loc == 0x2001 || loc == 0x2003 || loc == 0x2005 || loc == 0x2006 || loc == 0x4014)
+	{
+		logger::PrintLine(logger::LogType::FATAL_ERROR, "Memory::ReadCPU - Reading write only memory! " + utility::int_to_hex(loc));
+		return 0;
+	}
+
+	if (loc == (size_t)ConstAddr::PPUDATA)
+	{
+		auto ppudata = ppu_registers->ppudata;
+		auto ppuaddr = ppu_registers->ppuaddr;
+		auto ppuctrl = ppu_registers->ppuctrl;
+		cpu_data[loc] =ppudata.Get();
+		ppudata.Set(ReadPPU(ppuaddr.GetAddr()));
+		if (ppuctrl.IsBitSet(ControllerBits::VRAM_INC))
+			ppuaddr.Add(32);
+		else
+			ppuaddr.Add(1);
+	}
+	else if (loc == (size_t)ConstAddr::PPUSTATUS)
+	{
+		auto ppuaddr = ppu_registers->ppuaddr;
+		auto ppuscroll = ppu_registers->ppuscroll;
+		auto ppustatus = ppu_registers->ppustatus;
+		ppuaddr.ClearCounter();
+		ppuscroll.ClearCounter();
+		cpu_data[loc] = ppustatus.Get();
+		ppustatus.ResetVblank();
+	}
+	else if (loc == (size_t)ConstAddr::OAMDATA)
+	{
+		cpu_data[loc] = oam_data[ppu_registers->oamaddr];
+		if(!ppu_registers->ppustatus.IsBitSet(StatusBits::VBLANK))
+			ppu_registers->oamaddr++;
 	}
 
 	return cpu_data[loc];
@@ -141,4 +228,9 @@ bool Memory::LoadNES(NesData *nes_data)
 	logger::PrintLine(logger::LogType::INFO, "Mapper name: " + mapper.name + " Program start would be: " + utility::int_to_hex(initial_pc));
 
 	return true;
+}
+
+void Memory::AttachPPURegisters(PpuRegisters *ppu_registers)
+{
+	this->ppu_registers = ppu_registers;
 }

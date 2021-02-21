@@ -238,9 +238,18 @@ void Cpu::ExecuteInstruction(Memory *mem)
 	instruction->func(this, mem, value, instruction->mode);
 
 	AddCycles(instruction->cycles);
+
+	if (mem->add_dma_cycles)
+	{
+		mem->add_dma_cycles = false;
+		if (cycle_counter % 2 == 1)
+			AddCycles(514);
+		else
+			AddCycles(513);
+	}
 }
 
-void Cpu::AddCycles(uint8_t num)
+void Cpu::AddCycles(uint32_t num)
 {
 	cycle_counter += num;
 	if (add_extra_cycle)

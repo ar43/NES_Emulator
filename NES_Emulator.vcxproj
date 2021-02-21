@@ -149,6 +149,13 @@
     <ClCompile Include="src\machine\machine.cpp" />
     <ClCompile Include="src\machine\memory\memory.cpp" />
     <ClCompile Include="src\machine\misc\instruction.cpp" />
+    <ClCompile Include="src\machine\ppu\ppu.cpp" />
+    <ClCompile Include="src\machine\ppu\ppuaddr.cpp" />
+    <ClCompile Include="src\machine\ppu\ppuctrl.cpp" />
+    <ClCompile Include="src\machine\ppu\ppudata.cpp" />
+    <ClCompile Include="src\machine\ppu\ppumask.cpp" />
+    <ClCompile Include="src\machine\ppu\ppuscroll.cpp" />
+    <ClCompile Include="src\machine\ppu\ppustatus.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\utility\utility.cpp" />
   </ItemGroup>
@@ -163,6 +170,14 @@
     <ClInclude Include="src\machine\memory\memory.h" />
     <ClInclude Include="src\machine\misc\instruction.h" />
     <ClInclude Include="src\machine\misc\nes_data.h" />
+    <ClInclude Include="src\machine\ppu\ppu.h" />
+    <ClInclude Include="src\machine\ppu\ppuaddr.h" />
+    <ClInclude Include="src\machine\ppu\ppuctrl.h" />
+    <ClInclude Include="src\machine\ppu\ppudata.h" />
+    <ClInclude Include="src\machine\ppu\ppumask.h" />
+    <ClInclude Include="src\machine\ppu\ppuregisters.h" />
+    <ClInclude Include="src\machine\ppu\ppuscroll.h" />
+    <ClInclude Include="src\machine\ppu\ppustatus.h" />
     <ClInclude Include="src\utility\utility.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

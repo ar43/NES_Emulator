@@ -49,6 +49,18 @@
     <Filter Include="Source Files\Machine\Misc">
       <UniqueIdentifier>{a3c803bb-8496-4e59-b374-4d60098d208c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Machine\PPU">
+      <UniqueIdentifier>{e1c5a9f0-5a5a-48b7-86e5-518b3b5deb84}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Machine\PPU">
+      <UniqueIdentifier>{c9517d78-0166-4144-aba4-3a8866ddec39}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Machine\PPU\Registers">
+      <UniqueIdentifier>{44291aa7-e188-4e7b-83e8-d5035f6992ee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Machine\PPU\Registers">
+      <UniqueIdentifier>{32bfbee6-56a5-4606-8d39-07fc11f1eb48}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -84,6 +96,27 @@
     <ClCompile Include="src\machine\machine.cpp">
       <Filter>Source Files\Machine</Filter>
     </ClCompile>
+    <ClCompile Include="src\machine\ppu\ppu.cpp">
+      <Filter>Source Files\Machine\PPU</Filter>
+    </ClCompile>
+    <ClCompile Include="src\machine\ppu\ppuaddr.cpp">
+      <Filter>Source Files\Machine\PPU\Registers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\machine\ppu\ppudata.cpp">
+      <Filter>Source Files\Machine\PPU\Registers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\machine\ppu\ppuctrl.cpp">
+      <Filter>Source Files\Machine\PPU\Registers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\machine\ppu\ppumask.cpp">
+      <Filter>Source Files\Machine\PPU\Registers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\machine\ppu\ppustatus.cpp">
+      <Filter>Source Files\Machine\PPU\Registers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\machine\ppu\ppuscroll.cpp">
+      <Filter>Source Files\Machine\PPU\Registers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\logger\logger.h">
@@ -118,6 +151,30 @@
     </ClInclude>
     <ClInclude Include="src\machine\misc\nes_data.h">
       <Filter>Header Files\Machine\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machine\ppu\ppu.h">
+      <Filter>Header Files\Machine\PPU</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machine\ppu\ppuaddr.h">
+      <Filter>Header Files\Machine\PPU\Registers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machine\ppu\ppuctrl.h">
+      <Filter>Header Files\Machine\PPU\Registers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machine\ppu\ppudata.h">
+      <Filter>Header Files\Machine\PPU\Registers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machine\ppu\ppumask.h">
+      <Filter>Header Files\Machine\PPU\Registers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machine\ppu\ppuscroll.h">
+      <Filter>Header Files\Machine\PPU\Registers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machine\ppu\ppustatus.h">
+      <Filter>Header Files\Machine\PPU\Registers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machine\ppu\ppuregisters.h">
+      <Filter>Header Files\Machine\PPU</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

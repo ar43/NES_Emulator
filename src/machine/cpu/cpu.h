@@ -20,7 +20,9 @@ public:
 
 	std::array<Register*, static_cast<size_t>(RegId::NUM_REGISTERS)> registers;
 	
-	void AddCycles(uint8_t num);
+	void AddCycles(uint32_t num);
+
+	void ExecuteInstruction(Memory* mem);
 	
 private:
 
@@ -46,7 +48,7 @@ private:
 
 	uint8_t Fetch(Memory *mem);
 	std::string fetch_buffer;
-	void ExecuteInstruction(Memory* mem);
+	
 	int ResolveAddressing(Memory* mem, Instruction* ins, std::string & out);
 
 	uint64_t cycle_counter = 0;

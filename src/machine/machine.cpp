@@ -11,6 +11,11 @@ Machine::Machine()
 	logger::PrintLine(logger::LogType::INFO, "Created machine");
 }
 
+void Machine::Init()
+{
+	memory.AttachPPURegisters(&ppu.registers);
+}
+
 void Machine::RunCPUTest(int instruction_count)
 {
 	logger::CPU_TEST_MODE = true;
@@ -22,6 +27,27 @@ void Machine::RunCPUTest(int instruction_count)
 		}
 	}
 	logger::CPU_TEST_MODE = false;
+}
+
+void Machine::RunROM(std::string path)
+{
+	if (LoadNES(path))
+	{
+		if (memory.LoadNES(nes_data.get()))
+		{
+			Run();
+		}
+	}
+}
+
+void Machine::Run()
+{
+	int initial_pc = memory.ReadCPU(0xFFFD)*256 + memory.ReadCPU(0xFFFC); //normally we jump to this
+	cpu.registers[(size_t)RegId::PC]->set(initial_pc);
+	while (1)
+	{
+		cpu.ExecuteInstruction(&memory);
+	}
 }
 
 bool Machine::LoadNES(std::string path)
