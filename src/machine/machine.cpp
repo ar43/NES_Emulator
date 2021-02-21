@@ -46,7 +46,10 @@ void Machine::Run()
 	cpu.registers[(size_t)RegId::PC]->set(initial_pc);
 	while (1)
 	{
+		uint64_t old_cycle = cpu.GetCycles();
 		cpu.ExecuteInstruction(&memory);
+		uint16_t budget = (uint16_t)(cpu.GetCycles() - old_cycle);
+		ppu.Step(&memory,budget);
 	}
 }
 

@@ -19,7 +19,7 @@ public:
 	bool IsBitSet(StatusBits bit);
 	void Set(uint8_t value);
 	uint8_t Get();
-	void ResetVblank();
+	void SetBit(StatusBits bit, bool val);
 private:
 	uint8_t value = 0;
 };

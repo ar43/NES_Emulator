@@ -21,8 +21,12 @@ public:
 	std::array<Register*, static_cast<size_t>(RegId::NUM_REGISTERS)> registers;
 	
 	void AddCycles(uint32_t num);
+	uint64_t GetCycles();
+	
 
 	void ExecuteInstruction(Memory* mem);
+	void PollReset(Memory* mem);
+	void PollNMI(Memory* mem);
 	
 private:
 
@@ -53,5 +57,6 @@ private:
 
 	uint64_t cycle_counter = 0;
 	bool add_extra_cycle = false;
+	bool reset = true;
 	
 };

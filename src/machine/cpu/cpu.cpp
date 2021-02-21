@@ -10,7 +10,6 @@ Cpu::Cpu()
 {
 	InitRegisters();
 	LoadInstructionSet();
-	cycle_counter = 7; // to account for boot or something, nestest.log starts with CYC 7, according to nesdev it doesnt matter at which number you start
 	fetch_buffer = "";
 	add_extra_cycle = false;
 }
@@ -217,8 +216,58 @@ int Cpu::ResolveAddressing(Memory* mem, Instruction* ins, std::string & out)
 	}
 }
 
+void Cpu::PollReset(Memory *mem)
+{
+	if (reset) //todo: actual implementation after getting rid of CPU test
+	{
+		logger::PrintLine(logger::LogType::INFO, "CPU RESET detected");
+		AddCycles(7);
+		reset = false;
+	}
+}
+
+void Cpu::PollNMI(Memory *mem)
+{
+	if (mem->trigger_nmi_interrupt)
+	{
+		logger::PrintLine(logger::LogType::INFO, "NMI RESET detected");
+		AddCycles(7);
+		mem->trigger_nmi_interrupt = false;
+		
+		auto p = registers[(size_t)RegId::P];
+		auto sp = registers[(size_t)RegId::SP];
+		auto pc = registers[(size_t)RegId::PC];
+		//p->set_flag(flags::Flags::B);
+		uint8_t ms = (pc->get() >> 8) & 0xFF;
+		uint8_t ls = pc->get() & 0xFF;
+
+		//push pc on stack
+		mem->WriteCPU(sp->get()+STACK_OFFSET, ms);
+		sp->decrement();
+		mem->WriteCPU(sp->get()+STACK_OFFSET, ls);
+		sp->decrement();
+
+		//push flags on stack
+		int to_write = p->get();
+		utility::SetBit(&to_write, 5, 1);
+		utility::SetBit(&to_write, 4, 0);
+		mem->WriteCPU(sp->get()+STACK_OFFSET, to_write);
+		sp->decrement();
+
+		//jump to NMI addr
+		uint8_t new_ls = mem->ReadCPU(0xFFFA);
+		uint8_t new_ms = mem->ReadCPU(0xFFFB);
+		int new_pc = (new_ms << 8) | new_ls;
+		pc->set(new_pc);
+		p->set_flag(flags::Flags::I);
+		
+	}
+}
+
 void Cpu::ExecuteInstruction(Memory *mem)
 {
+	PollReset(mem);
+	PollNMI(mem);
 	int old_pc = registers[(size_t)RegId::PC]->get();
 
 	uint8_t opcode = Fetch(mem);
@@ -247,6 +296,11 @@ void Cpu::ExecuteInstruction(Memory *mem)
 		else
 			AddCycles(513);
 	}
+}
+
+uint64_t Cpu::GetCycles()
+{
+	return cycle_counter;
 }
 
 void Cpu::AddCycles(uint32_t num)

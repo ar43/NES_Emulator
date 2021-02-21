@@ -48,6 +48,7 @@ public:
 	void AttachPPURegisters(PpuRegisters* ppu_registers);
 	
 	bool add_dma_cycles = false;
+	bool trigger_nmi_interrupt = false;
 
 private:
 	std::array<uint8_t, Memory::CPU_MEM_SIZE> cpu_data;

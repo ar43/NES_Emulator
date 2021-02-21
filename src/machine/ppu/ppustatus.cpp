@@ -16,9 +16,9 @@ uint8_t PpuStatus::Get()
 	return value;
 }
 
-void PpuStatus::ResetVblank()
+void PpuStatus::SetBit(StatusBits bit, bool val)
 {
 	int cur_val = this->value;
-	utility::SetBit(&cur_val, 7, false);
+	utility::SetBit(&cur_val, (int)bit, val);
 	this->value = (uint8_t)cur_val;
 }

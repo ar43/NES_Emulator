@@ -42,7 +42,15 @@ void Memory::WriteCPU(size_t loc, uint8_t byte)
 	}
 	else if (loc == (size_t)ConstAddr::PPUCTRL)
 	{
-		ppu_registers->ppuctrl.Set(byte);
+		auto ppuctrl = ppu_registers->ppuctrl;
+		auto ppustatus = ppu_registers->ppustatus;
+		auto before = ppuctrl.IsBitSet(ControllerBits::GEN_NMI);
+		ppuctrl.Set(byte);
+		auto after = ppuctrl.IsBitSet(ControllerBits::GEN_NMI);
+		if (before == false && after == true && ppustatus.IsBitSet(StatusBits::VBLANK))
+		{
+			trigger_nmi_interrupt = true;
+		}
 	}
 	else if (loc == (size_t)ConstAddr::PPUMASK)
 	{
@@ -121,7 +129,7 @@ uint8_t Memory::ReadCPU(size_t loc)
 		ppuaddr.ClearCounter();
 		ppuscroll.ClearCounter();
 		cpu_data[loc] = ppustatus.Get();
-		ppustatus.ResetVblank();
+		ppustatus.SetBit(StatusBits::VBLANK,false);
 	}
 	else if (loc == (size_t)ConstAddr::OAMDATA)
 	{
