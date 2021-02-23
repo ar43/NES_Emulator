@@ -35,6 +35,7 @@ void Machine::RunROM(std::string path, Display *display)
 	{
 		if (memory.LoadNES(nes_data.get()))
 		{
+			display->BuildPixelValues(&memory);
 			Run(display);
 		}
 	}
@@ -42,8 +43,6 @@ void Machine::RunROM(std::string path, Display *display)
 
 void Machine::Run(Display *display)
 {
-	int initial_pc = memory.ReadCPU(0xFFFD)*256 + memory.ReadCPU(0xFFFC); //normally we jump to this
-	cpu.registers[(size_t)RegId::PC]->set(initial_pc);
 	frame.init();
 	SDL_Delay(20);
 	while (running)

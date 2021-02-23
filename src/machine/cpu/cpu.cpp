@@ -234,6 +234,8 @@ void Cpu::PollReset(Memory *mem)
 	{
 		logger::PrintLine(logger::LogType::INFO, "CPU RESET detected");
 		AddCycles(7);
+		int initial_pc = mem->ReadCPU(0xFFFD)*256 + mem->ReadCPU(0xFFFC); //normally we jump to this
+		registers[(size_t)RegId::PC]->set(initial_pc);
 		reset = false;
 	}
 }

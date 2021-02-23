@@ -42,8 +42,36 @@ bool Display::Init()
 
     SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
     texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, SCREEN_WIDTH, SCREEN_HEIGHT);
-
     return true;
+}
+
+void Display::BuildPixelValues(Memory *mem)
+{
+    uint32_t offset = 0;
+
+    for (int bank = 0; bank < 2; bank++)
+    {
+        for (int index = 0; index < TILE_PER_BANK; index++)
+        {
+            if (bank == 1)
+                offset = 0x1000;
+            int counter = 0;
+            for (int i = 0; i < TILE_HEIGHT; i++)
+            {
+                for (int j = 0; j < TILE_WIDTH; j++)
+                {
+                    uint8_t data1 = mem->chr_rom[offset + BYTES_PER_TILE * index + i];
+                    uint8_t data2 = mem->chr_rom[offset + BYTES_PER_TILE * index + i + 8];
+                    int bit1 = (int)(data1 & (1 << (7 - j))) != 0;
+                    int bit2 = (int)(data2 & (1 << (7 - j))) != 0;
+                    uint8_t value = 1 * bit1 + 2 * bit2;
+                    pixel_values[bank][index*PIXEL_PER_TILE + counter] = value;
+                    counter++;
+
+                }
+            }
+        }
+    }
 }
 
 void Display::SetScale(uint8_t scale)
@@ -56,7 +84,7 @@ void Display::SetScale(uint8_t scale)
     this->scale = scale;
 }
 
-void Display::DrawTile(Memory *mem, uint8_t bank, uint8_t index, int x, int y)
+void Display::DrawBackgroundTile(Memory *mem, uint8_t bank, uint8_t index, int x, int y)
 {
     assert(index <= 255 && index >= 0 && bank >= 0 && bank <= 1);
     SDL_Color colors[4];
@@ -64,21 +92,13 @@ void Display::DrawTile(Memory *mem, uint8_t bank, uint8_t index, int x, int y)
     palette.GetColor(&colors[1], 0x02);
     palette.GetColor(&colors[2], 0x36);
     palette.GetColor(&colors[3], 0x16);
-    uint32_t offset = 0;
-    if (bank == 1)
-        offset = 0x1000;
-
-    for (int i = 0; i < 8; i++)
+    for (int i = 0; i < TILE_HEIGHT; i++)
     {
-        for (int j = 0; j < 8; j++)
+        for (int j = 0; j < TILE_WIDTH; j++)
         {
-            uint8_t data1 = mem->chr_rom[offset + 16 * index + i];
-            uint8_t data2 = mem->chr_rom[offset + 16 * index + i + 8];
-            int bit1 = (int)(data1 & (1 << (7-j))) != 0;
-            int bit2 = (int)(data2 & (1 << (7-j))) != 0;
-            int value = 1 * bit1 + 2 * bit2;
+            uint8_t value = pixel_values[bank][index*PIXEL_PER_TILE + i*TILE_WIDTH+j];
             pixels[(y + i) * SCREEN_WIDTH + (x + j)] = colors[value].r << 24 | colors[value].g << 16 | colors[value].b << 8 | 0xFF;
-            
+            //counter++;
         }
     }
 }
@@ -102,14 +122,14 @@ void Display::DrawChrRom(Memory *mem)
     { 
         for (int i = 0; i < 16; i++)
         {
-            DrawTile(mem, 0, i+j*16, 8*i, j*8);
+            DrawBackgroundTile(mem, 0, i+j*16, 8*i, j*8);
         }
     }
     for(int j = 0; j < 16;j++)
     { 
         for (int i = 0; i < 16; i++)
         {
-            DrawTile(mem, 1, i+j*16, 8*i+128, j*8);
+            DrawBackgroundTile(mem, 1, i+j*16, 8*i+128, j*8);
         }
     }
 }
@@ -120,7 +140,7 @@ void Display::DrawBackground(Memory* mem)
     {
         for (int x = 0; x < 32; x++)
         {
-            DrawTile(mem, 1, mem->ReadPPU(0x2000 + y * 32 + x), x * 8, y * 8);
+            DrawBackgroundTile(mem, 1, mem->ReadPPU(0x2000 + y * 32 + x), x * 8, y * 8);
         }
     }
 }
@@ -147,6 +167,7 @@ void Display::Render(Memory *mem)
     {
         RenderStart();
         DrawBackground(mem);
+        //DrawChrRom(mem);
         RenderEnd();
         ProcessInput();
     }
