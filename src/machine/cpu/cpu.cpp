@@ -245,16 +245,6 @@ void Cpu::PollNMI(Memory *mem, Display *display)
 		//logger::PrintLine(logger::LogType::INFO, "NMI INTERRUPT detected");
 		AddCycles(7);
 		mem->trigger_nmi_interrupt = false;
-
-		display->Render(mem);
-		while (SDL_PollEvent(&display->e) != 0)
-		{
-			if (display->e.type == SDL_QUIT)
-			{
-				logger::PrintLine(logger::LogType::INFO, "Exiting");
-				exit(1);
-			}
-		}
 		
 		auto p = registers[(size_t)RegId::P];
 		auto sp = registers[(size_t)RegId::SP];

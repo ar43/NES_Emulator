@@ -119,9 +119,20 @@ void Display::DrawBackground(Memory* mem)
 
 void Display::Render(Memory *mem)
 {
-    RenderStart();
-    DrawBackground(mem);
-    RenderEnd();
+    if (mem->trigger_nmi_interrupt)
+    {
+        RenderStart();
+        DrawBackground(mem);
+        RenderEnd();
+        while (SDL_PollEvent(&e) != 0)
+        {
+            if (e.type == SDL_QUIT)
+            {
+                logger::PrintLine(logger::LogType::INFO, "Exiting");
+                exit(1);
+            }
+        }
+    }
 }
 
 void Display::RenderEnd()

@@ -44,13 +44,12 @@ void Machine::Run(Display *display)
 {
 	int initial_pc = memory.ReadCPU(0xFFFD)*256 + memory.ReadCPU(0xFFFC); //normally we jump to this
 	cpu.registers[(size_t)RegId::PC]->set(initial_pc);
-	uint32_t currentTime = SDL_GetTicks();
-	int counter = 0;
 	while (1)
 	{
 		static uint64_t cycle_accumulator = 0;
 
 		uint64_t old_cycle = cpu.GetCycles();
+		display->Render(&memory);
 		cpu.ExecuteInstruction(&memory, display);
 
 		uint16_t budget = (uint16_t)(cpu.GetCycles() - old_cycle);
@@ -60,10 +59,6 @@ void Machine::Run(Display *display)
 		if (cycle_accumulator >= 29780)
 		{
 			cycle_accumulator -= 29780;
-			uint32_t deltaTime = SDL_GetTicks() - currentTime;
-			logger::PrintLine(logger::LogType::INFO, "Frame time: " + std::to_string(deltaTime));
-			//SDL_Delay(1000/60);
-			currentTime = SDL_GetTicks();
 		}
 		
 	}
