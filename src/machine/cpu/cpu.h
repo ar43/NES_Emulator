@@ -1,6 +1,7 @@
 #pragma once
 #include "register.h"
 #include "../../machine/misc/instruction.h"
+#include "../../display/display.h"
 #include <array>
 #include <map>
 
@@ -24,9 +25,9 @@ public:
 	uint64_t GetCycles();
 	
 
-	void ExecuteInstruction(Memory* mem);
+	void ExecuteInstruction(Memory* mem, Display *display);
 	void PollReset(Memory* mem);
-	void PollNMI(Memory* mem);
+	void PollNMI(Memory* mem, Display* display);
 
 	std::string output_string;
 	

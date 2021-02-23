@@ -1,6 +1,7 @@
 #include "palette.h"
 #include "../logger/logger.h"
 #include <fstream>
+#include <cassert>
 
 bool Palette::Load(std::string name)
 {
@@ -26,16 +27,7 @@ bool Palette::Load(std::string name)
 
 void Palette::GetColor(SDL_Color *color, uint8_t index)
 {
-	if (color == nullptr)
-	{
-		logger::PrintLine(logger::LogType::FATAL_ERROR, "Palette::GetColor null color pointer");
-		return;
-	}
-	else if (index < 0 || index > 63)
-	{
-		logger::PrintLine(logger::LogType::FATAL_ERROR, "Palette::GetColor index out of bounds " + std::to_string(index));
-		return;
-	}
+	assert(color != nullptr && index >= 0 && index <= 63);
 
 	index *= 3;
 

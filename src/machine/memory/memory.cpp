@@ -29,25 +29,25 @@ void Memory::WriteCPU(size_t loc, uint8_t byte)
 	else if (loc == (size_t)ConstAddr::PPUDATA)
 	{
 		//logger::PrintLine(logger::LogType::WARNING, "Writing to PPUDATA! Who knows if this is correct?");
-		auto ppudata = ppu_registers->ppudata;
-		auto ppuaddr = ppu_registers->ppuaddr;
-		auto ppuctrl = ppu_registers->ppuctrl;
+		auto ppudata = &ppu_registers->ppudata;
+		auto ppuaddr = &ppu_registers->ppuaddr;
+		auto ppuctrl = &ppu_registers->ppuctrl;
 		//WritePPU(ppuaddr.GetAddr(),ppudata.Get());
-		WritePPU(ppuaddr.GetAddr(), byte);
-		ppudata.Set(byte);
-		if (ppuctrl.IsBitSet(ControllerBits::VRAM_INC))
-			ppuaddr.Add(32);
+		WritePPU(ppuaddr->GetAddr(), byte);
+		ppudata->Set(byte);
+		if (ppuctrl->IsBitSet(ControllerBits::VRAM_INC))
+			ppuaddr->Add(32);
 		else
-			ppuaddr.Add(1);
+			ppuaddr->Add(1);
 	}
 	else if (loc == (size_t)ConstAddr::PPUCTRL)
 	{
-		auto ppuctrl = ppu_registers->ppuctrl;
-		auto ppustatus = ppu_registers->ppustatus;
-		auto before = ppuctrl.IsBitSet(ControllerBits::GEN_NMI);
-		ppuctrl.Set(byte);
-		auto after = ppuctrl.IsBitSet(ControllerBits::GEN_NMI);
-		if (before == false && after == true && ppustatus.IsBitSet(StatusBits::VBLANK))
+		auto ppuctrl = &ppu_registers->ppuctrl;
+		auto ppustatus = &ppu_registers->ppustatus;
+		auto before = ppuctrl->IsBitSet(ControllerBits::GEN_NMI);
+		ppuctrl->Set(byte);
+		auto after = ppuctrl->IsBitSet(ControllerBits::GEN_NMI);
+		if (before == false && after == true && ppustatus->IsBitSet(StatusBits::VBLANK))
 		{
 			trigger_nmi_interrupt = true;
 		}
@@ -132,25 +132,25 @@ uint8_t Memory::ReadCPU(size_t loc)
 
 	if (loc == (size_t)ConstAddr::PPUDATA)
 	{
-		auto ppudata = ppu_registers->ppudata;
-		auto ppuaddr = ppu_registers->ppuaddr;
-		auto ppuctrl = ppu_registers->ppuctrl;
-		cpu_data[loc] =ppudata.Get();
-		ppudata.Set(ReadPPU(ppuaddr.GetAddr()));
-		if (ppuctrl.IsBitSet(ControllerBits::VRAM_INC))
-			ppuaddr.Add(32);
+		auto ppudata = &ppu_registers->ppudata;
+		auto ppuaddr = &ppu_registers->ppuaddr;
+		auto ppuctrl = &ppu_registers->ppuctrl;
+		cpu_data[loc] = ppudata->Get();
+		ppudata->Set(ReadPPU(ppuaddr->GetAddr()));
+		if (ppuctrl->IsBitSet(ControllerBits::VRAM_INC))
+			ppuaddr->Add(32);
 		else
-			ppuaddr.Add(1);
+			ppuaddr->Add(1);
 	}
 	else if (loc == (size_t)ConstAddr::PPUSTATUS)
 	{
-		auto ppuaddr = ppu_registers->ppuaddr;
-		auto ppuscroll = ppu_registers->ppuscroll;
-		auto ppustatus = ppu_registers->ppustatus;
-		ppuaddr.ClearCounter();
-		ppuscroll.ClearCounter();
-		cpu_data[loc] = ppustatus.Get();
-		ppustatus.SetBit(StatusBits::VBLANK,false);
+		auto ppuaddr = &ppu_registers->ppuaddr;
+		auto ppuscroll = &ppu_registers->ppuscroll;
+		auto ppustatus = &ppu_registers->ppustatus;
+		ppuaddr->ClearCounter();
+		ppuscroll->ClearCounter();
+		cpu_data[loc] = ppustatus->Get();
+		ppustatus->SetBit(StatusBits::VBLANK,false);
 	}
 	else if (loc == (size_t)ConstAddr::OAMDATA)
 	{

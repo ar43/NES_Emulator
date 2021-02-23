@@ -60,7 +60,7 @@ void Display::DrawTile(Memory *mem, uint8_t bank, uint8_t index, int x, int y)
 {
     assert(index <= 255 && index >= 0 && bank >= 0 && bank <= 1);
     SDL_Color colors[4];
-    palette.GetColor(&colors[0], 0x0F);
+    palette.GetColor(&colors[0], mem->ReadPPU(0x3F00));
     palette.GetColor(&colors[1], 0x02);
     palette.GetColor(&colors[2], 0x36);
     palette.GetColor(&colors[3], 0x16);
@@ -77,10 +77,8 @@ void Display::DrawTile(Memory *mem, uint8_t bank, uint8_t index, int x, int y)
             int bit1 = utility::IsBitSet(data1, 7-j);
             int bit2 = utility::IsBitSet(data2, 7-j);
             int value = 1 * bit1 + 2 * bit2;
-            pixels[(y + i) * SCREEN_WIDTH * 4 + (x + j) * 4] = colors[value].r;
-            pixels[(y + i) * SCREEN_WIDTH * 4 + (x + j) * 4+1] = colors[value].g;
-            pixels[(y + i) * SCREEN_WIDTH * 4 + (x + j) * 4+2] = colors[value].b;
-            pixels[(y + i) * SCREEN_WIDTH * 4 + (x + j) * 4+3] = colors[value].a;
+            pixels[(y + i) * SCREEN_WIDTH + (x + j)] = colors[value].r << 24 | colors[value].g << 16 | colors[value].b << 8 | colors[value].a;
+            
         }
     }
 }
@@ -99,11 +97,22 @@ void Display::DrawChrRom(Memory *mem)
             DrawTile(mem, 0, i+j*16, 8*i, j*8);
         }
     }
-    for(int j = 0; j < 10;j++)
+    for(int j = 0; j < 16;j++)
     { 
         for (int i = 0; i < 16; i++)
         {
-            DrawTile(mem, 1, i+j*16, 8*i, j*8+128);
+            DrawTile(mem, 1, i+j*16, 8*i+128, j*8);
+        }
+    }
+}
+
+void Display::DrawBackground(Memory* mem)
+{
+    for (int y = 0; y < 30; y++)
+    {
+        for (int x = 0; x < 32; x++)
+        {
+            DrawTile(mem, 1, mem->ReadPPU(0x2000 + y * 32 + x), x * 8, y * 8);
         }
     }
 }
@@ -111,11 +120,11 @@ void Display::DrawChrRom(Memory *mem)
 void Display::Render(Memory *mem)
 {
     RenderStart();
-    DrawChrRom(mem);
-    RenderFrame();
+    DrawBackground(mem);
+    RenderEnd();
 }
 
-void Display::RenderFrame()
+void Display::RenderEnd()
 {
     SDL_RenderClear(renderer);
     uint32_t *cur_pixels = nullptr;
@@ -128,10 +137,7 @@ void Display::RenderFrame()
         return;
     }
 
-    for (uint32_t i = 0; i < pixels.size() / 4; i++)
-    {
-        cur_pixels[i] = pixels[i * 4] << 24 | pixels[i * 4 + 1] << 16 | pixels[i * 4 + 2] << 8 | pixels[i * 4 + 3];
-    }
+    memcpy(cur_pixels, pixels.data(), sizeof(uint32_t) * SCREEN_HEIGHT * SCREEN_WIDTH);
 
     SDL_UnlockTexture(texture);
 

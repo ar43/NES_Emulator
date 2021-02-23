@@ -26,7 +26,7 @@ void Cpu::RunTest(Memory* mem, int count)
 
 	for (int i = 0; i < count; i++)
 	{
-		ExecuteInstruction(mem);
+		ExecuteInstruction(mem, nullptr);
 	}
 	logger::WriteTestToFile();
 	logger::PrintLine(logger::LogType::INFO, "Finished CPU Test");
@@ -238,13 +238,23 @@ void Cpu::PollReset(Memory *mem)
 	}
 }
 
-void Cpu::PollNMI(Memory *mem)
+void Cpu::PollNMI(Memory *mem, Display *display)
 {
 	if (mem->trigger_nmi_interrupt)
 	{
-		logger::PrintLine(logger::LogType::INFO, "NMI RESET detected");
+		//logger::PrintLine(logger::LogType::INFO, "NMI INTERRUPT detected");
 		AddCycles(7);
 		mem->trigger_nmi_interrupt = false;
+
+		display->Render(mem);
+		while (SDL_PollEvent(&display->e) != 0)
+		{
+			if (display->e.type == SDL_QUIT)
+			{
+				logger::PrintLine(logger::LogType::INFO, "Exiting");
+				exit(1);
+			}
+		}
 		
 		auto p = registers[(size_t)RegId::P];
 		auto sp = registers[(size_t)RegId::SP];
@@ -276,10 +286,10 @@ void Cpu::PollNMI(Memory *mem)
 	}
 }
 
-void Cpu::ExecuteInstruction(Memory *mem)
+void Cpu::ExecuteInstruction(Memory *mem, Display *display)
 {
 	PollReset(mem);
-	PollNMI(mem);
+	PollNMI(mem, display);
 	int old_pc = registers[(size_t)RegId::PC]->get();
 
 	uint8_t opcode = Fetch(mem);
