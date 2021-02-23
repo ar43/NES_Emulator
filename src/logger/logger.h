@@ -13,7 +13,7 @@ namespace logger
 		DEBUG,
 		WARNING,
 		FATAL_ERROR,
-		ERROR
+		INTERNAL_ERROR
 	};
 
 	void PrintLine(LogType logType, std::string msg);

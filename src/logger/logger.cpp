@@ -41,8 +41,8 @@ namespace logger
 			return "(WARNING)";
 		case LogType::FATAL_ERROR:
 			return "(FATAL_ERROR)";
-		case LogType::ERROR:
-			return "(ERROR)";
+		case LogType::INTERNAL_ERROR:
+			return "(INTERNAL_ERROR)";
 		default:
 			return "(UNKNOWN)";
 		}

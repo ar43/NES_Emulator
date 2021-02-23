@@ -44,21 +44,27 @@ void Machine::Run(Display *display)
 {
 	int initial_pc = memory.ReadCPU(0xFFFD)*256 + memory.ReadCPU(0xFFFC); //normally we jump to this
 	cpu.registers[(size_t)RegId::PC]->set(initial_pc);
-	while (1)
+	frame.init();
+	SDL_Delay(20);
+	while (running)
 	{
 		static uint64_t cycle_accumulator = 0;
+		frame.start();
 
-		uint64_t old_cycle = cpu.GetCycles();
-		display->Render(&memory);
-		cpu.ExecuteInstruction(&memory, display);
-
-		uint16_t budget = (uint16_t)(cpu.GetCycles() - old_cycle);
-		ppu.Step(&memory,budget);
-
-		cycle_accumulator += budget;
-		if (cycle_accumulator >= 29780)
+		if (frame.capTimer.tick(&frame))
 		{
-			cycle_accumulator -= 29780;
+			cycle_accumulator = 0;
+			while (cycle_accumulator < 29780)
+			{
+				uint64_t old_cycle = cpu.GetCycles();
+				display->Render(&memory);
+				cpu.ExecuteInstruction(&memory, display);
+				uint16_t budget = (uint16_t)(cpu.GetCycles() - old_cycle);
+				ppu.Step(&memory, budget);
+				cycle_accumulator += budget;
+			}
+			frame.end(display->GetWindow());
+			
 		}
 		
 	}
@@ -69,27 +75,27 @@ bool Machine::LoadNES(std::string path)
 	std::size_t found = path.find(".nes");
 	if (found == std::string::npos)
 	{
-		logger::PrintLine(logger::LogType::ERROR, "Bad file format! .nes required");
+		logger::PrintLine(logger::LogType::INTERNAL_ERROR, "Bad file format! .nes required");
 		return false;
 	}
 
 	std::ifstream ifs(path, std::ifstream::in | std::ifstream::binary);
 	if (!ifs.is_open())
 	{
-		logger::PrintLine(logger::LogType::ERROR, "File does not exist!");
+		logger::PrintLine(logger::LogType::INTERNAL_ERROR, "File does not exist!");
 		return false;
 	}
 	char header[16];
 	ifs.read(header, 16);
 	if (!ifs)
 	{
-		logger::PrintLine(logger::LogType::ERROR, "Bad file format! File too short.");
+		logger::PrintLine(logger::LogType::INTERNAL_ERROR, "Bad file format! File too short.");
 		ifs.close();
 		return false;
 	}
 	if (strncmp(header, "NES\x1A", 4) != 0)
 	{
-		logger::PrintLine(logger::LogType::ERROR, "Bad file signature!");
+		logger::PrintLine(logger::LogType::INTERNAL_ERROR, "Bad file signature!");
 		ifs.close();
 		return false;
 	}
@@ -116,7 +122,7 @@ bool Machine::LoadNES(std::string path)
 		ifs.read(nes_data->trainer_data.data(), nes_data->trainer_data.size());
 		if (!ifs)
 		{
-			logger::PrintLine(logger::LogType::ERROR, "Bad file format! File too short.");
+			logger::PrintLine(logger::LogType::INTERNAL_ERROR, "Bad file format! File too short.");
 			ifs.close();
 			return false;
 		}
@@ -129,7 +135,7 @@ bool Machine::LoadNES(std::string path)
 		ifs.read(data.get(), INES_PRG_BLOCK_SIZE);
 		if (!ifs)
 		{
-			logger::PrintLine(logger::LogType::ERROR, "Bad file format! File too short.");
+			logger::PrintLine(logger::LogType::INTERNAL_ERROR, "Bad file format! File too short.");
 			ifs.close();
 			return false;
 		}
@@ -141,7 +147,7 @@ bool Machine::LoadNES(std::string path)
 		ifs.read(data.get(), INES_CHR_BLOCK_SIZE);
 		if (!ifs)
 		{
-			logger::PrintLine(logger::LogType::ERROR, "Bad file format! File too short.");
+			logger::PrintLine(logger::LogType::INTERNAL_ERROR, "Bad file format! File too short.");
 			ifs.close();
 			return false;
 		}

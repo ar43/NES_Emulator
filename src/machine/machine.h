@@ -4,6 +4,7 @@
 #include "ppu/ppu.h"
 #include "misc/nes_data.h"
 #include "../display/display.h"
+#include "../timing/frame.h"
 #include <memory>
 
 class Machine
@@ -14,6 +15,9 @@ public:
 	Memory memory;
 	Ppu ppu;
 	std::unique_ptr<NesData> nes_data;
+	bool running = true;
+
+	Frame frame;
 
 	void Init();
 	bool LoadNES(std::string path);

@@ -34,6 +34,8 @@ public:
 	void SetScale(uint8_t scale);
 	uint8_t GetScale();
 
+	SDL_Window* GetWindow();
+
 	SDL_Event e;
 private:
 	uint8_t scale = 4;

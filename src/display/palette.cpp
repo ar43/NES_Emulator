@@ -9,14 +9,14 @@ bool Palette::Load(std::string name)
 	std::ifstream ifs(path, std::ifstream::in | std::ifstream::binary);
 	if (!ifs.is_open())
 	{
-		logger::PrintLine(logger::LogType::ERROR, "Palette file does not exist! " + path);
+		logger::PrintLine(logger::LogType::INTERNAL_ERROR, "Palette file does not exist! " + path);
 		return false;
 	}
 
 	ifs.read((char*)palette.data(), palette.size());
 	if (!ifs)
 	{
-		logger::PrintLine(logger::LogType::ERROR, "Bad .pal file format! File too short.");
+		logger::PrintLine(logger::LogType::INTERNAL_ERROR, "Bad .pal file format! File too short.");
 		ifs.close();
 		return false;
 	}

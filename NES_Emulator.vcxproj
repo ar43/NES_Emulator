@@ -162,6 +162,8 @@
     <ClCompile Include="src\machine\ppu\ppuscroll.cpp" />
     <ClCompile Include="src\machine\ppu\ppustatus.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\timing\frame.cpp" />
+    <ClCompile Include="src\timing\timer.cpp" />
     <ClCompile Include="src\utility\utility.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -185,6 +187,8 @@
     <ClInclude Include="src\machine\ppu\ppuregisters.h" />
     <ClInclude Include="src\machine\ppu\ppuscroll.h" />
     <ClInclude Include="src\machine\ppu\ppustatus.h" />
+    <ClInclude Include="src\timing\frame.h" />
+    <ClInclude Include="src\timing\timer.h" />
     <ClInclude Include="src\utility\utility.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -247,7 +247,7 @@ bool Memory::LoadNES(NesData *nes_data)
 	}
 	default :
 	{
-		logger::PrintLine(logger::LogType::ERROR, "Memory::LoadNES - Unsupported mapper");
+		logger::PrintLine(logger::LogType::INTERNAL_ERROR, "Memory::LoadNES - Unsupported mapper");
 		return false;
 	}
 

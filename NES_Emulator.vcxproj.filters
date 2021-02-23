@@ -67,6 +67,12 @@
     <Filter Include="Source Files\Display">
       <UniqueIdentifier>{6e61b500-50d5-4d4d-be7d-7aa556053373}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Timing">
+      <UniqueIdentifier>{cbdea81c-e4ee-408d-a863-31f40d829174}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Timing">
+      <UniqueIdentifier>{c888ca63-ae0b-4df2-a8f3-c4f5e2a77038}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -128,6 +134,12 @@
     </ClCompile>
     <ClCompile Include="src\display\palette.cpp">
       <Filter>Source Files\Display</Filter>
+    </ClCompile>
+    <ClCompile Include="src\timing\frame.cpp">
+      <Filter>Source Files\Timing</Filter>
+    </ClCompile>
+    <ClCompile Include="src\timing\timer.cpp">
+      <Filter>Source Files\Timing</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -193,6 +205,12 @@
     </ClInclude>
     <ClInclude Include="src\display\palette.h">
       <Filter>Header Files\Display</Filter>
+    </ClInclude>
+    <ClInclude Include="src\timing\frame.h">
+      <Filter>Header Files\Timing</Filter>
+    </ClInclude>
+    <ClInclude Include="src\timing\timer.h">
+      <Filter>Header Files\Timing</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

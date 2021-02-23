@@ -117,6 +117,22 @@ void Display::DrawBackground(Memory* mem)
     }
 }
 
+void Display::ProcessInput() //move this to own class
+{
+    while (SDL_PollEvent(&e) != 0)
+    {
+        if (e.type == SDL_QUIT)
+        {
+            logger::PrintLine(logger::LogType::INFO, "Exiting");
+            exit(1);
+        }
+        else if (e.type == SDL_KEYDOWN) {
+            logger::PrintLine(logger::LogType::INFO, "User just pressed down a key!");
+        }
+
+    }
+}
+
 void Display::Render(Memory *mem)
 {
     if (mem->trigger_nmi_interrupt)
@@ -124,15 +140,13 @@ void Display::Render(Memory *mem)
         RenderStart();
         DrawBackground(mem);
         RenderEnd();
-        while (SDL_PollEvent(&e) != 0)
-        {
-            if (e.type == SDL_QUIT)
-            {
-                logger::PrintLine(logger::LogType::INFO, "Exiting");
-                exit(1);
-            }
-        }
+        ProcessInput();
     }
+}
+
+SDL_Window* Display::GetWindow()
+{
+    return window;
 }
 
 void Display::RenderEnd()
