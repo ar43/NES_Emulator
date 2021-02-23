@@ -32,6 +32,12 @@ namespace utility
         return (value & (1 << pos)) != 0;
     }
 
+    int IsBitSetInt(int value, int pos)
+    {
+        assert(pos >= 0);
+        return (value & (1 << pos)) != 0;
+    }
+
     void SetBit(int *value, int pos, bool which)
     {
         assert(pos >= 0);

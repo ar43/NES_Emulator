@@ -39,6 +39,7 @@ public:
 
 	void WriteCPU(size_t loc, uint8_t byte);
 	uint8_t ReadCPU(size_t loc);
+	uint8_t ReadCPUSafe(size_t loc);
 
 	void WritePPU(size_t loc, uint8_t byte);
 	uint8_t ReadPPU(size_t loc);

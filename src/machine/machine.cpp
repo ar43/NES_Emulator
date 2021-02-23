@@ -29,27 +29,54 @@ void Machine::RunCPUTest(int instruction_count)
 	logger::CPU_TEST_MODE = false;
 }
 
-void Machine::RunROM(std::string path)
+void Machine::RunROM(std::string path, Display *display)
 {
 	if (LoadNES(path))
 	{
 		if (memory.LoadNES(nes_data.get()))
 		{
-			Run();
+			Run(display);
 		}
 	}
 }
 
-void Machine::Run()
+void Machine::Run(Display *display)
 {
 	int initial_pc = memory.ReadCPU(0xFFFD)*256 + memory.ReadCPU(0xFFFC); //normally we jump to this
 	cpu.registers[(size_t)RegId::PC]->set(initial_pc);
+	uint32_t currentTime = SDL_GetTicks();
+	SDL_Event e;
+	int counter = 0;
 	while (1)
 	{
+		static uint64_t cycle_accumulator = 0;
+
 		uint64_t old_cycle = cpu.GetCycles();
 		cpu.ExecuteInstruction(&memory);
+
 		uint16_t budget = (uint16_t)(cpu.GetCycles() - old_cycle);
 		ppu.Step(&memory,budget);
+
+		cycle_accumulator += budget;
+		if (cycle_accumulator >= 29780)
+		{
+			cycle_accumulator -= 29780;
+
+			while (SDL_PollEvent(&e) != 0)
+			{
+				if (e.type == SDL_QUIT)
+				{
+					exit(1);
+				}
+			}
+			
+			display->Render(&memory);
+			uint32_t deltaTime = SDL_GetTicks() - currentTime;
+			logger::PrintLine(logger::LogType::INFO, "Frame time: " + std::to_string(deltaTime));
+			//SDL_Delay(1000/60);
+			currentTime = SDL_GetTicks();
+		}
+		
 	}
 }
 

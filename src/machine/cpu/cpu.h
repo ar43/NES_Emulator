@@ -27,12 +27,14 @@ public:
 	void ExecuteInstruction(Memory* mem);
 	void PollReset(Memory* mem);
 	void PollNMI(Memory* mem);
+
+	std::string output_string;
 	
 private:
 
-	std::map<uint8_t, Instruction*> instruction_set;
+	std::array<Instruction*, 256> instruction_set;
 
-	void AddInstruction(std::string name, uint8_t opcode, AddressingMode mode, uint8_t bytes, uint8_t cycles, std::function<void(Cpu*,Memory*,int, AddressingMode mode)> f, bool extra_cycle = false);
+	void AddInstruction(std::string name, uint8_t opcode, AddressingMode mode, uint8_t bytes, uint8_t cycles, void (*f)(Cpu*, Memory*, int, AddressingMode mode), bool extra_cycle = false);
 	Instruction* GetInstruction(uint8_t opcode);
 
 	void LoadInstructionSet();
@@ -53,7 +55,7 @@ private:
 	uint8_t Fetch(Memory *mem);
 	std::string fetch_buffer;
 	
-	int ResolveAddressing(Memory* mem, Instruction* ins, std::string & out);
+	int ResolveAddressing(Memory* mem, Instruction* ins);
 
 	uint64_t cycle_counter = 0;
 	bool add_extra_cycle = false;

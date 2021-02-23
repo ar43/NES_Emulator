@@ -28,7 +28,7 @@ void Memory::WriteCPU(size_t loc, uint8_t byte)
 	}
 	else if (loc == (size_t)ConstAddr::PPUDATA)
 	{
-		logger::PrintLine(logger::LogType::WARNING, "Writing to PPUDATA! Who knows if this is correct?");
+		//logger::PrintLine(logger::LogType::WARNING, "Writing to PPUDATA! Who knows if this is correct?");
 		auto ppudata = ppu_registers->ppudata;
 		auto ppuaddr = ppu_registers->ppuaddr;
 		auto ppuctrl = ppu_registers->ppuctrl;
@@ -83,6 +83,27 @@ void Memory::WriteCPU(size_t loc, uint8_t byte)
 
 	cpu_data[loc] = byte;
 
+}
+
+uint8_t Memory::ReadCPUSafe(size_t loc)
+{
+	if (loc < 0 || loc >= cpu_data.size())
+	{
+		logger::PrintLine(logger::LogType::FATAL_ERROR, "Memory::ReadCPUSafe - Tried to read out of bounds: " + utility::int_to_hex(loc));
+		return 0;
+	}
+
+	//mirroring
+	if (loc >= 0x0800 && loc <= 0x1FFF)
+	{
+		loc &= 0x07FF;
+	}
+	else if (loc >= 0x2008 && loc <= 0x3FFF)
+	{
+		loc &= 0x2007;
+	}
+
+	return cpu_data[loc];
 }
 
 uint8_t Memory::ReadCPU(size_t loc)

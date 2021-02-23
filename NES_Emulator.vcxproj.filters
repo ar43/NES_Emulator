@@ -61,6 +61,12 @@
     <Filter Include="Header Files\Machine\PPU\Registers">
       <UniqueIdentifier>{32bfbee6-56a5-4606-8d39-07fc11f1eb48}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Display">
+      <UniqueIdentifier>{4571141f-1c8b-437d-9349-bf35de22a96d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Display">
+      <UniqueIdentifier>{6e61b500-50d5-4d4d-be7d-7aa556053373}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -116,6 +122,12 @@
     </ClCompile>
     <ClCompile Include="src\machine\ppu\ppuscroll.cpp">
       <Filter>Source Files\Machine\PPU\Registers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\display\display.cpp">
+      <Filter>Source Files\Display</Filter>
+    </ClCompile>
+    <ClCompile Include="src\display\palette.cpp">
+      <Filter>Source Files\Display</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -175,6 +187,12 @@
     </ClInclude>
     <ClInclude Include="src\machine\ppu\ppuregisters.h">
       <Filter>Header Files\Machine\PPU</Filter>
+    </ClInclude>
+    <ClInclude Include="src\display\display.h">
+      <Filter>Header Files\Display</Filter>
+    </ClInclude>
+    <ClInclude Include="src\display\palette.h">
+      <Filter>Header Files\Display</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

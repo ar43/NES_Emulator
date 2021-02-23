@@ -3,6 +3,7 @@
 #include "memory/memory.h"
 #include "ppu/ppu.h"
 #include "misc/nes_data.h"
+#include "../display/display.h"
 #include <memory>
 
 class Machine
@@ -17,7 +18,7 @@ public:
 	void Init();
 	bool LoadNES(std::string path);
 	void RunCPUTest(int instruction_count);
-	void RunROM(std::string path);
+	void RunROM(std::string path, Display *display);
 private:
-	void Run();
+	void Run(Display *display);
 };

@@ -8,6 +8,7 @@
 
 Cpu::Cpu()
 {
+	std::fill(std::begin(instruction_set), std::end(instruction_set), nullptr);
 	InitRegisters();
 	LoadInstructionSet();
 	fetch_buffer = "";
@@ -33,7 +34,7 @@ void Cpu::RunTest(Memory* mem, int count)
 
 uint8_t Cpu::Fetch(Memory* mem)
 {
-	uint8_t ret = mem->ReadCPU(registers[(size_t)RegId::PC]->get());
+	uint8_t ret = mem->ReadCPUSafe(registers[(size_t)RegId::PC]->get());
 	registers[(size_t)RegId::PC]->increment();
 
 	if (logger::CPU_TEST_MODE)
@@ -44,7 +45,7 @@ uint8_t Cpu::Fetch(Memory* mem)
 	return ret;
 }
 
-int Cpu::ResolveAddressing(Memory* mem, Instruction* ins, std::string & out)
+int Cpu::ResolveAddressing(Memory* mem, Instruction* ins)
 {
 	switch (ins->mode)
 	{
@@ -57,19 +58,22 @@ int Cpu::ResolveAddressing(Memory* mem, Instruction* ins, std::string & out)
 	{
 		//special case, beware!
 		//have to take care of this on opcode level
-		out = "A";
+		if(logger::CPU_TEST_MODE)
+			output_string = "A";
 		return 0;
 	}
 	case AddressingMode::IMMEDIATE:
 	{
 		auto fetched = Fetch(mem);
-		out = "#$" + utility::int_to_hex(fetched);
+		if(logger::CPU_TEST_MODE)
+			output_string = "#$" + utility::int_to_hex(fetched);
 		return fetched;
 	}
 	case AddressingMode::ZERO_PAGE:
 	{
 		auto fetched = Fetch(mem);
-		out = "$" + utility::int_to_hex(fetched) + " = " + utility::int_to_hex(mem->ReadCPU(fetched));
+		if(logger::CPU_TEST_MODE)
+			output_string = "$" + utility::int_to_hex(fetched) + " = " + utility::int_to_hex(mem->ReadCPUSafe(fetched));
 		return fetched;
 	}
 	case AddressingMode::ZERO_PAGE_X:
@@ -78,7 +82,8 @@ int Cpu::ResolveAddressing(Memory* mem, Instruction* ins, std::string & out)
 		int x = registers[(size_t)RegId::X]->get();
 		int addr = fetched + x;
 		addr = addr % 0x100;
-		out = "$" + utility::int_to_hex(fetched) + ",X @ " + utility::int_to_hex(addr) + " = " + utility::int_to_hex(mem->ReadCPU(addr));
+		if(logger::CPU_TEST_MODE)
+			output_string = "$" + utility::int_to_hex(fetched) + ",X @ " + utility::int_to_hex(addr) + " = " + utility::int_to_hex(mem->ReadCPUSafe(addr));
 		return addr;
 	}
 	case AddressingMode::ZERO_PAGE_Y:
@@ -87,14 +92,16 @@ int Cpu::ResolveAddressing(Memory* mem, Instruction* ins, std::string & out)
 		int y = registers[(size_t)RegId::Y]->get();
 		int addr = fetched + y;
 		addr = addr % 0x100;
-		out = "$" + utility::int_to_hex(fetched) + ",Y @ " + utility::int_to_hex(addr) + " = " + utility::int_to_hex(mem->ReadCPU(addr));
+		if(logger::CPU_TEST_MODE)
+			output_string = "$" + utility::int_to_hex(fetched) + ",Y @ " + utility::int_to_hex(addr) + " = " + utility::int_to_hex(mem->ReadCPUSafe(addr));
 		return addr;
 	}
 	case AddressingMode::RELATIVE:
 	{
 		uint8_t fetched = Fetch(mem);
 		int ret = (int8_t)fetched;
-		out = "$" + utility::int_to_hex(ret + registers[(size_t)RegId::PC]->get());
+		if(logger::CPU_TEST_MODE)
+			output_string = "$" + utility::int_to_hex(ret + registers[(size_t)RegId::PC]->get());
 		return ret;
 	}
 	case AddressingMode::ABSOLUTE:
@@ -103,10 +110,10 @@ int Cpu::ResolveAddressing(Memory* mem, Instruction* ins, std::string & out)
 		uint8_t ms = Fetch(mem);
 		int ret = (ms << 8) | ls;
 
-		if(ins->name.compare("JMP") != 0 && ins->name.compare("JSR") != 0)
-			out = "$" + utility::int_to_hex(ret) + " = " + utility::int_to_hex(mem->ReadCPU(ret));
-		else
-			out = "$" + utility::int_to_hex(ret);
+		if(logger::CPU_TEST_MODE && ins->name.compare("JMP") != 0 && ins->name.compare("JSR") != 0)
+			output_string = "$" + utility::int_to_hex(ret) + " = " + utility::int_to_hex(mem->ReadCPUSafe(ret));
+		else if(logger::CPU_TEST_MODE)
+			output_string = "$" + utility::int_to_hex(ret);
 
 		return ret;
 	}
@@ -125,7 +132,8 @@ int Cpu::ResolveAddressing(Memory* mem, Instruction* ins, std::string & out)
 		if (ins->extra_cycle && first_page != second_page)
 			add_extra_cycle = true;
 
-		out = "$" + utility::int_to_hex(first) + ",X @ " + utility::int_to_hex(second) + " = " + utility::int_to_hex(mem->ReadCPU(second));
+		if(logger::CPU_TEST_MODE)
+			output_string = "$" + utility::int_to_hex(first) + ",X @ " + utility::int_to_hex(second) + " = " + utility::int_to_hex(mem->ReadCPUSafe(second));
 		return second;
 	}
 	case AddressingMode::ABSOLUTE_Y: //extra cycle support
@@ -143,7 +151,8 @@ int Cpu::ResolveAddressing(Memory* mem, Instruction* ins, std::string & out)
 		if (ins->extra_cycle && first_page != second_page)
 			add_extra_cycle = true;
 
-		out = "$" + utility::int_to_hex(first) + ",Y @ " + utility::int_to_hex(second) + " = " + utility::int_to_hex(mem->ReadCPU(second));
+		if(logger::CPU_TEST_MODE)
+			output_string = "$" + utility::int_to_hex(first) + ",Y @ " + utility::int_to_hex(second) + " = " + utility::int_to_hex(mem->ReadCPUSafe(second));
 		return second;
 	}
 	case AddressingMode::INDIRECT:
@@ -153,16 +162,17 @@ int Cpu::ResolveAddressing(Memory* mem, Instruction* ins, std::string & out)
 		size_t addr = (ms << 8) | ls;
 
 		assert(addr < 0xFFFF);
-		uint8_t ls_lookup = mem->ReadCPU(addr);
+		uint8_t ls_lookup = mem->ReadCPUSafe(addr);
 		int old_addr = addr;
 		addr = addr + 1;
 		if (addr % 0x100 == 0)
 			addr -= 0x100;
-		uint8_t ms_lookup = mem->ReadCPU(addr);
+		uint8_t ms_lookup = mem->ReadCPUSafe(addr);
 
 		int ret = (ms_lookup << 8) | ls_lookup;
 
-		out = "($" + utility::int_to_hex(old_addr) + ") = " + utility::int_to_hex(ret);
+		if(logger::CPU_TEST_MODE)
+			output_string = "($" + utility::int_to_hex(old_addr) + ") = " + utility::int_to_hex(ret);
 
 		return ret;
 	}
@@ -174,14 +184,15 @@ int Cpu::ResolveAddressing(Memory* mem, Instruction* ins, std::string & out)
 		if (addr > 0xFF)
 			addr = addr % 0x100;
 
-		uint8_t ls_lookup = mem->ReadCPU(addr);
+		uint8_t ls_lookup = mem->ReadCPUSafe(addr);
 		int old_addr = addr;
 		addr = (addr + 1) % 0x100;
-		uint8_t ms_lookup = mem->ReadCPU(addr);
+		uint8_t ms_lookup = mem->ReadCPUSafe(addr);
 
 		int ret = (ms_lookup << 8) | ls_lookup;
 
-		out = "($" + utility::int_to_hex(fetched) + ",X) @ " + utility::int_to_hex(old_addr) + " = " + utility::int_to_hex(ret) + " = " + utility::int_to_hex(mem->ReadCPU(ret));
+		if(logger::CPU_TEST_MODE)
+			output_string = "($" + utility::int_to_hex(fetched) + ",X) @ " + utility::int_to_hex(old_addr) + " = " + utility::int_to_hex(ret) + " = " + utility::int_to_hex(mem->ReadCPUSafe(ret));
 
 		return ret;
 	}
@@ -189,9 +200,9 @@ int Cpu::ResolveAddressing(Memory* mem, Instruction* ins, std::string & out)
 	{
 		uint8_t fetched = Fetch(mem);
 		int addr = fetched;
-		uint8_t ls_lookup = mem->ReadCPU(addr);
+		uint8_t ls_lookup = mem->ReadCPUSafe(addr);
 		addr= (addr + 1) % 0x100;
-		uint8_t ms_lookup = mem->ReadCPU(addr);
+		uint8_t ms_lookup = mem->ReadCPUSafe(addr);
 
 		int first = (ms_lookup << 8) | ls_lookup;
 		int y = registers[(size_t)RegId::Y]->get();
@@ -203,7 +214,8 @@ int Cpu::ResolveAddressing(Memory* mem, Instruction* ins, std::string & out)
 		if (ins->extra_cycle && first_page != second_page)
 			add_extra_cycle = true;
 
-		out = "($" + utility::int_to_hex(fetched) + "),Y = " + utility::int_to_hex(first) + " @ " + utility::int_to_hex(second) + " = " + utility::int_to_hex(mem->ReadCPU(second));
+		if(logger::CPU_TEST_MODE)
+			output_string = "($" + utility::int_to_hex(fetched) + "),Y = " + utility::int_to_hex(first) + " @ " + utility::int_to_hex(second) + " = " + utility::int_to_hex(mem->ReadCPUSafe(second));
 
 		return second;
 	}
@@ -272,18 +284,16 @@ void Cpu::ExecuteInstruction(Memory *mem)
 
 	uint8_t opcode = Fetch(mem);
 	auto instruction = GetInstruction(opcode);
-	std::string val = "";
-	int value = ResolveAddressing(mem, instruction, val);
+
+	int value = ResolveAddressing(mem, instruction);
 
 	if (logger::CPU_TEST_MODE)
 	{
 		std::stringstream ss;
-		ss << utility::int_to_hex(old_pc) << "  " << std::setw(10) << std::left << GetFetchBuffer() << instruction->name << " " << std::setw(28) << std::left << val << RegistersToString() << PPUCounterToString() << " " << CYCToString() << std::endl;
+		ss << utility::int_to_hex(old_pc) << "  " << std::setw(10) << std::left << GetFetchBuffer() << instruction->name << " " << std::setw(28) << std::left << output_string << RegistersToString() << PPUCounterToString() << " " << CYCToString() << std::endl;
 		logger::cpu_test_buffer.push_back(ss.str());
 	}
 
-	if (instruction->mode != AddressingMode::RELATIVE)
-		assert(value >= 0);
 	instruction->func(this, mem, value, instruction->mode);
 
 	AddCycles(instruction->cycles);
@@ -336,10 +346,9 @@ void Cpu::InitRegisters()
 	registers[(size_t)RegId::P]->set_flag(flags::Flags::I);
 }
 
-void Cpu::AddInstruction(std::string name, uint8_t opcode, AddressingMode mode, uint8_t bytes, uint8_t cycles, std::function<void(Cpu*,Memory*,int, AddressingMode mode)> f, bool extra_cycle)
+void Cpu::AddInstruction(std::string name, uint8_t opcode, AddressingMode mode, uint8_t bytes, uint8_t cycles, void (*f)(Cpu*, Memory*, int, AddressingMode mode), bool extra_cycle)
 {
-	auto it = instruction_set.find(opcode);
-	if (it != instruction_set.end())
+	if (instruction_set[opcode] != nullptr)
 	{
 		logger::PrintLine(logger::LogType::FATAL_ERROR, "Cpu::AddInstruction - trying to add an instruction with same opcode (name: " + name + " | op: " + utility::int_to_hex(opcode) + ")");
 		return;
@@ -351,8 +360,7 @@ void Cpu::AddInstruction(std::string name, uint8_t opcode, AddressingMode mode, 
 
 Instruction* Cpu::GetInstruction(uint8_t opcode)
 {
-	auto it = instruction_set.find(opcode);
-	if (it != instruction_set.end())
+	if (instruction_set[opcode] != nullptr)
 	{
 		return instruction_set[opcode];
 	}
