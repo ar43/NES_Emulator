@@ -15,7 +15,6 @@ public:
 	{
 		window = nullptr;
 		renderer = nullptr;
-		std::fill(std::begin(pixels), std::end(pixels), 0);
 	}
 	~Display();
 	bool Init();
@@ -43,5 +42,5 @@ private:
 	SDL_Texture* texture;
 	SDL_Renderer* renderer;
 	
-	std::array<uint32_t, SCREEN_HEIGHT* SCREEN_WIDTH> pixels;
+	uint32_t* pixels;
 };

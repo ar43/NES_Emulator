@@ -74,10 +74,10 @@ void Display::DrawTile(Memory *mem, uint8_t bank, uint8_t index, int x, int y)
         {
             uint8_t data1 = mem->chr_rom[offset + 16 * index + i];
             uint8_t data2 = mem->chr_rom[offset + 16 * index + i + 8];
-            int bit1 = (int)(data1 & (1 << 7-j)) != 0;
-            int bit2 = (int)(data2 & (1 << 7-j)) != 0;
+            int bit1 = (int)(data1 & (1 << (7-j))) != 0;
+            int bit2 = (int)(data2 & (1 << (7-j))) != 0;
             int value = 1 * bit1 + 2 * bit2;
-            pixels[(y + i) * SCREEN_WIDTH + (x + j)] = colors[value].r << 24 | colors[value].g << 16 | colors[value].b << 8 | colors[value].a;
+            pixels[(y + i) * SCREEN_WIDTH + (x + j)] = colors[value].r << 24 | colors[value].g << 16 | colors[value].b << 8 | 0xFF;
             
         }
     }
@@ -85,7 +85,15 @@ void Display::DrawTile(Memory *mem, uint8_t bank, uint8_t index, int x, int y)
 
 void Display::RenderStart()
 {
-    std::fill(std::begin(pixels), std::end(pixels), 0);
+    SDL_RenderClear(renderer);
+    int pitch = SCREEN_WIDTH * 4;
+    int status = SDL_LockTexture(texture, NULL, (void**)&pixels, &pitch);
+
+    if(status != 0)
+    {
+        logger::PrintLine(logger::LogType::FATAL_ERROR, "Unable to lock Texture: " + std::string(SDL_GetError()));
+        return;
+    }
 }
 
 void Display::DrawChrRom(Memory *mem)
@@ -151,18 +159,6 @@ SDL_Window* Display::GetWindow()
 
 void Display::RenderEnd()
 {
-    SDL_RenderClear(renderer);
-    uint32_t *cur_pixels = nullptr;
-    int pitch = SCREEN_WIDTH * 4;
-    int stat = SDL_LockTexture(texture, NULL, (void**)&cur_pixels, &pitch);
-
-    if(stat != 0)
-    {
-        logger::PrintLine(logger::LogType::FATAL_ERROR, "Unable to lock Texture: " + std::string(SDL_GetError()));
-        return;
-    }
-
-    memcpy(cur_pixels, pixels.data(), sizeof(uint32_t) * SCREEN_HEIGHT * SCREEN_WIDTH);
 
     SDL_UnlockTexture(texture);
 
