@@ -84,20 +84,21 @@ void Display::SetScale(uint8_t scale)
     this->scale = scale;
 }
 
-void Display::DrawBackgroundTile(Memory *mem, uint8_t bank, uint8_t index, int x, int y)
+void Display::DrawBackgroundTile(Memory *mem, uint8_t bank, uint8_t index, SDL_Color* color_pointer, int x, int y)
 {
     assert(index <= 255 && index >= 0 && bank >= 0 && bank <= 1);
-    SDL_Color colors[4];
-    palette.GetColor(&colors[0], mem->ReadPPU(0x3F00));
-    palette.GetColor(&colors[1], 0x02);
+    /*SDL_Color colors[4];
+    palette.GetColor(&colors[0], palette.universal_background);
+    palette.GetColor(&colors[1], palette.);
     palette.GetColor(&colors[2], 0x36);
-    palette.GetColor(&colors[3], 0x16);
+    palette.GetColor(&colors[3], 0x16);*/
+
     for (int i = 0; i < TILE_HEIGHT; i++)
     {
         for (int j = 0; j < TILE_WIDTH; j++)
         {
             uint8_t value = pixel_values[bank][index*PIXEL_PER_TILE + i*TILE_WIDTH+j];
-            pixels[(y + i) * SCREEN_WIDTH + (x + j)] = colors[value].r << 24 | colors[value].g << 16 | colors[value].b << 8 | 0xFF;
+            pixels[(y + i) * SCREEN_WIDTH + (x + j)] = color_pointer[value].r << 24 | color_pointer[value].g << 16 | color_pointer[value].b << 8 | 0xFF;
             //counter++;
         }
     }
@@ -118,7 +119,7 @@ void Display::RenderStart()
 
 void Display::DrawChrRom(Memory *mem)
 {
-    for(int j = 0; j < 16;j++)
+    /*for(int j = 0; j < 16;j++)
     { 
         for (int i = 0; i < 16; i++)
         {
@@ -131,19 +132,51 @@ void Display::DrawChrRom(Memory *mem)
         {
             DrawBackgroundTile(mem, 1, i+j*16, 8*i+128, j*8);
         }
+    }*/
+}
+
+void Display::GetBackgroundMetaTileColor(Memory *mem, SDL_Color *color, int x, int y, int nametable)
+{
+    int index = (y / 4) * 8 + (x / 4);
+    uint8_t byte = mem->ReadPPU(nametable + 960 + index);
+    bool x_odd = (bool)((x / 2) % 2);
+    bool y_odd = (bool)((y / 2) % 2);
+    if (x_odd && y_odd)
+    {
+        index = (byte >> 6) & 3;
     }
+    else if (!x_odd && y_odd)
+    {
+        index = (byte >> 4) & 3;
+    }
+    else if (x_odd && !y_odd)
+    {
+        index = (byte >> 2) & 3;
+    }
+    else
+    {
+        index = byte & 3;
+    }
+    palette.GetColor(&color[0], palette.universal_background);
+    palette.GetColor(&color[1], palette.background[index][0]);
+    palette.GetColor(&color[2], palette.background[index][1]);
+    palette.GetColor(&color[3], palette.background[index][2]);
 }
 
 void Display::DrawBackground(Memory* mem)
 {
     int nametable = mem->ppu_registers->ppuctrl.GetNametable();
     uint8_t bank = mem->ppu_registers->ppuctrl.IsBitSet(ControllerBits::BACKGROUND_PATTERN);
+    palette.LoadBackground(mem);
+    SDL_Color colors[4];
     for (int y = 0; y < 30; y++)
     {
         for (int x = 0; x < 32; x++)
         {
+            if (x % 2 == 0)
+                GetBackgroundMetaTileColor(mem, colors, x, y, nametable);
             uint8_t index = mem->ReadPPU(nametable + y * 32 + x);
-            DrawBackgroundTile(mem, bank, index, x * 8, y * 8);
+            DrawBackgroundTile(mem, bank, index, colors, x * 8, y * 8);
         }
     }
 }

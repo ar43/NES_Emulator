@@ -26,12 +26,15 @@ public:
 
 	Palette palette;
 
-	void DrawBackgroundTile(Memory *mem, uint8_t bank, uint8_t index, int x, int y);
+	
 	void RenderStart();
 	void RenderEnd();
 	void Render(Memory *mem);
 	void DrawChrRom(Memory *mem);
+
+	void DrawBackgroundTile(Memory *mem, uint8_t bank, uint8_t index, SDL_Color *color_pointer, int x, int y);
 	void DrawBackground(Memory* mem);
+	void GetBackgroundMetaTileColor(Memory *mem, SDL_Color *color, int x, int y, int nametable);
 
 	void BuildPixelValues(Memory *mem);
 

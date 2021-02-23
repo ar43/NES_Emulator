@@ -1,5 +1,6 @@
 #include "palette.h"
 #include "../logger/logger.h"
+#include "../machine/memory/memory.h"
 #include <fstream>
 #include <cassert>
 
@@ -23,6 +24,19 @@ bool Palette::Load(std::string name)
 
 	ifs.close();
 	return true;
+}
+
+void Palette::LoadBackground(Memory* mem)
+{
+	int counter = 0;
+	universal_background = mem->ReadPPU(0x3F00);
+	for (int i = 0x3F01; i <= 0x3F0F; i++)
+	{
+		if (i == 0x3F04 || i == 0x3F08 || i == 0x3F0C)
+			continue;
+		background[counter / 3][counter % 3] = mem->ReadPPU(i);
+		counter++;
+	}
 }
 
 void Palette::GetColor(SDL_Color *color, uint8_t index)
