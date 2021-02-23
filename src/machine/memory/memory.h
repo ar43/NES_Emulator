@@ -48,6 +48,7 @@ public:
 	bool LoadNES(NesData *nes_data);
 
 	void AttachPPURegisters(PpuRegisters* ppu_registers);
+	PpuRegisters *ppu_registers;
 	
 	bool add_dma_cycles = false;
 	bool trigger_nmi_interrupt = false;
@@ -57,7 +58,7 @@ private:
 	uint8_t ppu_data[PPU_MEM_SIZE];
 	uint8_t oam_data[OAM_MEM_SIZE];
 	
-	PpuRegisters *ppu_registers;
+	
 
 	Mapper mapper;
 };

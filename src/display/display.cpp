@@ -136,11 +136,14 @@ void Display::DrawChrRom(Memory *mem)
 
 void Display::DrawBackground(Memory* mem)
 {
+    int nametable = mem->ppu_registers->ppuctrl.GetNametable();
+    uint8_t bank = mem->ppu_registers->ppuctrl.IsBitSet(ControllerBits::BACKGROUND_PATTERN);
     for (int y = 0; y < 30; y++)
     {
         for (int x = 0; x < 32; x++)
         {
-            DrawBackgroundTile(mem, 1, mem->ReadPPU(0x2000 + y * 32 + x), x * 8, y * 8);
+            uint8_t index = mem->ReadPPU(nametable + y * 32 + x);
+            DrawBackgroundTile(mem, bank, index, x * 8, y * 8);
         }
     }
 }
