@@ -6,12 +6,6 @@
 
 void Memory::WriteCPU(size_t loc, uint8_t byte)
 {
-	if (loc < 0 || loc >= cpu_data.size())
-	{ 
-		logger::PrintLine(logger::LogType::FATAL_ERROR, "Memory::WriteCPU - Tried to write out of bounds: " + std::to_string(loc));
-		return;
-	}
-
 	//mirroring
 	if (loc >= 0x0800 && loc <= 0x1FFF)
 	{
@@ -87,12 +81,6 @@ void Memory::WriteCPU(size_t loc, uint8_t byte)
 
 uint8_t Memory::ReadCPUSafe(size_t loc)
 {
-	if (loc < 0 || loc >= cpu_data.size())
-	{
-		logger::PrintLine(logger::LogType::FATAL_ERROR, "Memory::ReadCPUSafe - Tried to read out of bounds: " + utility::int_to_hex(loc));
-		return 0;
-	}
-
 	//mirroring
 	if (loc >= 0x0800 && loc <= 0x1FFF)
 	{
@@ -108,12 +96,6 @@ uint8_t Memory::ReadCPUSafe(size_t loc)
 
 uint8_t Memory::ReadCPU(size_t loc)
 {
-	if (loc < 0 || loc >= cpu_data.size())
-	{ 
-		logger::PrintLine(logger::LogType::FATAL_ERROR, "Memory::ReadCPU - Tried to read out of bounds: " + utility::int_to_hex(loc));
-		return 0;
-	}
-
 	//mirroring
 	if (loc >= 0x0800 && loc <= 0x1FFF)
 	{
@@ -164,12 +146,6 @@ uint8_t Memory::ReadCPU(size_t loc)
 
 void Memory::WritePPU(size_t loc, uint8_t byte)
 {
-	if (loc < 0 || loc >= ppu_data.size())
-	{ 
-		logger::PrintLine(logger::LogType::FATAL_ERROR, "Memory::WritePPU - Tried to write out of bounds: " + std::to_string(loc));
-		return;
-	}
-
 	//mirroring
 	if (loc >= 0x3000 && loc <= 0x3EFF)
 	{
@@ -185,12 +161,6 @@ void Memory::WritePPU(size_t loc, uint8_t byte)
 
 uint8_t Memory::ReadPPU(size_t loc)
 {
-	if (loc < 0 || loc >= ppu_data.size())
-	{ 
-		logger::PrintLine(logger::LogType::FATAL_ERROR, "Memory::ReadPPU - Tried to read out of bounds: " + utility::int_to_hex(loc));
-		return 0;
-	}
-
 	//mirroring
 	if (loc >= 0x3000 && loc <= 0x3EFF)
 	{
@@ -242,6 +212,7 @@ bool Memory::LoadNES(NesData *nes_data)
 		for (int i = 0; i < INES_CHR_BLOCK_SIZE; i++)
 		{
 			ppu_data[i] = dat_chr[i];
+			chr_rom[i] = dat_chr[i];
 		}
 		break;
 	}

@@ -72,10 +72,10 @@ void Display::DrawTile(Memory *mem, uint8_t bank, uint8_t index, int x, int y)
     {
         for (int j = 0; j < 8; j++)
         {
-            uint8_t data1 = mem->ReadPPU(offset + 16 * index + i);
-            uint8_t data2 = mem->ReadPPU(offset + 16 * index + i + 8);
-            int bit1 = utility::IsBitSet(data1, 7-j);
-            int bit2 = utility::IsBitSet(data2, 7-j);
+            uint8_t data1 = mem->chr_rom[offset + 16 * index + i];
+            uint8_t data2 = mem->chr_rom[offset + 16 * index + i + 8];
+            int bit1 = (int)(data1 & (1 << 7-j)) != 0;
+            int bit2 = (int)(data2 & (1 << 7-j)) != 0;
             int value = 1 * bit1 + 2 * bit2;
             pixels[(y + i) * SCREEN_WIDTH + (x + j)] = colors[value].r << 24 | colors[value].g << 16 | colors[value].b << 8 | colors[value].a;
             

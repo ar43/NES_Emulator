@@ -36,6 +36,7 @@ public:
 	static const size_t CPU_MEM_SIZE = 0x10000;
 	static const size_t PPU_MEM_SIZE = 0x4000;
 	static const size_t OAM_MEM_SIZE = 0x100;
+	static const size_t CHR_ROM_SIZE = 0x2000;
 
 	void WriteCPU(size_t loc, uint8_t byte);
 	uint8_t ReadCPU(size_t loc);
@@ -50,7 +51,7 @@ public:
 	
 	bool add_dma_cycles = false;
 	bool trigger_nmi_interrupt = false;
-
+	std::array<uint8_t, Memory::CHR_ROM_SIZE> chr_rom;
 private:
 	std::array<uint8_t, Memory::CPU_MEM_SIZE> cpu_data;
 	std::array<uint8_t, Memory::PPU_MEM_SIZE> ppu_data;
