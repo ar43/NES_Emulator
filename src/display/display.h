@@ -43,7 +43,7 @@ public:
 	SDL_Window* GetWindow();
 
 	SDL_Event e;
-	std::array <std::array<uint8_t, TILE_PER_BANK * PIXEL_PER_TILE>, 2> pixel_values;
+	uint8_t pixel_values[2][TILE_PER_BANK * PIXEL_PER_TILE];
 private:
 	uint8_t scale = 4;
 	SDL_Window* window;

@@ -30,8 +30,8 @@ class Memory
 public:
 	Memory() 
 	{
-		std::fill(std::begin(cpu_data), std::end(cpu_data), 0);
-		std::fill(std::begin(ppu_data), std::end(ppu_data), 0);
+		memset(cpu_data, 0, CPU_MEM_SIZE * sizeof(uint8_t));
+		memset(ppu_data, 0, PPU_MEM_SIZE * sizeof(uint8_t));
 	}
 	static const size_t CPU_MEM_SIZE = 0x10000;
 	static const size_t PPU_MEM_SIZE = 0x4000;
@@ -51,11 +51,11 @@ public:
 	
 	bool add_dma_cycles = false;
 	bool trigger_nmi_interrupt = false;
-	std::array<uint8_t, Memory::CHR_ROM_SIZE> chr_rom;
+	uint8_t chr_rom[CHR_ROM_SIZE];
 private:
-	std::array<uint8_t, Memory::CPU_MEM_SIZE> cpu_data;
-	std::array<uint8_t, Memory::PPU_MEM_SIZE> ppu_data;
-	std::array<uint8_t, Memory::OAM_MEM_SIZE> oam_data;
+	uint8_t cpu_data[CPU_MEM_SIZE];
+	uint8_t ppu_data[PPU_MEM_SIZE];
+	uint8_t oam_data[OAM_MEM_SIZE];
 	
 	PpuRegisters *ppu_registers;
 
