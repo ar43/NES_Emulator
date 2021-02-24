@@ -39,6 +39,18 @@ void Palette::LoadBackground(Memory* mem)
 	}
 }
 
+void Palette::LoadSprite(Memory* mem)
+{
+	int counter = 0;
+	for (int i = 0x3F11; i <= 0x3F1F; i++)
+	{
+		if (i == 0x3F14 || i == 0x3F18 || i == 0x3F1C)
+			continue;
+		sprite[counter / 3][counter % 3] = mem->ReadPPU(i);
+		counter++;
+	}
+}
+
 void Palette::GetColor(SDL_Color *color, uint8_t index)
 {
 	assert(color != nullptr && index >= 0 && index <= 63);

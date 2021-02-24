@@ -10,6 +10,10 @@ constexpr int TILE_WIDTH = 8;
 constexpr int TILE_HEIGHT = 8;
 constexpr int TILE_PER_BANK = 256;
 constexpr int BYTES_PER_TILE = 16;
+constexpr int NUM_SPRITES = 64;
+constexpr int BYTES_PER_SPRITE = 4;
+constexpr int TILES_X = 32;
+constexpr int TILES_Y = 30;
 
 class Memory;
 
@@ -35,6 +39,9 @@ public:
 	void DrawBackgroundTile(Memory *mem, uint8_t bank, uint8_t index, SDL_Color *color_pointer, int x, int y);
 	void DrawBackground(Memory* mem);
 	void GetBackgroundMetaTileColor(Memory *mem, SDL_Color *color, int x, int y, int nametable);
+
+	void DrawSprites(Memory* mem, bool front);
+	void DrawSprite(Memory* mem, uint8_t bank, uint8_t index, uint8_t palette_id, bool flip_h, bool flip_v, int x, int y);
 
 	void BuildPixelValues(Memory *mem);
 

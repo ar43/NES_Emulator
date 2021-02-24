@@ -53,11 +53,11 @@ public:
 	bool add_dma_cycles = false;
 	bool trigger_nmi_interrupt = false;
 	uint8_t chr_rom[CHR_ROM_SIZE];
+	uint8_t oam_data[OAM_MEM_SIZE];
+
 private:
 	uint8_t cpu_data[CPU_MEM_SIZE];
 	uint8_t ppu_data[PPU_MEM_SIZE];
-	uint8_t oam_data[OAM_MEM_SIZE];
-	
 	
 
 	Mapper mapper;

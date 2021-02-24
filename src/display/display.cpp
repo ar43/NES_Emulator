@@ -87,11 +87,6 @@ void Display::SetScale(uint8_t scale)
 void Display::DrawBackgroundTile(Memory *mem, uint8_t bank, uint8_t index, SDL_Color* color_pointer, int x, int y)
 {
     assert(index <= 255 && index >= 0 && bank >= 0 && bank <= 1);
-    /*SDL_Color colors[4];
-    palette.GetColor(&colors[0], palette.universal_background);
-    palette.GetColor(&colors[1], palette.);
-    palette.GetColor(&colors[2], 0x36);
-    palette.GetColor(&colors[3], 0x16);*/
 
     for (int i = 0; i < TILE_HEIGHT; i++)
     {
@@ -99,6 +94,41 @@ void Display::DrawBackgroundTile(Memory *mem, uint8_t bank, uint8_t index, SDL_C
         {
             uint8_t value = pixel_values[bank][index*PIXEL_PER_TILE + i*TILE_WIDTH+j];
             pixels[(y + i) * SCREEN_WIDTH + (x + j)] = color_pointer[value].r << 24 | color_pointer[value].g << 16 | color_pointer[value].b << 8 | 0xFF;
+            //counter++;
+        }
+    }
+}
+
+void Display::DrawSprite(Memory *mem, uint8_t bank, uint8_t index, uint8_t palette_id, bool flip_h, bool flip_v, int x, int y)
+{
+    assert(index <= 255 && index >= 0 && bank >= 0 && bank <= 1);
+    SDL_Color colors[4];
+    palette.GetColor(&colors[0], palette.universal_background);
+
+    for(int i = 0; i < 3;i++)
+        palette.GetColor(&colors[i+1], palette.sprite[palette_id][i]);
+
+    int loc = 0;
+
+    for (int i = 0; i < TILE_HEIGHT; i++)
+    {
+        for (int j = 0; j < TILE_WIDTH; j++)
+        {
+            uint8_t value = pixel_values[bank][index*PIXEL_PER_TILE + i*TILE_WIDTH+j];
+
+            if (value == 0)
+                continue;
+
+            if(!flip_h && !flip_v)
+                loc = (y + i) * SCREEN_WIDTH + (x + j);
+            else if (flip_h && flip_v)
+                loc = (y + (7 - i)) * SCREEN_WIDTH + (x + (7 - j));
+            else if(flip_h)
+                loc = (y + i) * SCREEN_WIDTH + (x + (7 - j));
+            else if (flip_v)
+                loc = (y + (7 - i)) * SCREEN_WIDTH + (x + j);
+
+            pixels[loc] = colors[value].r << 24 | colors[value].g << 16 | colors[value].b << 8 | 0xFF;
             //counter++;
         }
     }
@@ -133,6 +163,36 @@ void Display::DrawChrRom(Memory *mem)
             DrawBackgroundTile(mem, 1, i+j*16, 8*i+128, j*8);
         }
     }*/
+}
+
+void Display::DrawSprites(Memory *mem, bool front)
+{
+    if (mem->ppu_registers->ppuctrl.IsBitSet(ControllerBits::SPRITE_SIZE))
+        logger::PrintLine(logger::LogType::FATAL_ERROR, "Unimplemented 8-16 sprite mode");
+
+    int nametable = mem->ppu_registers->ppuctrl.GetNametable();
+    uint8_t bank = mem->ppu_registers->ppuctrl.IsBitSet(ControllerBits::SPRITE_PATTERN);
+
+    palette.LoadSprite(mem);
+
+    for (int i = 0; i < NUM_SPRITES; i++)
+    {
+        uint8_t index = i * 4;
+        uint8_t attributes = mem->oam_data[index + 2];
+        bool priority = utility::IsBitSet(attributes, 5); //if false continue
+        
+        uint8_t y = mem->oam_data[index];
+        if (y >= 0xEF)
+            continue;
+        uint8_t x = mem->oam_data[index + 3];
+        uint8_t tile_id = mem->oam_data[index + 1];
+        
+        uint8_t palette_id = attributes & 3;
+        
+        bool flip_h = utility::IsBitSet(attributes, 6);
+        bool flip_v = utility::IsBitSet(attributes, 7);
+        DrawSprite(mem, bank, tile_id, palette_id, flip_h, flip_v, x, y+1);
+    }
 }
 
 void Display::GetBackgroundMetaTileColor(Memory *mem, SDL_Color *color, int x, int y, int nametable)
@@ -203,7 +263,7 @@ void Display::Render(Memory *mem)
     {
         RenderStart();
         DrawBackground(mem);
-        //DrawChrRom(mem);
+        DrawSprites(mem,true);
         RenderEnd();
         ProcessInput();
     }
