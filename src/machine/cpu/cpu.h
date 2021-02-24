@@ -25,8 +25,8 @@ public:
 	
 
 	void ExecuteInstruction(Memory* mem);
-	void PollReset(Memory* mem);
-	void PollNMI(Memory* mem);
+	void HandleReset(Memory* mem, int reset);
+	void HandleNMI(Memory* mem);
 
 	std::string output_string;
 	
@@ -59,6 +59,5 @@ private:
 
 	uint64_t cycle_counter = 0;
 	bool add_extra_cycle = false;
-	bool reset = true;
 	
 };

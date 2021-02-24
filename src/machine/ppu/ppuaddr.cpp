@@ -22,6 +22,13 @@ void PpuAddr::ClearCounter()
 	counter = 0;
 }
 
+void PpuAddr::Clear()
+{
+	counter = 0;
+	addr[0] = 0;
+	addr[1] = 0;
+}
+
 void PpuAddr::Add(uint8_t val)
 {
 	int current_addr = GetAddr();

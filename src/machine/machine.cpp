@@ -41,6 +41,22 @@ void Machine::RunROM(std::string path)
 	}
 }
 
+void Machine::PollInterrupts()
+{
+	if (memory.trigger_nmi_interrupt)
+	{
+		ppu.display.Render(&memory);
+		cpu.HandleNMI(&memory);
+		memory.trigger_nmi_interrupt = false;
+	}
+	else if (reset)
+	{
+		ppu.HandleReset();
+		cpu.HandleReset(&memory, reset);
+		reset = 0;
+	}
+}
+
 void Machine::Run()
 {
 	frame.init();
@@ -56,7 +72,7 @@ void Machine::Run()
 			while (cycle_accumulator < 29780)
 			{
 				uint64_t old_cycle = cpu.GetCycles();
-				ppu.display.Render(&memory);
+				PollInterrupts();
 				cpu.ExecuteInstruction(&memory);
 				uint16_t budget = (uint16_t)(cpu.GetCycles() - old_cycle);
 				ppu.Step(&memory, budget);

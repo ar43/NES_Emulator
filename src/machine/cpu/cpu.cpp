@@ -228,60 +228,57 @@ int Cpu::ResolveAddressing(Memory* mem, Instruction* ins)
 	}
 }
 
-void Cpu::PollReset(Memory *mem)
+void Cpu::HandleReset(Memory *mem, int reset)
 {
-	if (reset) //todo: actual implementation after getting rid of CPU test
-	{
-		logger::PrintLine(logger::LogType::INFO, "CPU RESET detected");
-		AddCycles(7);
-		int initial_pc = mem->ReadCPU(0xFFFD)*256 + mem->ReadCPU(0xFFFC); //normally we jump to this
-		registers[(size_t)RegId::PC]->set(initial_pc);
-		reset = false;
-	}
+	
+	logger::PrintLine(logger::LogType::INFO, "CPU RESET detected");
+	AddCycles(7);
+	int initial_pc = mem->ReadCPU(0xFFFD)*256 + mem->ReadCPU(0xFFFC); //normally we jump to this
+	registers[(size_t)RegId::PC]->set(initial_pc);
+
+	if (reset == 2)
+		registers[(size_t)RegId::SP]->set(0xFD);
+	else
+		registers[(size_t)RegId::SP]->set(registers[(size_t)RegId::SP]->get() - 3);
+
+	registers[(size_t)RegId::P]->set_flag(flags::Flags::I);
 }
 
-void Cpu::PollNMI(Memory *mem)
+void Cpu::HandleNMI(Memory *mem)
 {
-	if (mem->trigger_nmi_interrupt)
-	{
-		//logger::PrintLine(logger::LogType::INFO, "NMI INTERRUPT detected");
-		AddCycles(7);
-		mem->trigger_nmi_interrupt = false;
+	//logger::PrintLine(logger::LogType::INFO, "NMI INTERRUPT detected");
+	AddCycles(7);
 		
-		auto p = registers[(size_t)RegId::P];
-		auto sp = registers[(size_t)RegId::SP];
-		auto pc = registers[(size_t)RegId::PC];
-		//p->set_flag(flags::Flags::B);
-		uint8_t ms = (pc->get() >> 8) & 0xFF;
-		uint8_t ls = pc->get() & 0xFF;
+	auto p = registers[(size_t)RegId::P];
+	auto sp = registers[(size_t)RegId::SP];
+	auto pc = registers[(size_t)RegId::PC];
+	//p->set_flag(flags::Flags::B);
+	uint8_t ms = (pc->get() >> 8) & 0xFF;
+	uint8_t ls = pc->get() & 0xFF;
 
-		//push pc on stack
-		mem->WriteCPU(sp->get()+STACK_OFFSET, ms);
-		sp->decrement();
-		mem->WriteCPU(sp->get()+STACK_OFFSET, ls);
-		sp->decrement();
+	//push pc on stack
+	mem->WriteCPU(sp->get()+STACK_OFFSET, ms);
+	sp->decrement();
+	mem->WriteCPU(sp->get()+STACK_OFFSET, ls);
+	sp->decrement();
 
-		//push flags on stack
-		int to_write = p->get();
-		utility::SetBit(&to_write, 5, 1);
-		utility::SetBit(&to_write, 4, 0);
-		mem->WriteCPU(sp->get()+STACK_OFFSET, to_write);
-		sp->decrement();
+	//push flags on stack
+	int to_write = p->get();
+	utility::SetBit(&to_write, 5, 1);
+	utility::SetBit(&to_write, 4, 0);
+	mem->WriteCPU(sp->get()+STACK_OFFSET, to_write);
+	sp->decrement();
 
-		//jump to NMI addr
-		uint8_t new_ls = mem->ReadCPU(0xFFFA);
-		uint8_t new_ms = mem->ReadCPU(0xFFFB);
-		int new_pc = (new_ms << 8) | new_ls;
-		pc->set(new_pc);
-		p->set_flag(flags::Flags::I);
-		
-	}
+	//jump to NMI addr
+	uint8_t new_ls = mem->ReadCPU(0xFFFA);
+	uint8_t new_ms = mem->ReadCPU(0xFFFB);
+	int new_pc = (new_ms << 8) | new_ls;
+	pc->set(new_pc);
+	p->set_flag(flags::Flags::I);
 }
 
 void Cpu::ExecuteInstruction(Memory *mem)
 {
-	PollReset(mem);
-	PollNMI(mem);
 	int old_pc = registers[(size_t)RegId::PC]->get();
 
 	uint8_t opcode = Fetch(mem);
@@ -342,9 +339,7 @@ void Cpu::InitRegisters()
 			registers[i] = new Register(RegType::BIT8);
 		}
 	}
-
-	registers[(size_t)RegId::SP]->set(0xFD);
-	registers[(size_t)RegId::P]->set_flag(flags::Flags::B);
+	registers[(size_t)RegId::P]->set_flag(flags::Flags::UNUSED);
 	registers[(size_t)RegId::P]->set_flag(flags::Flags::I);
 }
 

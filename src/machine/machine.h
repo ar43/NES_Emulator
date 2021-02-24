@@ -15,11 +15,13 @@ public:
 	Ppu ppu;
 	std::unique_ptr<NesData> nes_data;
 	bool running = true;
+	int reset = 2;
 
 	Frame frame;
 
 	void Init();
 	bool LoadNES(std::string path);
+	void PollInterrupts();
 	void RunCPUTest(int instruction_count);
 	void RunROM(std::string path);
 private:

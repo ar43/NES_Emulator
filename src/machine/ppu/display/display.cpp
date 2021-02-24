@@ -265,15 +265,12 @@ void Display::ProcessInput() //move this to own class
 
 void Display::Render(Memory *mem)
 {
-    if (mem->trigger_nmi_interrupt)
-    {
-        RenderStart(mem);
-        DrawSprites(mem,true);
-        DrawBackground(mem);
-        DrawSprites(mem,false);
-        RenderEnd();
-        ProcessInput();
-    }
+    RenderStart(mem);
+    DrawSprites(mem,true);
+    DrawBackground(mem);
+    DrawSprites(mem,false);
+    RenderEnd();
+    ProcessInput();
 }
 
 SDL_Window* Display::GetWindow()
