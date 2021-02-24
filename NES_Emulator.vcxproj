@@ -143,8 +143,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\display\display.cpp" />
-    <ClCompile Include="src\display\palette.cpp" />
     <ClCompile Include="src\logger\logger.cpp" />
     <ClCompile Include="src\machine\cpu\cpu.cpp" />
     <ClCompile Include="src\machine\cpu\flags.cpp" />
@@ -154,6 +152,8 @@
     <ClCompile Include="src\machine\machine.cpp" />
     <ClCompile Include="src\machine\memory\memory.cpp" />
     <ClCompile Include="src\machine\misc\instruction.cpp" />
+    <ClCompile Include="src\machine\ppu\display\display.cpp" />
+    <ClCompile Include="src\machine\ppu\display\palette.cpp" />
     <ClCompile Include="src\machine\ppu\ppu.cpp" />
     <ClCompile Include="src\machine\ppu\ppuaddr.cpp" />
     <ClCompile Include="src\machine\ppu\ppuctrl.cpp" />
@@ -167,8 +167,6 @@
     <ClCompile Include="src\utility\utility.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\display\display.h" />
-    <ClInclude Include="src\display\palette.h" />
     <ClInclude Include="src\logger\logger.h" />
     <ClInclude Include="src\machine\cpu\addressingmode.h" />
     <ClInclude Include="src\machine\cpu\cpu.h" />
@@ -179,6 +177,8 @@
     <ClInclude Include="src\machine\memory\memory.h" />
     <ClInclude Include="src\machine\misc\instruction.h" />
     <ClInclude Include="src\machine\misc\nes_data.h" />
+    <ClInclude Include="src\machine\ppu\display\display.h" />
+    <ClInclude Include="src\machine\ppu\display\palette.h" />
     <ClInclude Include="src\machine\ppu\ppu.h" />
     <ClInclude Include="src\machine\ppu\ppuaddr.h" />
     <ClInclude Include="src\machine\ppu\ppuctrl.h" />

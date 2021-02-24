@@ -26,7 +26,7 @@ void Cpu::RunTest(Memory* mem, int count)
 
 	for (int i = 0; i < count; i++)
 	{
-		ExecuteInstruction(mem, nullptr);
+		ExecuteInstruction(mem);
 	}
 	logger::WriteTestToFile();
 	logger::PrintLine(logger::LogType::INFO, "Finished CPU Test");
@@ -240,7 +240,7 @@ void Cpu::PollReset(Memory *mem)
 	}
 }
 
-void Cpu::PollNMI(Memory *mem, Display *display)
+void Cpu::PollNMI(Memory *mem)
 {
 	if (mem->trigger_nmi_interrupt)
 	{
@@ -278,10 +278,10 @@ void Cpu::PollNMI(Memory *mem, Display *display)
 	}
 }
 
-void Cpu::ExecuteInstruction(Memory *mem, Display *display)
+void Cpu::ExecuteInstruction(Memory *mem)
 {
 	PollReset(mem);
-	PollNMI(mem, display);
+	PollNMI(mem);
 	int old_pc = registers[(size_t)RegId::PC]->get();
 
 	uint8_t opcode = Fetch(mem);

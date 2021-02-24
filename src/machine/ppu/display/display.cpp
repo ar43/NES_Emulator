@@ -1,7 +1,7 @@
 #include "display.h"
-#include "../logger/logger.h"
-#include "../utility/utility.h"
-#include "../machine/memory/memory.h"
+#include "../../../logger/logger.h"
+#include "../../../utility/utility.h"
+#include "../../memory/memory.h"
 #include <cassert>
 
 

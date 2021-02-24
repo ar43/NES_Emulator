@@ -29,19 +29,19 @@ void Machine::RunCPUTest(int instruction_count)
 	logger::CPU_TEST_MODE = false;
 }
 
-void Machine::RunROM(std::string path, Display *display)
+void Machine::RunROM(std::string path)
 {
 	if (LoadNES(path))
 	{
 		if (memory.LoadNES(nes_data.get()))
 		{
-			display->BuildPixelValues(&memory);
-			Run(display);
+			ppu.display.BuildPixelValues(&memory);
+			Run();
 		}
 	}
 }
 
-void Machine::Run(Display *display)
+void Machine::Run()
 {
 	frame.init();
 	SDL_Delay(20);
@@ -56,13 +56,13 @@ void Machine::Run(Display *display)
 			while (cycle_accumulator < 29780)
 			{
 				uint64_t old_cycle = cpu.GetCycles();
-				display->Render(&memory);
-				cpu.ExecuteInstruction(&memory, display);
+				ppu.display.Render(&memory);
+				cpu.ExecuteInstruction(&memory);
 				uint16_t budget = (uint16_t)(cpu.GetCycles() - old_cycle);
 				ppu.Step(&memory, budget);
 				cycle_accumulator += budget;
 			}
-			frame.end(display->GetWindow());
+			frame.end(ppu.display.GetWindow());
 			
 		}
 		
