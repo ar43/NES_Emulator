@@ -134,9 +134,16 @@ void Display::DrawSprite(Memory *mem, uint8_t bank, uint8_t index, uint8_t palet
     }
 }
 
-void Display::RenderStart()
+void Display::RenderStart(Memory *mem)
 {
+    palette.LoadSprite(mem);
+    palette.LoadBackground(mem);
+    SDL_Color color;
+    palette.GetColor(&color, palette.universal_background);
+
+    SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
     SDL_RenderClear(renderer);
+
     int pitch = SCREEN_WIDTH * 4;
     int status = SDL_LockTexture(texture, NULL, (void**)&pixels, &pitch);
 
@@ -165,7 +172,7 @@ void Display::DrawChrRom(Memory *mem)
     }*/
 }
 
-void Display::DrawSprites(Memory *mem, bool front)
+void Display::DrawSprites(Memory *mem, bool behind)
 {
     if (mem->ppu_registers->ppuctrl.IsBitSet(ControllerBits::SPRITE_SIZE))
         logger::PrintLine(logger::LogType::FATAL_ERROR, "Unimplemented 8-16 sprite mode");
@@ -173,13 +180,12 @@ void Display::DrawSprites(Memory *mem, bool front)
     int nametable = mem->ppu_registers->ppuctrl.GetNametable();
     uint8_t bank = mem->ppu_registers->ppuctrl.IsBitSet(ControllerBits::SPRITE_PATTERN);
 
-    palette.LoadSprite(mem);
-
-    for (int i = 0; i < NUM_SPRITES; i++)
+    for (int i = NUM_SPRITES-1; i >= 0; i--)
     {
         uint8_t index = i * 4;
         uint8_t attributes = mem->oam_data[index + 2];
-        bool priority = utility::IsBitSet(attributes, 5); //if false continue
+        if (utility::IsBitSet(attributes, 5) != behind)
+            continue;
         
         uint8_t y = mem->oam_data[index];
         if (y >= 0xEF)
@@ -227,7 +233,7 @@ void Display::DrawBackground(Memory* mem)
 {
     int nametable = mem->ppu_registers->ppuctrl.GetNametable();
     uint8_t bank = mem->ppu_registers->ppuctrl.IsBitSet(ControllerBits::BACKGROUND_PATTERN);
-    palette.LoadBackground(mem);
+
     SDL_Color colors[4];
     for (int y = 0; y < 30; y++)
     {
@@ -261,9 +267,10 @@ void Display::Render(Memory *mem)
 {
     if (mem->trigger_nmi_interrupt)
     {
-        RenderStart();
-        DrawBackground(mem);
+        RenderStart(mem);
         DrawSprites(mem,true);
+        DrawBackground(mem);
+        DrawSprites(mem,false);
         RenderEnd();
         ProcessInput();
     }
@@ -276,7 +283,6 @@ SDL_Window* Display::GetWindow()
 
 void Display::RenderEnd()
 {
-
     SDL_UnlockTexture(texture);
 
     SDL_RenderCopy(renderer, texture, NULL, NULL);

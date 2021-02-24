@@ -31,7 +31,7 @@ public:
 	Palette palette;
 
 	
-	void RenderStart();
+	void RenderStart(Memory *mem);
 	void RenderEnd();
 	void Render(Memory *mem);
 	void DrawChrRom(Memory *mem);
@@ -40,7 +40,7 @@ public:
 	void DrawBackground(Memory* mem);
 	void GetBackgroundMetaTileColor(Memory *mem, SDL_Color *color, int x, int y, int nametable);
 
-	void DrawSprites(Memory* mem, bool front);
+	void DrawSprites(Memory* mem, bool behind);
 	void DrawSprite(Memory* mem, uint8_t bank, uint8_t index, uint8_t palette_id, bool flip_h, bool flip_v, int x, int y);
 
 	void BuildPixelValues(Memory *mem);
