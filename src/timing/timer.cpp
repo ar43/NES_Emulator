@@ -20,6 +20,9 @@ bool Timer::tick(Frame* frame)
 	if (!active)
 		return false;
 
+	if (bypass)
+		return true;
+
 	double t = frame->getTime();
 	double dif = t - startTime;
 	dif /= 1000.0;

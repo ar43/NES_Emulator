@@ -10,7 +10,11 @@ void Ppu::Step(Memory *mem, uint16_t budget)
 		cycle -= 341;
 		scanline++;
 
-		if (scanline == 241)
+		if (scanline == 30)
+		{
+			registers.ppustatus.SetBit(StatusBits::SPRITE0_HIT,true); //temporary hack
+		}
+		else if (scanline == 241)
 		{
 			registers.ppustatus.SetBit(StatusBits::VBLANK,true);
 			registers.ppustatus.SetBit(StatusBits::SPRITE0_HIT,false);
@@ -19,8 +23,7 @@ void Ppu::Step(Memory *mem, uint16_t budget)
 				mem->trigger_nmi_interrupt = true;
 			}
 		}
-
-		if (scanline >= 262)
+		else if (scanline >= 262)
 		{
 			scanline = 0;
 			mem->trigger_nmi_interrupt = false;

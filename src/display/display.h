@@ -58,7 +58,8 @@ private:
 	uint8_t scale = 4;
 	SDL_Window* window;
 	SDL_Texture* texture;
+	SDL_Surface* surface;
 	SDL_Renderer* renderer;
 	
-	uint32_t* pixels;
+	//uint32_t* pixels;
 };

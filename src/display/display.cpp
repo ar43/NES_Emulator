@@ -41,7 +41,9 @@ bool Display::Init()
     }
 
     SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-    texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, SCREEN_WIDTH, SCREEN_HEIGHT);
+    //texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, SCREEN_WIDTH, SCREEN_HEIGHT);
+    texture = nullptr;
+    surface = SDL_CreateRGBSurfaceWithFormat(0, SCREEN_WIDTH, SCREEN_HEIGHT, 32, SDL_PIXELFORMAT_RGBA8888);
     return true;
 }
 
@@ -87,12 +89,14 @@ void Display::SetScale(uint8_t scale)
 void Display::DrawBackgroundTile(Memory *mem, uint8_t bank, uint8_t index, SDL_Color* color_pointer, int x, int y)
 {
     assert(index <= 255 && index >= 0 && bank >= 0 && bank <= 1);
-
+    uint32_t* pixels = (uint32_t*)surface->pixels;
     for (int i = 0; i < TILE_HEIGHT; i++)
     {
         for (int j = 0; j < TILE_WIDTH; j++)
         {
             uint8_t value = pixel_values[bank][index*PIXEL_PER_TILE + i*TILE_WIDTH+j];
+            if (value == 0)
+                continue;
             pixels[(y + i) * SCREEN_WIDTH + (x + j)] = color_pointer[value].r << 24 | color_pointer[value].g << 16 | color_pointer[value].b << 8 | 0xFF;
             //counter++;
         }
@@ -108,6 +112,8 @@ void Display::DrawSprite(Memory *mem, uint8_t bank, uint8_t index, uint8_t palet
     for(int i = 0; i < 3;i++)
         palette.GetColor(&colors[i+1], palette.sprite[palette_id][i]);
 
+    uint32_t* pixels = (uint32_t*)surface->pixels;
+
     int loc = 0;
 
     for (int i = 0; i < TILE_HEIGHT; i++)
@@ -120,13 +126,13 @@ void Display::DrawSprite(Memory *mem, uint8_t bank, uint8_t index, uint8_t palet
                 continue;
 
             if(!flip_h && !flip_v)
-                loc = (y + i) * SCREEN_WIDTH + (x + j);
+                loc = (y + i) * SCREEN_WIDTH + ((x + j) & 255);
             else if (flip_h && flip_v)
-                loc = (y + (7 - i)) * SCREEN_WIDTH + (x + (7 - j));
+                loc = (y + (7 - i)) * SCREEN_WIDTH + ((x + (7 - j)) & 255);
             else if(flip_h)
-                loc = (y + i) * SCREEN_WIDTH + (x + (7 - j));
+                loc = (y + i) * SCREEN_WIDTH + ((x + (7 - j)) & 255);
             else if (flip_v)
-                loc = (y + (7 - i)) * SCREEN_WIDTH + (x + j);
+                loc = (y + (7 - i)) * SCREEN_WIDTH + ((x + j) & 255);
 
             pixels[loc] = colors[value].r << 24 | colors[value].g << 16 | colors[value].b << 8 | 0xFF;
             //counter++;
@@ -143,15 +149,9 @@ void Display::RenderStart(Memory *mem)
 
     SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
     SDL_RenderClear(renderer);
-
-    int pitch = SCREEN_WIDTH * 4;
-    int status = SDL_LockTexture(texture, NULL, (void**)&pixels, &pitch);
-
-    if(status != 0)
-    {
-        logger::PrintLine(logger::LogType::FATAL_ERROR, "Unable to lock Texture: " + std::string(SDL_GetError()));
-        return;
-    }
+    SDL_FillRect(surface, NULL,SDL_MapRGB(surface->format,color.r,color.g,color.b));
+    if (texture != nullptr)
+        SDL_DestroyTexture(texture);
 }
 
 void Display::DrawChrRom(Memory *mem)
@@ -283,7 +283,7 @@ SDL_Window* Display::GetWindow()
 
 void Display::RenderEnd()
 {
-    SDL_UnlockTexture(texture);
+    texture = SDL_CreateTextureFromSurface(renderer, surface);
 
     SDL_RenderCopy(renderer, texture, NULL, NULL);
     SDL_RenderPresent(renderer);
