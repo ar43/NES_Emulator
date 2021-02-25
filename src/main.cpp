@@ -12,7 +12,7 @@ int main(int argc, char *args[])
 	machine->Init();
 	machine->ppu.display.Init();
 	//machine->RunCPUTest(5000);
-	machine->RunROM("roms/super_mario_bros.nes");
+	machine->RunROM("roms/donkey_kong.nes");
 	
 	delete machine;
 	return 0;

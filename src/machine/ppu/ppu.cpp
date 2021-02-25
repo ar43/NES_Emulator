@@ -7,13 +7,14 @@ void Ppu::Step(Memory *mem, uint16_t budget)
 	cycle += budget;
 	if (cycle >= 341)
 	{
+		if (IsSprite0Hit(mem))
+		{
+			registers.ppustatus.SetBit(StatusBits::SPRITE0_HIT,true);
+		}
 		cycle -= 341;
 		scanline++;
-		if (scanline == 30)
-		{
-			registers.ppustatus.SetBit(StatusBits::SPRITE0_HIT,true); //temporary hack
-		}
-		else if (scanline == 241)
+		
+		if (scanline == 241)
 		{
 			registers.ppustatus.SetBit(StatusBits::VBLANK,true);
 			registers.ppustatus.SetBit(StatusBits::SPRITE0_HIT,false);
@@ -32,6 +33,13 @@ void Ppu::Step(Memory *mem, uint16_t budget)
 		}
 
 	}
+}
+
+bool Ppu::IsSprite0Hit(Memory *mem)
+{
+	int y = mem->oam_data[0];
+	int x = mem->oam_data[3];
+	return (y == scanline) && x <= cycle && registers.ppumask.IsBitSet(MaskBits::SHOW_SPRITES);
 }
 
 void Ppu::HandleReset()
