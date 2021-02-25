@@ -174,6 +174,10 @@ void Display::DrawChrRom(Memory *mem)
 
 void Display::DrawSprites(Memory *mem, bool behind)
 {
+    bool toggle = mem->ppu_registers->ppumask.IsBitSet(MaskBits::SHOW_SPRITES);
+    if (!toggle)
+        return;
+
     if (mem->ppu_registers->ppuctrl.IsBitSet(ControllerBits::SPRITE_SIZE))
         logger::PrintLine(logger::LogType::FATAL_ERROR, "Unimplemented 8-16 sprite mode");
 
@@ -231,6 +235,10 @@ void Display::GetBackgroundMetaTileColor(Memory *mem, SDL_Color *color, int x, i
 
 void Display::DrawBackground(Memory* mem)
 {
+    bool toggle = mem->ppu_registers->ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND);
+    if (!toggle)
+        return;
+
     int nametable = mem->ppu_registers->ppuctrl.GetNametable();
     uint8_t bank = mem->ppu_registers->ppuctrl.IsBitSet(ControllerBits::BACKGROUND_PATTERN);
 
