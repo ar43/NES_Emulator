@@ -169,6 +169,14 @@ void Memory::WritePPU(size_t loc, uint8_t byte)
 	{
 		loc &= 0x3f1f;
 	}
+	else if (loc == 0x3f10 || loc == 0x3f14 || loc == 0x3f18 || loc == 0x3f1C)
+	{
+		loc -= 0x10;
+	}
+	else if (loc < 0x2000)
+	{
+		logger::PrintLine(logger::LogType::WARNING, "Wrote to chr ROM");
+	}
 
 	ppu_data[loc] = byte;
 }
@@ -183,6 +191,10 @@ uint8_t Memory::ReadPPU(size_t loc)
 	else if (loc >= 0x3f20 && loc <= 0x3FFF)
 	{
 		loc &= 0x3f1f;
+	}
+	else if (loc == 0x3f10 || loc == 0x3f14 || loc == 0x3f18 || loc == 0x3f1C)
+	{
+		loc -= 0x10;
 	}
 
 	return ppu_data[loc];
