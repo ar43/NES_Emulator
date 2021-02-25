@@ -24,7 +24,6 @@ public:
 	void Init();
 	bool LoadNES(std::string path);
 	void PollInterrupts();
-	void RunCPUTest(int instruction_count);
 	void RunROM(std::string path);
 private:
 	void Run();

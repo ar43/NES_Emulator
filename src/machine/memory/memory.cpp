@@ -2,6 +2,7 @@
 #include "../../logger/logger.h"
 #include "../misc/nes_data.h"
 #include "../../utility/utility.h"
+#include "../input/joypad.h"
 #include <assert.h>
 
 void Memory::WriteCPU(size_t loc, uint8_t byte)
@@ -74,6 +75,11 @@ void Memory::WriteCPU(size_t loc, uint8_t byte)
 			oam_data[i] = cpu_data[addr + i];
 		}
 	}
+	else if (loc == 0x4016)
+	{
+		joypad[0].Write(byte);
+		joypad[1].Write(byte);
+	}
 
 	cpu_data[loc] = byte;
 
@@ -139,6 +145,14 @@ uint8_t Memory::ReadCPU(size_t loc)
 		cpu_data[loc] = oam_data[ppu_registers->oamaddr];
 		if(!ppu_registers->ppustatus.IsBitSet(StatusBits::VBLANK))
 			ppu_registers->oamaddr++;
+	}
+	else if (loc == 0x4016)
+	{
+		cpu_data[loc] = joypad[0].Read();
+	}
+	else if (loc == 0x4017)
+	{
+		cpu_data[loc] = joypad[1].Read();
 	}
 
 	return cpu_data[loc];
@@ -230,7 +244,8 @@ bool Memory::LoadNES(NesData *nes_data)
 	return true;
 }
 
-void Memory::AttachPPURegisters(PpuRegisters *ppu_registers)
+void Memory::AttachStuff(PpuRegisters *ppu_registers, Joypad *joypad)
 {
 	this->ppu_registers = ppu_registers;
+	this->joypad = joypad;
 }

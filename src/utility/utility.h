@@ -6,4 +6,5 @@ namespace utility
     bool IsBitSet(int value, int pos);
     int IsBitSetInt(int value, int pos);
     void SetBit(int *value, int pos, bool which);
+    void SetBit(uint8_t *value, int pos, bool which);
 }

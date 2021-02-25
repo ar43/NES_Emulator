@@ -18,6 +18,7 @@ enum class ConstAddr
 };
 
 struct NesData;
+class Joypad;
 
 struct Mapper
 {
@@ -47,13 +48,14 @@ public:
 
 	bool LoadNES(NesData *nes_data);
 
-	void AttachPPURegisters(PpuRegisters* ppu_registers);
+	void AttachStuff(PpuRegisters* ppu_registers, Joypad *joypad);
 	PpuRegisters *ppu_registers;
 	
 	bool add_dma_cycles = false;
 	bool trigger_nmi_interrupt = false;
 	uint8_t chr_rom[CHR_ROM_SIZE];
 	uint8_t oam_data[OAM_MEM_SIZE];
+	Joypad* joypad;
 
 private:
 	uint8_t cpu_data[CPU_MEM_SIZE];

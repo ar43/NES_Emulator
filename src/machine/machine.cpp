@@ -13,20 +13,7 @@ Machine::Machine()
 
 void Machine::Init()
 {
-	memory.AttachPPURegisters(&ppu.registers);
-}
-
-void Machine::RunCPUTest(int instruction_count)
-{
-	logger::CPU_TEST_MODE = true;
-	if (LoadNES("cpu_testing/nestest.nes"))
-	{
-		if (memory.LoadNES(nes_data.get()))
-		{
-			cpu.RunTest(&memory, instruction_count);
-		}
-	}
-	logger::CPU_TEST_MODE = false;
+	memory.AttachStuff(&ppu.registers, input.joypad);
 }
 
 void Machine::RunROM(std::string path)

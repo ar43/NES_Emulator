@@ -22,6 +22,47 @@ void Input::Poll(MachineStatus *machine_status, SDL_Window *window)
 				break;
 			}
 
+			case SDLK_RETURN:
+			{
+				joypad[0].SetState(JoypadButtons::START);
+				break;
+			}
+			case SDLK_BACKSPACE:
+			{
+				joypad[0].SetState(JoypadButtons::SELECT);
+				break;
+			}
+			case SDLK_UP:
+			{
+				joypad[0].SetState(JoypadButtons::UP);
+				break;
+			}
+			case SDLK_DOWN:
+			{
+				joypad[0].SetState(JoypadButtons::DOWN);
+				break;
+			}
+			case SDLK_LEFT:
+			{
+				joypad[0].SetState(JoypadButtons::LEFT);
+				break;
+			}
+			case SDLK_RIGHT:
+			{
+				joypad[0].SetState(JoypadButtons::RIGHT);
+				break;
+			}
+			case SDLK_y:
+			{
+				joypad[0].SetState(JoypadButtons::B);
+				break;
+			}
+			case SDLK_x:
+			{
+				joypad[0].SetState(JoypadButtons::A);
+				break;
+			}
+
 			case SDLK_F1:
 			{
 				machine_status->paused = true;
@@ -46,6 +87,56 @@ void Input::Poll(MachineStatus *machine_status, SDL_Window *window)
 				break;
 			}
         }
+		else if (e.type == SDL_KEYUP)
+		{
+			switch (e.key.keysym.sym)
+			{
+
+			case SDLK_RETURN:
+			{
+				joypad[0].ResetState(JoypadButtons::START);
+				break;
+			}
+			case SDLK_BACKSPACE:
+			{
+				joypad[0].ResetState(JoypadButtons::SELECT);
+				break;
+			}
+			case SDLK_UP:
+			{
+				joypad[0].ResetState(JoypadButtons::UP);
+				break;
+			}
+			case SDLK_DOWN:
+			{
+				joypad[0].ResetState(JoypadButtons::DOWN);
+				break;
+			}
+			case SDLK_LEFT:
+			{
+				joypad[0].ResetState(JoypadButtons::LEFT);
+				break;
+			}
+			case SDLK_RIGHT:
+			{
+				joypad[0].ResetState(JoypadButtons::RIGHT);
+				break;
+			}
+			case SDLK_y:
+			{
+				joypad[0].ResetState(JoypadButtons::B);
+				break;
+			}
+			case SDLK_x:
+			{
+				joypad[0].ResetState(JoypadButtons::A);
+				break;
+			}
+
+			default:
+				break;
+			}
+		}
 
     }
 }

@@ -150,6 +150,9 @@
     <ClCompile Include="src\machine\input\input.cpp">
       <Filter>Source Files\Machine\Input</Filter>
     </ClCompile>
+    <ClCompile Include="src\machine\input\joypad.cpp">
+      <Filter>Source Files\Machine\Input</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\logger\logger.h">
@@ -226,6 +229,9 @@
     </ClInclude>
     <ClInclude Include="src\machine\misc\machine_status.h">
       <Filter>Header Files\Machine\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machine\input\joypad.h">
+      <Filter>Header Files\Machine\Input</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
