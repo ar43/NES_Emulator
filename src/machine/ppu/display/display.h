@@ -45,8 +45,6 @@ public:
 
 	void BuildPixelValues(Memory *mem);
 
-	void ProcessInput();
-
 	void SetScale(uint8_t scale);
 	uint8_t GetScale();
 

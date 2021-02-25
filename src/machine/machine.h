@@ -4,6 +4,8 @@
 #include "ppu/ppu.h"
 #include "misc/nes_data.h"
 #include "../timing/frame.h"
+#include "misc/machine_status.h"
+#include "input/input.h"
 #include <memory>
 
 class Machine
@@ -13,9 +15,9 @@ public:
 	Cpu cpu;
 	Memory memory;
 	Ppu ppu;
+	Input input;
 	std::unique_ptr<NesData> nes_data;
-	bool running = true;
-	int reset = 2;
+	MachineStatus machine_status;
 
 	Frame frame;
 

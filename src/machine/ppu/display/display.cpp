@@ -247,22 +247,6 @@ void Display::DrawBackground(Memory* mem)
     }
 }
 
-void Display::ProcessInput() //move this to own class
-{
-    while (SDL_PollEvent(&e) != 0)
-    {
-        if (e.type == SDL_QUIT)
-        {
-            logger::PrintLine(logger::LogType::INFO, "Exiting");
-            exit(1);
-        }
-        else if (e.type == SDL_KEYDOWN) {
-            logger::PrintLine(logger::LogType::INFO, "User just pressed down a key!");
-        }
-
-    }
-}
-
 void Display::Render(Memory *mem)
 {
     RenderStart(mem);
@@ -270,7 +254,6 @@ void Display::Render(Memory *mem)
     DrawBackground(mem);
     DrawSprites(mem,false);
     RenderEnd();
-    ProcessInput();
 }
 
 SDL_Window* Display::GetWindow()

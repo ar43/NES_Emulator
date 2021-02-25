@@ -149,6 +149,7 @@
     <ClCompile Include="src\machine\cpu\is_load.cpp" />
     <ClCompile Include="src\machine\cpu\opcodes.cpp" />
     <ClCompile Include="src\machine\cpu\register.cpp" />
+    <ClCompile Include="src\machine\input\input.cpp" />
     <ClCompile Include="src\machine\machine.cpp" />
     <ClCompile Include="src\machine\memory\memory.cpp" />
     <ClCompile Include="src\machine\misc\instruction.cpp" />
@@ -173,9 +174,11 @@
     <ClInclude Include="src\machine\cpu\flags.h" />
     <ClInclude Include="src\machine\cpu\opcodes.h" />
     <ClInclude Include="src\machine\cpu\register.h" />
+    <ClInclude Include="src\machine\input\input.h" />
     <ClInclude Include="src\machine\machine.h" />
     <ClInclude Include="src\machine\memory\memory.h" />
     <ClInclude Include="src\machine\misc\instruction.h" />
+    <ClInclude Include="src\machine\misc\machine_status.h" />
     <ClInclude Include="src\machine\misc\nes_data.h" />
     <ClInclude Include="src\machine\ppu\display\display.h" />
     <ClInclude Include="src\machine\ppu\display\palette.h" />

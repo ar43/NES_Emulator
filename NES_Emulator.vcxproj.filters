@@ -73,6 +73,12 @@
     <Filter Include="Header Files\Machine\PPU\Display">
       <UniqueIdentifier>{f28efa02-490e-40cd-911f-fc8b0f1765af}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Machine\Input">
+      <UniqueIdentifier>{76268196-535a-4137-9666-68a93bb83a80}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Machine\Input">
+      <UniqueIdentifier>{37f31363-ad2a-47a7-afeb-d3479980eb15}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -140,6 +146,9 @@
     </ClCompile>
     <ClCompile Include="src\machine\ppu\display\palette.cpp">
       <Filter>Source Files\Machine\PPU\Display</Filter>
+    </ClCompile>
+    <ClCompile Include="src\machine\input\input.cpp">
+      <Filter>Source Files\Machine\Input</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -211,6 +220,12 @@
     </ClInclude>
     <ClInclude Include="src\machine\ppu\display\palette.h">
       <Filter>Header Files\Machine\PPU\Display</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machine\input\input.h">
+      <Filter>Header Files\Machine\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machine\misc\machine_status.h">
+      <Filter>Header Files\Machine\Misc</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

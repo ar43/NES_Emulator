@@ -46,25 +46,32 @@ void Machine::PollInterrupts()
 	if (memory.trigger_nmi_interrupt)
 	{
 		ppu.display.Render(&memory);
+		input.Poll(&machine_status, ppu.display.GetWindow());
 		cpu.HandleNMI(&memory);
 		memory.trigger_nmi_interrupt = false;
 	}
-	else if (reset)
+	else if (machine_status.reset)
 	{
 		ppu.HandleReset();
-		cpu.HandleReset(&memory, reset);
-		reset = 0;
+		cpu.HandleReset(&memory, machine_status.reset);
+		machine_status.reset = 0;
 	}
 }
 
 void Machine::Run()
 {
 	frame.init();
+	machine_status.speedup = &frame.capTimer.bypass;
 	SDL_Delay(20);
-	while (running)
+	while (machine_status.running)
 	{
 		static uint64_t cycle_accumulator = 0;
 		frame.start();
+
+		while (machine_status.paused)
+		{
+			input.PollPause(&machine_status);
+		}
 
 		if (frame.capTimer.tick(&frame))
 		{
