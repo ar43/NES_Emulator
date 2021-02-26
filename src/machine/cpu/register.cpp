@@ -4,16 +4,9 @@
 void Register::set(int value)
 {
 	if(type == RegType::BIT8 || type == RegType::FLAG)
-		assert(value >= 0 && value <= 0xFF);
+		this->value = value & 0xFF;
 	else
-		assert(value >= 0 && value <= 0xFFFF);
-
-	this->value = value;
-
-	if (type == RegType::FLAG)
-	{
-		reset_flag(flags::Flags::UNUSED);
-	}
+		this->value = value & 0xFFFF;
 }
 
 int Register::get()
@@ -23,38 +16,29 @@ int Register::get()
 
 void Register::increment()
 {
-	assert(type != RegType::FLAG);
-
 	value++;
 
 	if (type == RegType::BIT8)
-		value = value % 0x100;
+		value = value & 0xFF;
 	else
-		assert(value >= 0 && value <= 0xFFFF);
+		value = value & 0xFFFF;
 }
 
 void Register::decrement()
 {
-	assert(type != RegType::FLAG);
-
 	value--;
 
-	if (type == RegType::BIT8)
-		if (value < 0)
-			value += 256;
-	else
-		assert(value >= 0 && value <= 0xFFFF);
+	if (type == RegType::BIT8 && value < 0)
+	{
+		value += 256;
+	}
 }
 
 void Register::set_flag(flags::Flags flag)
 {
 	assert(type == RegType::FLAG);
 
-	/*if (flag == flags::Flags::UNUSED)
-		logger::PrintLine(logger::LogType::WARNING, "Setting UNUSED flag!");*/
-
 	int n = (int)flag;
-	assert(n <= 7 && n >= 0);
 
 	this->value |= 1 << n;
 }
