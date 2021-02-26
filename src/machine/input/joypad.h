@@ -20,6 +20,7 @@ public:
 	uint8_t Read();
 	void SetState(JoypadButtons button);
 	void ResetState(JoypadButtons button);
+	void Clear();
 private:
 	uint8_t state = 0;
 	uint8_t index = 0;

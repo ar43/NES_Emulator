@@ -33,7 +33,6 @@ void Machine::PollInterrupts()
 	if (memory.trigger_nmi_interrupt)
 	{
 		ppu.display.Render(&memory);
-		input.Poll(&machine_status, ppu.display.GetWindow());
 		cpu.HandleNMI(&memory);
 		memory.trigger_nmi_interrupt = false;
 	}
@@ -62,6 +61,7 @@ void Machine::Run()
 
 		if (frame.capTimer.tick(&frame))
 		{
+			input.Poll(&machine_status, ppu.display.GetWindow(), &ppu.display, &memory);
 			cycle_accumulator = 0;
 			while (cycle_accumulator < 29780)
 			{

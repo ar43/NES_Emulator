@@ -38,3 +38,8 @@ void Joypad::Write(uint8_t value)
 		strobe = false;
 	}
 }
+
+void Joypad::Clear()
+{
+	state = 0;
+}

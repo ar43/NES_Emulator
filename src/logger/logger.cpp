@@ -20,12 +20,13 @@ namespace logger
 	{
 		if(CPU_TEST_MODE)
 		{
-			std::ofstream out("cpu_testing/cpu_test.log", std::ofstream::out | std::ofstream::trunc);
+			std::ofstream out("tests/cpu_test.log", std::ofstream::out | std::ofstream::app);
 			for (auto& str : cpu_test_buffer)
 			{
 				out << str;
 			}
 			out.close();
+			cpu_test_buffer.clear();
 		}
 	}
 

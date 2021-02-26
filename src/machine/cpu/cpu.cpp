@@ -291,6 +291,7 @@ void Cpu::ExecuteInstruction(Memory *mem)
 		std::stringstream ss;
 		ss << utility::int_to_hex(old_pc) << "  " << std::setw(10) << std::left << GetFetchBuffer() << instruction->name << " " << std::setw(28) << std::left << output_string << RegistersToString() << PPUCounterToString() << " " << CYCToString() << std::endl;
 		logger::cpu_test_buffer.push_back(ss.str());
+		output_string = "";
 	}
 
 	instruction->func(this, mem, value, instruction->mode);
@@ -381,7 +382,7 @@ std::string Cpu::RegistersToString()
 
 std::string Cpu::PPUCounterToString()
 {
-	uint64_t first = (cycle_counter * 3) / 341;
+	uint64_t first = ((cycle_counter * 3) / 341) & 261;
 	uint64_t second = (cycle_counter * 3) % 341;
 	std::stringstream ss;
 	std::stringstream ss2;

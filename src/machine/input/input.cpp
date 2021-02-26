@@ -1,8 +1,9 @@
 #include "input.h"
 #include "../misc/machine_status.h"
 #include "../../logger/logger.h"
+#include "../ppu/display/display.h"
 
-void Input::Poll(MachineStatus *machine_status, SDL_Window *window)
+void Input::Poll(MachineStatus *machine_status, SDL_Window *window, Display* display, Memory *memory)
 {
     while (SDL_PollEvent(&e) != 0)
     {
@@ -83,6 +84,12 @@ void Input::Poll(MachineStatus *machine_status, SDL_Window *window)
 				break;
 			}
 
+			case SDLK_F4:
+			{
+				display->Render(memory);
+				break;
+			}
+
 			default:
 				break;
 			}
@@ -149,6 +156,7 @@ void Input::PollPause(MachineStatus *machine_status)
 		{
 			logger::PrintLine(logger::LogType::INFO, "Exiting");
 			machine_status->running = false;
+			machine_status->paused = false;
 		}
 		else if (e.type == SDL_KEYDOWN) 
 		{
@@ -158,12 +166,15 @@ void Input::PollPause(MachineStatus *machine_status)
 			{
 				logger::PrintLine(logger::LogType::INFO, "Exiting");
 				machine_status->running = false;
+				machine_status->paused = false;
 				break;
 			}
 
 			case SDLK_F1:
 			{
 				machine_status->paused = false;
+				joypad[0].Clear();
+				joypad[1].Clear();
 				break;
 			}
 

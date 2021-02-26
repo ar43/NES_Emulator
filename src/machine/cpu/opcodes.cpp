@@ -234,8 +234,7 @@ namespace opcodes
 
 	void BIT(Cpu* cpu, Memory* mem, int value, AddressingMode mode)
 	{
-		if (mode != AddressingMode::IMMEDIATE)
-			value = mem->ReadCPU(value);
+		value = mem->ReadCPU(value);
 
 		auto p = cpu->registers[(size_t)RegId::P];
 		auto a = cpu->registers[(size_t)RegId::A];
