@@ -29,7 +29,6 @@ void Memory::WriteCPU(size_t loc, uint8_t byte)
 		auto ppuctrl = &ppu_registers->ppuctrl;
 		//WritePPU(ppuaddr.GetAddr(),ppudata.Get());
 		WritePPU(ppuaddr->GetAddr(), byte);
-		ppudata->Set(byte);
 		if (ppuctrl->IsBitSet(ControllerBits::VRAM_INC))
 			ppuaddr->Add(32);
 		else
