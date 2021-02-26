@@ -16,7 +16,8 @@ public:
 	void Add(uint8_t val);
 	void ClearCounter();
 	void Clear();
+	uint8_t addr[2];
 private:
 	uint32_t counter;
-	std::array<uint8_t, 2> addr;
+	
 };

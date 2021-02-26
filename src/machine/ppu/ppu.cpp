@@ -1,5 +1,6 @@
 #include "ppu.h"
 #include "../../utility/utility.h"
+#include "../../logger/logger.h"
 
 void Ppu::Step(Memory *mem, uint16_t budget)
 {
@@ -10,6 +11,7 @@ void Ppu::Step(Memory *mem, uint16_t budget)
 		if (IsSprite0Hit(mem))
 		{
 			registers.ppustatus.SetBit(StatusBits::SPRITE0_HIT,true);
+			mem->sprite0_hit_y = mem->oam_data[0];
 		}
 		cycle -= 341;
 		scanline++;

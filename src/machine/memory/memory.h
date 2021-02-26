@@ -63,6 +63,9 @@ public:
 	uint8_t pixel_values[2][256 * 64];
 	Joypad* joypad;
 
+	int scrolling = 0; //0 horizontal, 1 vertical, 2 other
+	int sprite0_hit_y = 0;
+
 private:
 	uint8_t cpu_data[CPU_MEM_SIZE];
 	uint8_t ppu_data[PPU_MEM_SIZE];

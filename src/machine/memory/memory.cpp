@@ -194,6 +194,13 @@ void Memory::WritePPU(size_t loc, uint8_t byte)
 uint8_t Memory::ReadPPU(size_t loc)
 {
 	//mirroring
+	if (scrolling == 0)
+	{
+		if (loc >= 0x2800 && loc < 0x3000)
+		{
+			loc &= 0x27FF;
+		}
+	}
 	if (loc >= 0x3000 && loc <= 0x3EFF)
 	{
 		loc &= 0x2EFF;
@@ -219,6 +226,11 @@ uint8_t Memory::ReadCHR(size_t loc)
 bool Memory::LoadNES(NesData *nes_data)
 {
 	mapper.number = nes_data->header.mapper_num;
+
+	if (utility::IsBitSet(nes_data->header.flags6, 0))
+		scrolling = 0;
+	else if(utility::IsBitSet(nes_data->header.flags6, 3))
+		scrolling = 2;
 	
 	//this should probably be made with functions... this can get really messy with many mappers
 	switch (mapper.number)

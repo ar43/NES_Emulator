@@ -3,6 +3,7 @@
 #include "../../../utility/utility.h"
 #include "../../memory/memory.h"
 #include <cassert>
+#include <cmath>
 
 
 bool Display::Init()
@@ -66,13 +67,31 @@ void Display::DrawBackgroundTile(Memory *mem, uint8_t bank, uint8_t index, SDL_C
         for (int j = 0; j < TILE_WIDTH; j++)
         {
             uint8_t value = mem->pixel_values[bank][index*PIXEL_PER_TILE + i*TILE_WIDTH+j];
+            int loc = (y + i) * SCREEN_WIDTH + (x + j);
             if (value == 0)
                 continue;
-            pixels[(y + i) * SCREEN_WIDTH + (x + j)] = color_pointer[value].r << 24 | color_pointer[value].g << 16 | color_pointer[value].b << 8 | 0xFF;
+            if (loc >= SCREEN_HEIGHT*SCREEN_WIDTH || x+j > 255 || loc < 0 || x+j < 0)
+                continue;
+            pixels[loc] = color_pointer[value].r << 24 | color_pointer[value].g << 16 | color_pointer[value].b << 8 | 0xFF;
             //counter++;
         }
     }
 }
+
+//void Display::DrawBackgroundTileOverride(Memory *mem, uint8_t bank, uint8_t index, SDL_Color* color_pointer, int x, int y)
+//{
+//    assert(index <= 255 && index >= 0 && bank >= 0 && bank <= 1);
+//    uint32_t* pixels = (uint32_t*)surface->pixels;
+//    for (int i = 0; i < TILE_HEIGHT; i++)
+//    {
+//        for (int j = 0; j < TILE_WIDTH; j++)
+//        {
+//            uint8_t value = mem->pixel_values[bank][index*PIXEL_PER_TILE + i*TILE_WIDTH+j];
+//            pixels[(y + i) * SCREEN_WIDTH + (x + j)] = color_pointer[value].r << 24 | color_pointer[value].g << 16 | color_pointer[value].b << 8 | 0xFF;
+//            //counter++;
+//        }
+//    }
+//}
 
 void Display::DrawSprite(Memory *mem, uint8_t bank, uint8_t index, uint8_t palette_id, bool flip_h, bool flip_v, int x, int y)
 {
@@ -204,24 +223,66 @@ void Display::GetBackgroundMetaTileColor(Memory *mem, SDL_Color *color, int x, i
     palette.GetColor(&color[3], palette.background[index][2]);
 }
 
-void Display::DrawBackground(Memory* mem)
+void Display::DrawBackgroundHSA(Memory* mem, uint8_t x_shift, int nametable, uint8_t bank)
+{
+    int title_size = mem->sprite0_hit_y / 8;
+    SDL_Color colors[4];
+    int test = x_shift / 8;
+    for (int y = title_size+1; y < 30; y++)
+    {
+        for (int x = test; x < 32; x++)
+        {
+            int final_x = x * 8 - x_shift;
+            GetBackgroundMetaTileColor(mem, colors, x, y, nametable);
+            uint8_t index = mem->ReadPPU(nametable + y * 32 + x);
+            DrawBackgroundTile(mem, bank, index, colors, final_x, y * 8);
+        }
+    }
+}
+
+void Display::DrawBackgroundHSB(Memory* mem, uint8_t x_shift, int nametable, uint8_t bank)
+{
+    int title_size = mem->sprite0_hit_y / 8;
+    nametable += 0x400;
+    SDL_Color colors[4];
+    int test = (int)ceil(double(x_shift) / double(8));
+    for (int y = title_size+1; y < 30; y++)
+    {
+        for (int x = 0; x < test; x++)
+        {
+            GetBackgroundMetaTileColor(mem, colors, x, y, nametable);
+            uint8_t index = mem->ReadPPU(nametable + y * 32 + x);
+            DrawBackgroundTile(mem, bank, index, colors, x*8+256-x_shift, y * 8);
+        }
+    }
+}
+
+void Display::DrawBackgroundHS(Memory* mem)
 {
     bool toggle = mem->ppu_registers->ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND);
     if (!toggle)
         return;
 
+    uint8_t x_scroll = mem->ppu_registers->ppuscroll.addr[0];
     int nametable = mem->ppu_registers->ppuctrl.GetNametable();
     uint8_t bank = mem->ppu_registers->ppuctrl.IsBitSet(ControllerBits::BACKGROUND_PATTERN);
+    int title_size = mem->sprite0_hit_y / 8;
+    
+    DrawBackgroundHSA(mem, x_scroll, nametable, bank);
+    DrawBackgroundHSB(mem, x_scroll, nametable, bank);
 
     SDL_Color colors[4];
-    for (int y = 0; y < 30; y++)
+    //draw title bar
+    if (mem->sprite0_hit_y)
     {
-        for (int x = 0; x < 32; x++)
+        for (int y = 0; y <= title_size; y++)
         {
-            if (x % 2 == 0)
-                GetBackgroundMetaTileColor(mem, colors, x, y, nametable);
-            uint8_t index = mem->ReadPPU(nametable + y * 32 + x);
-            DrawBackgroundTile(mem, bank, index, colors, x * 8, y * 8);
+            for (int x = 0; x < 32; x++)
+            {
+                GetBackgroundMetaTileColor(mem, colors, x, y, 0x2000);
+                uint8_t index = mem->ReadPPU(0x2000 + y * 32 + x);
+                DrawBackgroundTile(mem, bank, index, colors, x * 8, y * 8);
+            }
         }
     }
 }
@@ -230,7 +291,12 @@ void Display::Render(Memory *mem)
 {
     RenderStart(mem);
     DrawSprites(mem,true);
-    DrawBackground(mem);
+
+    if(mem->scrolling == 0)
+        DrawBackgroundHS(mem);
+    else
+        logger::PrintLine(logger::LogType::FATAL_ERROR, "scrolling > 0 not implemented");
+
     DrawSprites(mem,false);
     RenderEnd();
 }
