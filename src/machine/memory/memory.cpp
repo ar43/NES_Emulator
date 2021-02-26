@@ -123,8 +123,18 @@ uint8_t Memory::ReadCPU(size_t loc)
 		auto ppudata = &ppu_registers->ppudata;
 		auto ppuaddr = &ppu_registers->ppuaddr;
 		auto ppuctrl = &ppu_registers->ppuctrl;
-		cpu_data[loc] = ppudata->Get();
-		ppudata->Set(ReadPPU(ppuaddr->GetAddr()));
+
+		if (ppuaddr->GetAddr() >= 0x3F00)
+		{
+			cpu_data[loc] = ReadPPU(ppuaddr->GetAddr());
+			ppudata->Set(ReadPPU(ppuaddr->GetAddr()-0x1000));
+		}
+		else
+		{
+			cpu_data[loc] = ppudata->Get();
+			ppudata->Set(ReadPPU(ppuaddr->GetAddr()));
+		}
+
 		if (ppuctrl->IsBitSet(ControllerBits::VRAM_INC))
 			ppuaddr->Add(32);
 		else
