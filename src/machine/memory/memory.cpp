@@ -69,10 +69,11 @@ void Memory::WriteCPU(size_t loc, uint8_t byte)
 	{
 		ppu_registers->oamdma = byte;
 		int addr = byte << 8;
+		int oamaddr = ppu_registers->oamaddr;
 		add_dma_cycles = true;
 		for (int i = 0; i < 256; i++)
 		{
-			oam_data[i] = cpu_data[addr + i];
+			oam_data[(oamaddr + i) & 0xFF] = cpu_data[addr + i];
 		}
 	}
 	else if (loc == 0x4016)
@@ -153,8 +154,6 @@ uint8_t Memory::ReadCPU(size_t loc)
 	else if (loc == (size_t)ConstAddr::OAMDATA)
 	{
 		cpu_data[loc] = oam_data[ppu_registers->oamaddr];
-		if(!ppu_registers->ppustatus.IsBitSet(StatusBits::VBLANK))
-			ppu_registers->oamaddr++;
 	}
 	else if (loc == 0x4016)
 	{
@@ -187,7 +186,7 @@ void Memory::WritePPU(size_t loc, uint8_t byte)
 	{
 		ppu_data[loc] = byte;
 		BuildPixelValue((uint8_t)(loc / 0x1000), (uint8_t)((loc / 2) & 0xff));
-		logger::PrintLine(logger::LogType::WARNING, "Wrote to chr RAM");
+		//logger::PrintLine(logger::LogType::WARNING, "Wrote to chr RAM");
 	}
 
 	ppu_data[loc] = byte;
