@@ -173,9 +173,11 @@ void Memory::WritePPU(size_t loc, uint8_t byte)
 	{
 		loc -= 0x10;
 	}
-	else if (loc < 0x2000)
+	else if (mapper.chr_ram && loc < 0x2000)
 	{
-		logger::PrintLine(logger::LogType::WARNING, "Wrote to chr ROM");
+		ppu_data[loc] = byte;
+		BuildPixelValue((uint8_t)(loc / 0x1000), (uint8_t)((loc / 2) & 0xff));
+		logger::PrintLine(logger::LogType::WARNING, "Wrote to chr RAM");
 	}
 
 	ppu_data[loc] = byte;
@@ -200,6 +202,12 @@ uint8_t Memory::ReadPPU(size_t loc)
 	return ppu_data[loc];
 }
 
+uint8_t Memory::ReadCHR(size_t loc)
+{
+	assert(loc < 0x2000);
+	return ppu_data[loc];
+}
+
 bool Memory::LoadNES(NesData *nes_data)
 {
 	mapper.number = nes_data->header.mapper_num;
@@ -213,10 +221,23 @@ bool Memory::LoadNES(NesData *nes_data)
 		mapper.name = "NROM";
 		int start_prg_1 = 0x8000;
 		int start_prg_2 = 0xC000;
-		assert(nes_data->prg_rom.size() <= 2);
-		assert(nes_data->chr_rom.size() == 1);
-		char* dat_chr = nes_data->chr_rom.at(0).get();
-		if (nes_data->prg_rom.size() == 1)
+		assert(nes_data->header.PRG_ROM_size <= 2);
+		assert(nes_data->header.CHR_ROM_size == 1 || nes_data->header.CHR_ROM_size == 0);
+		if (nes_data->header.CHR_ROM_size == 1)
+		{
+			char* dat_chr = nes_data->chr_rom.at(0).get();
+			for (int i = 0; i < INES_CHR_BLOCK_SIZE; i++)
+			{
+				ppu_data[i] = dat_chr[i];
+			}
+			mapper.chr_ram = false;
+		}
+		else
+		{
+			mapper.chr_ram = true;
+		}
+		
+		if (nes_data->header.PRG_ROM_size == 1)
 		{
 			char* dat = nes_data->prg_rom.at(0).get();
 			for (int i = 0; i < INES_PRG_BLOCK_SIZE; i++)
@@ -234,11 +255,6 @@ bool Memory::LoadNES(NesData *nes_data)
 				cpu_data[start_prg_1 + i] = dat[i];
 				cpu_data[start_prg_2 + i] = dat2[i];
 			}
-		}
-		for (int i = 0; i < INES_CHR_BLOCK_SIZE; i++)
-		{
-			ppu_data[i] = dat_chr[i];
-			chr_rom[i] = dat_chr[i];
 		}
 		break;
 	}
@@ -260,4 +276,55 @@ void Memory::AttachStuff(PpuRegisters *ppu_registers, Joypad *joypad)
 {
 	this->ppu_registers = ppu_registers;
 	this->joypad = joypad;
+}
+
+void Memory::BuildPixelValues()
+{
+	uint32_t offset = 0;
+
+	for (int bank = 0; bank < 2; bank++)
+	{
+		for (int index = 0; index < TILE_PER_BANK; index++)
+		{
+			if (bank == 1)
+				offset = 0x1000;
+			int counter = 0;
+			for (int i = 0; i < TILE_HEIGHT; i++)
+			{
+				for (int j = 0; j < TILE_WIDTH; j++)
+				{
+					uint8_t data1 = ReadCHR(offset + BYTES_PER_TILE * index + i);
+					uint8_t data2 = ReadCHR(offset + BYTES_PER_TILE * index + i + 8);
+					int bit1 = (int)(data1 & (1 << (7 - j))) != 0;
+					int bit2 = (int)(data2 & (1 << (7 - j))) != 0;
+					uint8_t value = 1 * bit1 + 2 * bit2;
+					pixel_values[bank][index*PIXEL_PER_TILE + counter] = value;
+					counter++;
+
+				}
+			}
+		}
+	}
+}
+
+void Memory::BuildPixelValue(uint8_t bank, uint8_t index)
+{
+	uint32_t offset = 0;
+	if (bank == 1)
+		offset = 0x1000;
+	int counter = 0;
+	for (int i = 0; i < TILE_HEIGHT; i++)
+	{
+		for (int j = 0; j < TILE_WIDTH; j++)
+		{
+			uint8_t data1 = ReadCHR(offset + BYTES_PER_TILE * index + i);
+			uint8_t data2 = ReadCHR(offset + BYTES_PER_TILE * index + i + 8);
+			int bit1 = (int)(data1 & (1 << (7 - j))) != 0;
+			int bit2 = (int)(data2 & (1 << (7 - j))) != 0;
+			uint8_t value = 1 * bit1 + 2 * bit2;
+			pixel_values[bank][index*PIXEL_PER_TILE + counter] = value;
+			counter++;
+
+		}
+	}
 }

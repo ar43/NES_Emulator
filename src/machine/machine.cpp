@@ -22,7 +22,7 @@ void Machine::RunROM(std::string path)
 	{
 		if (memory.LoadNES(nes_data.get()))
 		{
-			ppu.display.BuildPixelValues(&memory);
+			memory.BuildPixelValues();
 			Run();
 		}
 	}

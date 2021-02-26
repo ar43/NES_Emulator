@@ -47,35 +47,6 @@ bool Display::Init()
     return true;
 }
 
-void Display::BuildPixelValues(Memory *mem)
-{
-    uint32_t offset = 0;
-
-    for (int bank = 0; bank < 2; bank++)
-    {
-        for (int index = 0; index < TILE_PER_BANK; index++)
-        {
-            if (bank == 1)
-                offset = 0x1000;
-            int counter = 0;
-            for (int i = 0; i < TILE_HEIGHT; i++)
-            {
-                for (int j = 0; j < TILE_WIDTH; j++)
-                {
-                    uint8_t data1 = mem->chr_rom[offset + BYTES_PER_TILE * index + i];
-                    uint8_t data2 = mem->chr_rom[offset + BYTES_PER_TILE * index + i + 8];
-                    int bit1 = (int)(data1 & (1 << (7 - j))) != 0;
-                    int bit2 = (int)(data2 & (1 << (7 - j))) != 0;
-                    uint8_t value = 1 * bit1 + 2 * bit2;
-                    pixel_values[bank][index*PIXEL_PER_TILE + counter] = value;
-                    counter++;
-
-                }
-            }
-        }
-    }
-}
-
 void Display::SetScale(uint8_t scale)
 {
     if (scale < 1 || scale > 6)
@@ -94,7 +65,7 @@ void Display::DrawBackgroundTile(Memory *mem, uint8_t bank, uint8_t index, SDL_C
     {
         for (int j = 0; j < TILE_WIDTH; j++)
         {
-            uint8_t value = pixel_values[bank][index*PIXEL_PER_TILE + i*TILE_WIDTH+j];
+            uint8_t value = mem->pixel_values[bank][index*PIXEL_PER_TILE + i*TILE_WIDTH+j];
             if (value == 0)
                 continue;
             pixels[(y + i) * SCREEN_WIDTH + (x + j)] = color_pointer[value].r << 24 | color_pointer[value].g << 16 | color_pointer[value].b << 8 | 0xFF;
@@ -120,7 +91,7 @@ void Display::DrawSprite(Memory *mem, uint8_t bank, uint8_t index, uint8_t palet
     {
         for (int j = 0; j < TILE_WIDTH; j++)
         {
-            uint8_t value = pixel_values[bank][index*PIXEL_PER_TILE + i*TILE_WIDTH+j];
+            uint8_t value = mem->pixel_values[bank][index*PIXEL_PER_TILE + i*TILE_WIDTH+j];
 
             if (value == 0)
                 continue;

@@ -3,6 +3,7 @@
 #include <string>
 #include <memory>
 #include "../ppu/ppuregisters.h"
+#include "../misc/constants.h"
 
 enum class ConstAddr
 {
@@ -24,6 +25,7 @@ struct Mapper
 {
 	std::string name;
 	int number;
+	bool chr_ram = false;
 };
 
 class Memory
@@ -45,16 +47,20 @@ public:
 
 	void WritePPU(size_t loc, uint8_t byte);
 	uint8_t ReadPPU(size_t loc);
+	uint8_t ReadCHR(size_t loc);
 
 	bool LoadNES(NesData *nes_data);
 
 	void AttachStuff(PpuRegisters* ppu_registers, Joypad *joypad);
 	PpuRegisters *ppu_registers;
+
+	void BuildPixelValues();
+	void BuildPixelValue(uint8_t bank, uint8_t index);
 	
 	bool add_dma_cycles = false;
 	bool trigger_nmi_interrupt = false;
-	uint8_t chr_rom[CHR_ROM_SIZE];
 	uint8_t oam_data[OAM_MEM_SIZE];
+	uint8_t pixel_values[2][256 * 64];
 	Joypad* joypad;
 
 private:

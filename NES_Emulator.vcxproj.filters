@@ -233,5 +233,8 @@
     <ClInclude Include="src\machine\input\joypad.h">
       <Filter>Header Files\Machine\Input</Filter>
     </ClInclude>
+    <ClInclude Include="src\machine\misc\constants.h">
+      <Filter>Header Files\Machine\Misc</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
