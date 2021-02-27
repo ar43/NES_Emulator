@@ -8,18 +8,26 @@ void Ppu::Step(Memory *mem, uint16_t budget)
 	cycle += budget;
 	if (cycle >= 341)
 	{
-		if (IsSprite0Hit(mem))
+		if (scanline <= 239)
 		{
-			registers.ppustatus.SetBit(StatusBits::SPRITE0_HIT,true);
-			mem->sprite0_hit_y = mem->oam_data[0];
+			if (!registers.ppustatus.IsBitSet(StatusBits::SPRITE0_HIT) && IsSprite0Hit(mem, scanline))
+			{
+				registers.ppustatus.SetBit(StatusBits::SPRITE0_HIT,true);
+			}
+
+			if (scanline == 0)
+				display.RenderStart(mem);
+			uint8_t x_scroll = mem->ppu_registers->ppuscroll.addr[0];
+			int nametable = mem->ppu_registers->ppuctrl.GetNametable();
+			uint8_t bank = mem->ppu_registers->ppuctrl.IsBitSet(ControllerBits::BACKGROUND_PATTERN);
+			display.DrawBackgroundLineHSA(mem, x_scroll, nametable, bank, scanline);
+			display.DrawBackgroundLineHSB(mem, x_scroll, nametable, bank, scanline);
 		}
-		/*if (registers.ppuscroll.changed)
-		{
-			logger::PrintLine(logger::LogType::DEBUG, "New Scroll: x: " + std::to_string(registers.ppuscroll.addr[0]) + " y: " + std::to_string(registers.ppuscroll.addr[1]) + "line: " + std::to_string(scanline));
-			registers.ppuscroll.changed = false;
-		}*/
+
 		cycle -= 341;
 		scanline++;
+
+		
 		
 		if (scanline == 241)
 		{
@@ -42,11 +50,43 @@ void Ppu::Step(Memory *mem, uint16_t budget)
 	}
 }
 
-bool Ppu::IsSprite0Hit(Memory *mem)
+bool Ppu::IsSprite0Hit(Memory *mem, int scanline)
 {
-	int y = mem->oam_data[0];
+	int y = mem->oam_data[0]+1;
+	if (scanline > y + 7 || scanline < y || y-1 > y >= 0xEF)
+		return false;
+	int attributes = mem->oam_data[2];
 	int x = mem->oam_data[3];
-	return (y == scanline) && x <= cycle && registers.ppumask.IsBitSet(MaskBits::SHOW_SPRITES);
+	uint8_t index = mem->oam_data[1];
+	bool what = (y == scanline) && x <= cycle && registers.ppumask.IsBitSet(MaskBits::SHOW_SPRITES);
+	uint8_t bank = mem->ppu_registers->ppuctrl.IsBitSet(ControllerBits::SPRITE_PATTERN);
+	bool flip_h = utility::IsBitSet(attributes, 6);
+	bool flip_v = utility::IsBitSet(attributes, 7);
+	int i = scanline - y;
+	uint32_t* pixels = (uint32_t*)display.surface->pixels;
+	for (int j = 0; j < TILE_WIDTH; j++)
+	{
+		uint8_t value = mem->pixel_values[bank][index*PIXEL_PER_TILE + i*TILE_WIDTH+j];
+
+		if (value == 0)
+			continue;
+		int loc = 0;
+
+		if(!flip_h && !flip_v)
+			loc = (y + i) * SCREEN_WIDTH + ((x + j) & 255);
+		else if (flip_h && flip_v)
+			loc = (y + (7 - i)) * SCREEN_WIDTH + ((x + (7 - j)) & 255);
+		else if(flip_h)
+			loc = (y + i) * SCREEN_WIDTH + ((x + (7 - j)) & 255);
+		else if (flip_v)
+			loc = (y + (7 - i)) * SCREEN_WIDTH + ((x + j) & 255);
+
+		if ((pixels[loc] & 0xFF) != 0xFE)
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 void Ppu::HandleReset()

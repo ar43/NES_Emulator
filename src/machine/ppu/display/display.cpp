@@ -137,11 +137,12 @@ void Display::RenderStart(Memory *mem)
     SDL_Color color;
     palette.GetColor(&color, palette.universal_background);
 
-    SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
+    SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, 0xfe);
     SDL_RenderClear(renderer);
     SDL_FillRect(surface, NULL,SDL_MapRGB(surface->format,color.r,color.g,color.b));
     if (texture != nullptr)
         SDL_DestroyTexture(texture);
+    DrawSprites(mem,true);
 }
 
 void Display::DrawChrRom(Memory *mem)
@@ -277,6 +278,10 @@ void Display::DrawBackgroundTileLine(Memory *mem, uint8_t bank, uint8_t index, S
 
 void Display::DrawBackgroundLineHSA(Memory* mem, uint8_t x_shift, int nametable, uint8_t bank, int line)
 {
+    bool toggle = mem->ppu_registers->ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND);
+    if (!toggle)
+        return;
+
     SDL_Color colors[4];
     int test = x_shift / 8;
     for (int x = test; x < 32; x++)
@@ -290,6 +295,10 @@ void Display::DrawBackgroundLineHSA(Memory* mem, uint8_t x_shift, int nametable,
 
 void Display::DrawBackgroundLineHSB(Memory* mem, uint8_t x_shift, int nametable, uint8_t bank, int line)
 {
+    bool toggle = mem->ppu_registers->ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND);
+    if (!toggle)
+        return;
+
     SDL_Color colors[4];
     nametable += 0x400;
     int test = (int)ceil(double(x_shift) / double(8));
@@ -302,51 +311,8 @@ void Display::DrawBackgroundLineHSB(Memory* mem, uint8_t x_shift, int nametable,
     }
 }
 
-void Display::DrawBackgroundHS(Memory* mem)
-{
-    bool toggle = mem->ppu_registers->ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND);
-    if (!toggle)
-        return;
-
-    uint8_t x_scroll = mem->ppu_registers->ppuscroll.addr[0];
-    int nametable = mem->ppu_registers->ppuctrl.GetNametable();
-    uint8_t bank = mem->ppu_registers->ppuctrl.IsBitSet(ControllerBits::BACKGROUND_PATTERN);
-    int title_size = mem->sprite0_hit_y / 8;
-    
-    //DrawBackgroundHSA(mem, x_scroll, nametable, bank);
-    //DrawBackgroundHSB(mem, x_scroll, nametable, bank);
-    for (int y = 0; y < 240; y++)
-    {
-        DrawBackgroundLineHSA(mem, x_scroll, nametable, bank, y);
-        DrawBackgroundLineHSB(mem, x_scroll, nametable, bank, y);
-    }
-        
-    //SDL_Color colors[4];
-    ////draw title bar
-    //if (mem->sprite0_hit_y)
-    //{
-    //    for (int y = 0; y <= title_size; y++)
-    //    {
-    //        for (int x = 0; x < 32; x++)
-    //        {
-    //            GetBackgroundMetaTileColor(mem, colors, x, y, 0x2000);
-    //            uint8_t index = mem->ReadPPU(0x2000 + y * 32 + x);
-    //            DrawBackgroundTile(mem, bank, index, colors, x * 8, y * 8);
-    //        }
-    //    }
-    //}
-}
-
 void Display::Render(Memory *mem)
 {
-    RenderStart(mem);
-    DrawSprites(mem,true);
-
-    if(mem->scrolling == 0)
-        DrawBackgroundHS(mem);
-    else
-        logger::PrintLine(logger::LogType::FATAL_ERROR, "scrolling > 0 not implemented");
-
     DrawSprites(mem,false);
     RenderEnd();
 }
