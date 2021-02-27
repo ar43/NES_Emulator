@@ -11,7 +11,7 @@ public:
 		counter = 0;
 	}
 	int GetAddr();
-	void Write(uint8_t value);
+	void Write(uint8_t value, int *t, int *v);
 	void Add(uint8_t val);
 	void ClearCounter();
 	void Clear();

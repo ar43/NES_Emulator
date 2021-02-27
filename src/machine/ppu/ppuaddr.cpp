@@ -1,4 +1,5 @@
 #include "ppuaddr.h"
+#include "../../utility/utility.h"
 
 //int GetAddr();
 //int Write();
@@ -10,11 +11,20 @@ int PpuAddr::GetAddr()
 	return ret;
 }
 
-void PpuAddr::Write(uint8_t value)
+void PpuAddr::Write(uint8_t value, int *t, int *v)
 {
 	auto loc = counter % 2;
 	addr[loc] = value;
 	counter++;
+	if (loc == 0)
+	{
+		utility::SetBit(t, 10, utility::IsBitSet(value, 2));
+		utility::SetBit(t, 10, utility::IsBitSet(value, 3));
+	}
+	else if (loc == 1)
+	{
+		*v = *t;
+	}
 }
 
 void PpuAddr::ClearCounter()

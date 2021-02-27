@@ -17,4 +17,6 @@ struct PpuRegisters
 	PpuAddr ppuaddr;
 	PpuData ppudata;
 	uint8_t oamdma;
+	int t = 0;
+	int v = 0;
 };

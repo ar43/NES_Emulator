@@ -18,7 +18,8 @@ void Ppu::Step(Memory *mem, uint16_t budget)
 			if (scanline == 0)
 				display.RenderStart(mem);
 			uint8_t x_scroll = mem->ppu_registers->ppuscroll.addr[0];
-			int nametable = mem->ppu_registers->ppuctrl.GetNametable();
+			int nametable = mem->ppu_registers->ppuctrl.GetNametable(mem->ppu_registers->v);
+			//logger::PrintLine(logger::LogType::DEBUG, std::to_string(nametable));
 			uint8_t bank = mem->ppu_registers->ppuctrl.IsBitSet(ControllerBits::BACKGROUND_PATTERN);
 			display.DrawBackgroundLineHSA(mem, x_scroll, nametable, bank, scanline);
 			display.DrawBackgroundLineHSB(mem, x_scroll, nametable, bank, scanline);
@@ -53,7 +54,7 @@ void Ppu::Step(Memory *mem, uint16_t budget)
 bool Ppu::IsSprite0Hit(Memory *mem, int scanline)
 {
 	int y = mem->oam_data[0]+1;
-	if (scanline > y + 7 || scanline < y || y-1 > y >= 0xEF)
+	if (scanline > y + 7 || scanline < y || y-1 >= 0xEF)
 		return false;
 	int attributes = mem->oam_data[2];
 	int x = mem->oam_data[3];
@@ -97,7 +98,7 @@ void Ppu::HandleReset()
 	registers.oamdata = 0;
 	registers.oamdma = 0;
 	registers.ppuaddr.Clear();
-	registers.ppuctrl.Set(0);
+	registers.ppuctrl.Set(0,&registers.v);
 	registers.ppudata.Set(0);
 	registers.ppumask.Set(0);
 	registers.ppuscroll.Clear();

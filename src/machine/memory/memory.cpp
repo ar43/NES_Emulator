@@ -19,7 +19,7 @@ void Memory::WriteCPU(size_t loc, uint8_t byte)
 
 	if (loc == (size_t)ConstAddr::PPUADDR)
 	{
-		ppu_registers->ppuaddr.Write(byte);
+		ppu_registers->ppuaddr.Write(byte, &ppu_registers->t, &ppu_registers->v);
 	}
 	else if (loc == (size_t)ConstAddr::PPUDATA)
 	{
@@ -39,7 +39,7 @@ void Memory::WriteCPU(size_t loc, uint8_t byte)
 		auto ppuctrl = &ppu_registers->ppuctrl;
 		auto ppustatus = &ppu_registers->ppustatus;
 		auto before = ppuctrl->IsBitSet(ControllerBits::GEN_NMI);
-		ppuctrl->Set(byte);
+		ppuctrl->Set(byte, &ppu_registers->v);
 		auto after = ppuctrl->IsBitSet(ControllerBits::GEN_NMI);
 		if (before == false && after == true && ppustatus->IsBitSet(StatusBits::VBLANK))
 		{

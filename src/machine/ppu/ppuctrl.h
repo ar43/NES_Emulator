@@ -33,9 +33,9 @@ enum class ControllerBits
 class PpuCtrl
 {
 public:
-	int GetNametable();
+	int GetNametable(int v);
 	bool IsBitSet(ControllerBits bit);
-	void Set(uint8_t value);
+	void Set(uint8_t value, int *v);
 private:
 	uint8_t value = 0;
 };
