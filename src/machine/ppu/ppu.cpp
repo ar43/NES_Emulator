@@ -13,6 +13,11 @@ void Ppu::Step(Memory *mem, uint16_t budget)
 			registers.ppustatus.SetBit(StatusBits::SPRITE0_HIT,true);
 			mem->sprite0_hit_y = mem->oam_data[0];
 		}
+		/*if (registers.ppuscroll.changed)
+		{
+			logger::PrintLine(logger::LogType::DEBUG, "New Scroll: x: " + std::to_string(registers.ppuscroll.addr[0]) + " y: " + std::to_string(registers.ppuscroll.addr[1]) + "line: " + std::to_string(scanline));
+			registers.ppuscroll.changed = false;
+		}*/
 		cycle -= 341;
 		scanline++;
 		

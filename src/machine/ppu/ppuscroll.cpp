@@ -1,4 +1,5 @@
 #include "ppuscroll.h"
+#include "../../logger/logger.h"
 
 int PpuScroll::GetAddr()
 {
@@ -11,6 +12,7 @@ void PpuScroll::Write(uint8_t value)
 	auto loc = counter % 2;
 	addr[loc] = value;
 	counter++;
+	changed = true;
 }
 
 void PpuScroll::ClearCounter()

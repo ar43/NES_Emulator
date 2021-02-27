@@ -257,6 +257,51 @@ void Display::DrawBackgroundHSB(Memory* mem, uint8_t x_shift, int nametable, uin
     }
 }
 
+void Display::DrawBackgroundTileLine(Memory *mem, uint8_t bank, uint8_t index, SDL_Color* color_pointer, int x, int line)
+{
+    assert(index <= 255 && index >= 0 && bank >= 0 && bank <= 1);
+    uint32_t* pixels = (uint32_t*)surface->pixels;
+    
+    for (int j = 0; j < TILE_WIDTH; j++)
+    {
+        uint8_t value = mem->pixel_values[bank][index*PIXEL_PER_TILE + (line & 7)*TILE_WIDTH+j];
+        int loc = line * SCREEN_WIDTH + (x + j);
+        if (value == 0)
+            continue;
+        if (loc >= SCREEN_HEIGHT*SCREEN_WIDTH || x+j > 255 || loc < 0 || x+j < 0)
+            continue;
+        pixels[loc] = color_pointer[value].r << 24 | color_pointer[value].g << 16 | color_pointer[value].b << 8 | 0xFF;
+        //counter++;
+    }
+}
+
+void Display::DrawBackgroundLineHSA(Memory* mem, uint8_t x_shift, int nametable, uint8_t bank, int line)
+{
+    SDL_Color colors[4];
+    int test = x_shift / 8;
+    for (int x = test; x < 32; x++)
+    {
+        int final_x = x * 8 - x_shift;
+        GetBackgroundMetaTileColor(mem, colors, x, line/8, nametable);
+        uint8_t index = mem->ReadPPU(nametable + (line/8) * 32 + x);
+        DrawBackgroundTileLine(mem, bank, index, colors, final_x, line);
+    }
+}
+
+void Display::DrawBackgroundLineHSB(Memory* mem, uint8_t x_shift, int nametable, uint8_t bank, int line)
+{
+    SDL_Color colors[4];
+    nametable += 0x400;
+    int test = (int)ceil(double(x_shift) / double(8));
+    for (int x = 0; x < test; x++)
+    {
+        int final_x = x * 8 + 256 - x_shift;
+        GetBackgroundMetaTileColor(mem, colors, x, line/8, nametable);
+        uint8_t index = mem->ReadPPU(nametable + (line/8) * 32 + x);
+        DrawBackgroundTileLine(mem, bank, index, colors, final_x, line);
+    }
+}
+
 void Display::DrawBackgroundHS(Memory* mem)
 {
     bool toggle = mem->ppu_registers->ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND);
@@ -268,23 +313,28 @@ void Display::DrawBackgroundHS(Memory* mem)
     uint8_t bank = mem->ppu_registers->ppuctrl.IsBitSet(ControllerBits::BACKGROUND_PATTERN);
     int title_size = mem->sprite0_hit_y / 8;
     
-    DrawBackgroundHSA(mem, x_scroll, nametable, bank);
-    DrawBackgroundHSB(mem, x_scroll, nametable, bank);
-
-    SDL_Color colors[4];
-    //draw title bar
-    if (mem->sprite0_hit_y)
+    //DrawBackgroundHSA(mem, x_scroll, nametable, bank);
+    //DrawBackgroundHSB(mem, x_scroll, nametable, bank);
+    for (int y = 0; y < 240; y++)
     {
-        for (int y = 0; y <= title_size; y++)
-        {
-            for (int x = 0; x < 32; x++)
-            {
-                GetBackgroundMetaTileColor(mem, colors, x, y, 0x2000);
-                uint8_t index = mem->ReadPPU(0x2000 + y * 32 + x);
-                DrawBackgroundTile(mem, bank, index, colors, x * 8, y * 8);
-            }
-        }
+        DrawBackgroundLineHSA(mem, x_scroll, nametable, bank, y);
+        DrawBackgroundLineHSB(mem, x_scroll, nametable, bank, y);
     }
+        
+    //SDL_Color colors[4];
+    ////draw title bar
+    //if (mem->sprite0_hit_y)
+    //{
+    //    for (int y = 0; y <= title_size; y++)
+    //    {
+    //        for (int x = 0; x < 32; x++)
+    //        {
+    //            GetBackgroundMetaTileColor(mem, colors, x, y, 0x2000);
+    //            uint8_t index = mem->ReadPPU(0x2000 + y * 32 + x);
+    //            DrawBackgroundTile(mem, bank, index, colors, x * 8, y * 8);
+    //        }
+    //    }
+    //}
 }
 
 void Display::Render(Memory *mem)

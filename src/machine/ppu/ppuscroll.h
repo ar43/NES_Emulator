@@ -17,6 +17,7 @@ public:
 	void ClearCounter();
 	void Clear();
 	uint8_t addr[2];
+	bool changed = false;
 private:
 	uint32_t counter;
 	
