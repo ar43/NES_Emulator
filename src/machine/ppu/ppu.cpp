@@ -98,9 +98,14 @@ void Ppu::HandleReset()
 	registers.oamdata = 0;
 	registers.oamdma = 0;
 	registers.ppuaddr.Clear();
+	registers.ppuaddr.w = &registers.w;
 	registers.ppuctrl.Set(0,&registers.v);
 	registers.ppudata.Set(0);
 	registers.ppumask.Set(0);
 	registers.ppuscroll.Clear();
+	registers.ppuscroll.w = &registers.w;
 	registers.ppustatus.Set(0);
+	registers.v = 0;
+	registers.t = 0;
+	registers.w = 0;
 }

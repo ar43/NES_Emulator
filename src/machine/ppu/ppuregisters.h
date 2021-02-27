@@ -19,4 +19,5 @@ struct PpuRegisters
 	uint8_t oamdma;
 	int t = 0;
 	int v = 0;
+	int w = 0;
 };

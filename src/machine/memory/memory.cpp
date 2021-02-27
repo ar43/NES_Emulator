@@ -145,8 +145,7 @@ uint8_t Memory::ReadCPU(size_t loc)
 		auto ppuaddr = &ppu_registers->ppuaddr;
 		auto ppuscroll = &ppu_registers->ppuscroll;
 		auto ppustatus = &ppu_registers->ppustatus;
-		ppuaddr->ClearCounter();
-		ppuscroll->ClearCounter();
+		ppu_registers->w = 0;
 		cpu_data[loc] = ppustatus->Get();
 		ppustatus->SetBit(StatusBits::VBLANK,false);
 	}

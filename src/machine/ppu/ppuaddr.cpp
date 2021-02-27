@@ -13,9 +13,9 @@ int PpuAddr::GetAddr()
 
 void PpuAddr::Write(uint8_t value, int *t, int *v)
 {
-	auto loc = counter % 2;
+	auto loc = *w % 2;
 	addr[loc] = value;
-	counter++;
+	*w = *w + 1;
 	if (loc == 0)
 	{
 		utility::SetBit(t, 10, utility::IsBitSet(value, 2));
@@ -27,14 +27,8 @@ void PpuAddr::Write(uint8_t value, int *t, int *v)
 	}
 }
 
-void PpuAddr::ClearCounter()
-{
-	counter = 0;
-}
-
 void PpuAddr::Clear()
 {
-	counter = 0;
 	addr[0] = 0;
 	addr[1] = 0;
 }
