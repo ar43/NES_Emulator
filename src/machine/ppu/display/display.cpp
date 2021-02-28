@@ -58,25 +58,25 @@ void Display::SetScale(uint8_t scale)
     this->scale = scale;
 }
 
-void Display::DrawBackgroundTile(Memory *mem, uint8_t bank, uint8_t index, SDL_Color* color_pointer, int x, int y)
-{
-    assert(index <= 255 && index >= 0 && bank >= 0 && bank <= 1);
-    uint32_t* pixels = (uint32_t*)surface->pixels;
-    for (int i = 0; i < TILE_HEIGHT; i++)
-    {
-        for (int j = 0; j < TILE_WIDTH; j++)
-        {
-            uint8_t value = mem->pixel_values[bank][index*PIXEL_PER_TILE + i*TILE_WIDTH+j];
-            int loc = (y + i) * SCREEN_WIDTH + (x + j);
-            if (value == 0)
-                continue;
-            if (loc >= SCREEN_HEIGHT*SCREEN_WIDTH || x+j > 255 || loc < 0 || x+j < 0)
-                continue;
-            pixels[loc] = color_pointer[value].r << 24 | color_pointer[value].g << 16 | color_pointer[value].b << 8 | 0xFF;
-            //counter++;
-        }
-    }
-}
+//void Display::DrawBackgroundTile(Memory *mem, uint8_t bank, uint8_t index, SDL_Color* color_pointer, int x, int y)
+//{
+//    assert(index <= 255 && index >= 0 && bank >= 0 && bank <= 1);
+//    uint32_t* pixels = (uint32_t*)surface->pixels;
+//    for (int i = 0; i < TILE_HEIGHT; i++)
+//    {
+//        for (int j = 0; j < TILE_WIDTH; j++)
+//        {
+//            uint8_t value = mem->pixel_values[bank][index*PIXEL_PER_TILE + i*TILE_WIDTH+j];
+//            int loc = (y + i) * SCREEN_WIDTH + (x + j);
+//            if (value == 0)
+//                continue;
+//            if (loc >= SCREEN_HEIGHT*SCREEN_WIDTH || x+j > 255 || loc < 0 || x+j < 0)
+//                continue;
+//            pixels[loc] = color_pointer[value].r << 24 | color_pointer[value].g << 16 | color_pointer[value].b << 8 | 0xFF;
+//            //counter++;
+//        }
+//    }
+//}
 
 //void Display::DrawBackgroundTileOverride(Memory *mem, uint8_t bank, uint8_t index, SDL_Color* color_pointer, int x, int y)
 //{
@@ -240,40 +240,6 @@ void Display::GetBackgroundMetaTileColor(Memory *mem, SDL_Color *color, int x, i
     palette.GetColor(&color[1], palette.background[index][0]);
     palette.GetColor(&color[2], palette.background[index][1]);
     palette.GetColor(&color[3], palette.background[index][2]);
-}
-
-void Display::DrawBackgroundHSA(Memory* mem, uint8_t x_shift, int nametable, uint8_t bank)
-{
-    int title_size = mem->sprite0_hit_y / 8;
-    SDL_Color colors[4];
-    int test = x_shift / 8;
-    for (int y = title_size+1; y < 30; y++)
-    {
-        for (int x = test; x < 32; x++)
-        {
-            int final_x = x * 8 - x_shift;
-            GetBackgroundMetaTileColor(mem, colors, x, y, nametable);
-            uint8_t index = mem->ReadPPU(nametable + y * 32 + x);
-            DrawBackgroundTile(mem, bank, index, colors, final_x, y * 8);
-        }
-    }
-}
-
-void Display::DrawBackgroundHSB(Memory* mem, uint8_t x_shift, int nametable, uint8_t bank)
-{
-    int title_size = mem->sprite0_hit_y / 8;
-    nametable += 0x400;
-    SDL_Color colors[4];
-    int test = (int)ceil(double(x_shift) / double(8));
-    for (int y = title_size+1; y < 30; y++)
-    {
-        for (int x = 0; x < test; x++)
-        {
-            GetBackgroundMetaTileColor(mem, colors, x, y, nametable);
-            uint8_t index = mem->ReadPPU(nametable + y * 32 + x);
-            DrawBackgroundTile(mem, bank, index, colors, x*8+256-x_shift, y * 8);
-        }
-    }
 }
 
 void Display::DrawBackgroundTileLine(Memory *mem, uint8_t bank, uint8_t index, SDL_Color* color_pointer, uint8_t read_line, int x, int line)
