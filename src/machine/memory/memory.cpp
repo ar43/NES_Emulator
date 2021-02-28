@@ -168,6 +168,24 @@ uint8_t Memory::ReadCPU(size_t loc)
 void Memory::WritePPU(size_t loc, uint8_t byte)
 {
 	//mirroring
+	if (scrolling == 0)
+	{
+		if (loc >= 0x2800 && loc < 0x3000)
+		{
+			loc &= 0x27FF;
+		}
+	}
+	else if (scrolling == 1)
+	{
+		if (loc >= 0x2400 && loc < 0x2800)
+		{
+			loc &= 0x23FF;
+		}
+		else if (loc >= 0x2C00 && loc < 0x3000)
+		{
+			loc &= 0x2BFF;
+		}
+	}
 	if (loc >= 0x3000 && loc <= 0x3EFF)
 	{
 		loc &= 0x2EFF;
@@ -198,6 +216,17 @@ uint8_t Memory::ReadPPU(size_t loc)
 		if (loc >= 0x2800 && loc < 0x3000)
 		{
 			loc &= 0x27FF;
+		}
+	}
+	else if (scrolling == 1)
+	{
+		if (loc >= 0x2400 && loc < 0x2800)
+		{
+			loc &= 0x23FF;
+		}
+		else if (loc >= 0x2C00 && loc < 0x3000)
+		{
+			loc &= 0x2BFF;
 		}
 	}
 	if (loc >= 0x3000 && loc <= 0x3EFF)
