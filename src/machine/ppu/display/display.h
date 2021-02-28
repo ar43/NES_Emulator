@@ -24,8 +24,9 @@ public:
 	void SetScale(uint8_t scale);
 	uint8_t GetScale();
 
-	void DrawBackgroundLineHSA(Memory* mem, uint8_t x_shift, int nametable, uint8_t bank, int line);
-	void DrawBackgroundLineHSB(Memory* mem, uint8_t x_shift, int nametable, uint8_t bank, int line);
+	void DrawBackgroundLineHSA(Memory* mem, uint8_t x_shift, uint8_t y_shift, int nametable, uint8_t bank, int line);
+	void DrawBackgroundLineVSB(Memory* mem, uint8_t x_shift, uint8_t y_shift, int nametable, uint8_t bank, int line);
+	void DrawBackgroundLineHSB(Memory* mem, uint8_t x_shift, uint8_t y_shift, int nametable, uint8_t bank, int line);
 
 	void DrawSpritesLine(Memory* mem, bool behind, int line);
 	
@@ -47,7 +48,7 @@ private:
 	void DrawChrRom(Memory *mem);
 
 	void DrawBackgroundTile(Memory *mem, uint8_t bank, uint8_t index, SDL_Color *color_pointer, int x, int y);
-	void DrawBackgroundTileLine(Memory *mem, uint8_t bank, uint8_t index, SDL_Color *color_pointer, int x, int line);
+	void DrawBackgroundTileLine(Memory *mem, uint8_t bank, uint8_t index, SDL_Color *color_pointer, uint8_t read_line, int x, int line);
 	//void DrawBackgroundTileOverride(Memory *mem, uint8_t bank, uint8_t index, SDL_Color *color_pointer, int x, int y);
 	void DrawBackgroundHS(Memory* mem);
 	void GetBackgroundMetaTileColor(Memory *mem, SDL_Color *color, int x, int y, int nametable);

@@ -4,6 +4,7 @@
 
 void Ppu::Step(Memory *mem, uint16_t budget)
 {
+	static uint8_t y_scroll = 0;
 	budget *= 3;
 	cycle += budget;
 	if (cycle >= 341)
@@ -16,13 +17,26 @@ void Ppu::Step(Memory *mem, uint16_t budget)
 			}
 
 			if (scanline == 0)
+			{
 				display.RenderStart(mem);
+				y_scroll = mem->ppu_registers->ppuscroll.addr[1];
+			}
+				
 			uint8_t x_scroll = mem->ppu_registers->ppuscroll.addr[0];
 			int nametable = mem->ppu_registers->ppuctrl.GetNametable(mem->ppu_registers->v);
 			//logger::PrintLine(logger::LogType::DEBUG, std::to_string(nametable));
 			uint8_t bank = mem->ppu_registers->ppuctrl.IsBitSet(ControllerBits::BACKGROUND_PATTERN);
-			display.DrawBackgroundLineHSA(mem, x_scroll, nametable, bank, scanline);
-			display.DrawBackgroundLineHSB(mem, x_scroll, nametable, bank, scanline);
+
+			if (scanline <= 239 - y_scroll)
+			{
+				display.DrawBackgroundLineHSA(mem, x_scroll, y_scroll, nametable, bank, scanline);
+				if(x_scroll)
+					display.DrawBackgroundLineHSB(mem, x_scroll, y_scroll, nametable, bank, scanline);
+			}
+			else
+			{
+				display.DrawBackgroundLineVSB(mem, x_scroll, y_scroll, nametable, bank, scanline); //todo: hor + ver scrolling
+			}
 		}
 
 		cycle -= 341;

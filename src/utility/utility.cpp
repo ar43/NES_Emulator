@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <algorithm>
 #include <string>
+#include "../logger/logger.h"
 
 namespace utility
 {
@@ -36,6 +37,30 @@ namespace utility
     {
         assert(pos >= 0);
         return (value & (1 << pos)) != 0;
+    }
+
+    int GetOtherNametable(int nametable, int scrolling)
+    {
+        if (scrolling == 0) //vertical mirroring
+        {
+            return nametable + 0x400;
+        }
+        else if (scrolling == 1) //horizontal mirroring
+        {
+            if (nametable <= 0x2400)
+            {
+                return nametable + 0x800;
+            }
+            else
+            {
+                return nametable - 0x800;
+            }
+        }
+        else
+        {
+            logger::PrintLine(logger::LogType::FATAL_ERROR, "scrolling type");
+            return 0;
+        }
     }
 
     void SetBit(int *value, int pos, bool which)

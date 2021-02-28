@@ -276,14 +276,14 @@ void Display::DrawBackgroundHSB(Memory* mem, uint8_t x_shift, int nametable, uin
     }
 }
 
-void Display::DrawBackgroundTileLine(Memory *mem, uint8_t bank, uint8_t index, SDL_Color* color_pointer, int x, int line)
+void Display::DrawBackgroundTileLine(Memory *mem, uint8_t bank, uint8_t index, SDL_Color* color_pointer, uint8_t read_line, int x, int line)
 {
     assert(index <= 255 && index >= 0 && bank >= 0 && bank <= 1);
     uint32_t* pixels = (uint32_t*)surface->pixels;
     
     for (int j = 0; j < TILE_WIDTH; j++)
     {
-        uint8_t value = mem->pixel_values[bank][index*PIXEL_PER_TILE + (line & 7)*TILE_WIDTH+j];
+        uint8_t value = mem->pixel_values[bank][index*PIXEL_PER_TILE + ((read_line) & 7)*TILE_WIDTH+j];
         int loc = line * SCREEN_WIDTH + (x + j);
         if (value == 0)
             continue;
@@ -294,7 +294,7 @@ void Display::DrawBackgroundTileLine(Memory *mem, uint8_t bank, uint8_t index, S
     }
 }
 
-void Display::DrawBackgroundLineHSA(Memory* mem, uint8_t x_shift, int nametable, uint8_t bank, int line)
+void Display::DrawBackgroundLineHSA(Memory* mem, uint8_t x_shift, uint8_t y_shift, int nametable, uint8_t bank, int line)
 {
     bool toggle = mem->ppu_registers->ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND);
     if (!toggle)
@@ -305,27 +305,47 @@ void Display::DrawBackgroundLineHSA(Memory* mem, uint8_t x_shift, int nametable,
     for (int x = test; x < 32; x++)
     {
         int final_x = x * 8 - x_shift;
-        GetBackgroundMetaTileColor(mem, colors, x, line/8, nametable);
-        uint8_t index = mem->ReadPPU(nametable + (line/8) * 32 + x);
-        DrawBackgroundTileLine(mem, bank, index, colors, final_x, line);
+        GetBackgroundMetaTileColor(mem, colors, x, (line+y_shift)/8, nametable);
+        uint8_t index = mem->ReadPPU(nametable + ((line+y_shift)/8) * 32 + x);
+        DrawBackgroundTileLine(mem, bank, index, colors, line+y_shift, final_x, line);
     }
 }
 
-void Display::DrawBackgroundLineHSB(Memory* mem, uint8_t x_shift, int nametable, uint8_t bank, int line)
+void Display::DrawBackgroundLineHSB(Memory* mem, uint8_t x_shift, uint8_t y_shift, int nametable, uint8_t bank, int line)
 {
     bool toggle = mem->ppu_registers->ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND);
     if (!toggle)
         return;
 
     SDL_Color colors[4];
-    nametable += 0x400;
+    nametable = utility::GetOtherNametable(nametable, mem->scrolling);
     int test = (int)ceil(double(x_shift) / double(8));
     for (int x = 0; x < test; x++)
     {
         int final_x = x * 8 + 256 - x_shift;
-        GetBackgroundMetaTileColor(mem, colors, x, line/8, nametable);
-        uint8_t index = mem->ReadPPU(nametable + (line/8) * 32 + x);
-        DrawBackgroundTileLine(mem, bank, index, colors, final_x, line);
+        GetBackgroundMetaTileColor(mem, colors, x, (line+y_shift)/8, nametable);
+        uint8_t index = mem->ReadPPU(nametable + ((line+y_shift)/8) * 32 + x);
+        DrawBackgroundTileLine(mem, bank, index, colors, line+y_shift, final_x, line);
+    }
+}
+
+void Display::DrawBackgroundLineVSB(Memory* mem, uint8_t x_shift, uint8_t y_shift, int nametable, uint8_t bank, int line)
+{
+    bool toggle = mem->ppu_registers->ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND);
+    if (!toggle)
+        return;
+
+    int new_line = line - (239-y_shift)-1;
+
+    SDL_Color colors[4];
+    nametable = utility::GetOtherNametable(nametable, mem->scrolling);
+    int test = x_shift / 8;
+    for (int x = test; x < 32; x++)
+    {
+        int final_x = x * 8 - x_shift;
+        GetBackgroundMetaTileColor(mem, colors, x, (new_line)/8, nametable);
+        uint8_t index = mem->ReadPPU(nametable + ((new_line)/8) * 32 + x);
+        DrawBackgroundTileLine(mem, bank, index, colors, new_line, final_x, line);
     }
 }
 

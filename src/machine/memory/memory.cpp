@@ -112,11 +112,11 @@ uint8_t Memory::ReadCPU(size_t loc)
 		loc &= 0x2007;
 	}
 
-	if (loc == 0x2000 || loc == 0x2001 || loc == 0x2003 || loc == 0x2005 || loc == 0x2006 || loc == 0x4014)
+	/*if (loc == 0x2000 || loc == 0x2001 || loc == 0x2003 || loc == 0x2005 || loc == 0x2006 || loc == 0x4014)
 	{
 		logger::PrintLine(logger::LogType::FATAL_ERROR, "Memory::ReadCPU - Reading write only memory! " + utility::int_to_hex(loc));
 		return 0;
-	}
+	}*/
 
 	if (loc == (size_t)ConstAddr::PPUDATA)
 	{
