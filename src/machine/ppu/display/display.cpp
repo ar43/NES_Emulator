@@ -105,25 +105,43 @@ void Display::DrawSprite(Memory *mem, uint8_t bank, uint8_t index, uint8_t palet
     uint32_t* pixels = (uint32_t*)surface->pixels;
 
     int loc = 0;
-
+    int x_calc = 0;
+    int y_calc = 0;
+    //logger::PrintLine(logger::LogType::DEBUG, "loc: " + std::to_string(x) + " " + std::to_string(y));
     for (int i = 0; i < TILE_HEIGHT; i++)
     {
         for (int j = 0; j < TILE_WIDTH; j++)
         {
-            uint8_t value = mem->pixel_values[bank][index*PIXEL_PER_TILE + i*TILE_WIDTH+j];
 
+            uint8_t value = mem->pixel_values[bank][index*PIXEL_PER_TILE + i*TILE_WIDTH+j];
             if (value == 0)
                 continue;
 
-            if(!flip_h && !flip_v)
-                loc = (y + i) * SCREEN_WIDTH + ((x + j) & 255);
+            if (!flip_h && !flip_v)
+            {
+                x_calc = x + j;
+                y_calc = y + i;
+            }
             else if (flip_h && flip_v)
-                loc = (y + (7 - i)) * SCREEN_WIDTH + ((x + (7 - j)) & 255);
+            {
+                x_calc = (x + (7 - j));
+                y_calc = (y + (7 - i));
+            }
             else if(flip_h)
-                loc = (y + i) * SCREEN_WIDTH + ((x + (7 - j)) & 255);
+            {
+                x_calc = (x + (7 - j));
+                y_calc = y + i;
+            }
             else if (flip_v)
-                loc = (y + (7 - i)) * SCREEN_WIDTH + ((x + j) & 255);
+            {
+                x_calc = x + j;
+                y_calc = (y + (7 - i));
+            }
 
+            loc = y_calc * SCREEN_WIDTH + x_calc;
+            if (x_calc >= SCREEN_WIDTH || x_calc < 0 || y_calc >= SCREEN_HEIGHT || y_calc < 0 || !mem->ppu_registers->ppumask.IsBitSet(MaskBits::SHOW_SPRITES_LEFT) && x_calc < 8)
+                continue;
+            
             pixels[loc] = colors[value].r << 24 | colors[value].g << 16 | colors[value].b << 8 | 0xFF;
             //counter++;
         }
@@ -269,7 +287,7 @@ void Display::DrawBackgroundTileLine(Memory *mem, uint8_t bank, uint8_t index, S
         int loc = line * SCREEN_WIDTH + (x + j);
         if (value == 0)
             continue;
-        if (loc >= SCREEN_HEIGHT*SCREEN_WIDTH || x+j > 255 || loc < 0 || x+j < 0)
+        if (loc >= SCREEN_HEIGHT*SCREEN_WIDTH || x+j > 255 || loc < 0 || x+j < 0 || !mem->ppu_registers->ppumask.IsBitSet(MaskBits::SHOW_SPRITES_LEFT) && (x+j) < 8)
             continue;
         pixels[loc] = color_pointer[value].r << 24 | color_pointer[value].g << 16 | color_pointer[value].b << 8 | 0xFF;
         //counter++;

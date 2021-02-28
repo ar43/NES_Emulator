@@ -84,9 +84,9 @@ bool Machine::LoadNES(std::string path)
 	std::size_t found = path.find(".nes");
 	if (found == std::string::npos)
 	{
-		logger::PrintLine(logger::LogType::INTERNAL_ERROR, "Bad file format! .nes required");
-		return false;
+		path += ".nes";
 	}
+	
 
 	std::ifstream ifs(path, std::ifstream::in | std::ifstream::binary);
 	if (!ifs.is_open())

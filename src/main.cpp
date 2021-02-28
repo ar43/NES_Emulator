@@ -12,7 +12,8 @@ int main(int argc, char *args[])
 	machine->Init();
 	machine->ppu.display.Init();
 	//machine->RunCPUTest(5000);
-	machine->RunROM("roms/super_mario_bros.nes");
+	if(argc == 2)
+		machine->RunROM(std::string(args[1]));
 	
 	delete machine;
 	return 0;
