@@ -63,7 +63,7 @@ public:
 	uint8_t pixel_values[2][256 * 64];
 	Joypad* joypad;
 
-	int scrolling = 1; //0 horizontal, 1 vertical, 2 other
+	int nametable_mirroring = 1; //0 vertical mirroring, 1 horizontal mirroring, 2 other
 	int sprite0_hit_y = 0;
 
 private:

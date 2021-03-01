@@ -41,11 +41,18 @@ namespace utility
 
     int GetOtherNametable(int nametable, int scrolling)
     {
-        if (scrolling == 0) //vertical mirroring
+        if (scrolling == 0) //horizontal scrolling
         {
-            return nametable + 0x400;
+            if (nametable == 0x2400)
+            {
+                return nametable - 0x400;
+            }
+            else
+            {
+                return nametable + 0x400;
+            }
         }
-        else if (scrolling == 1) //horizontal mirroring
+        else if (scrolling == 1) //vertical scrolling
         {
             if (nametable <= 0x2400)
             {
@@ -58,7 +65,7 @@ namespace utility
         }
         else
         {
-            logger::PrintLine(logger::LogType::FATAL_ERROR, "scrolling type");
+            logger::PrintLine(logger::LogType::FATAL_ERROR, "bad scrolling type");
             return 0;
         }
     }

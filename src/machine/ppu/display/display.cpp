@@ -284,7 +284,7 @@ void Display::DrawBackgroundLineHSB(Memory* mem, uint8_t x_shift, uint8_t y_shif
         return;
 
     SDL_Color colors[4];
-    nametable += 0x400; //is this correct? perhaps!
+    nametable = utility::GetOtherNametable(nametable, 0);
     int test = (int)ceil(double(x_shift) / double(8));
     for (int x = 0; x < test; x++)
     {
@@ -304,7 +304,7 @@ void Display::DrawBackgroundLineVSB(Memory* mem, uint8_t x_shift, uint8_t y_shif
     int new_line = line - (239-y_shift)-1;
 
     SDL_Color colors[4];
-    nametable = utility::GetOtherNametable(nametable, mem->scrolling);
+    nametable = utility::GetOtherNametable(nametable, 1);
     int test = x_shift / 8;
     for (int x = test; x < 32; x++)
     {

@@ -35,7 +35,7 @@ void Ppu::Step(Memory *mem, uint16_t budget)
 			}
 			else
 			{
-				display.DrawBackgroundLineVSB(mem, x_scroll, y_scroll, nametable, bank, scanline); //todo: hor + ver scrolling
+				display.DrawBackgroundLineVSB(mem, x_scroll, y_scroll, nametable, bank, scanline); //todo: hor + ver scrolling if(x_scroll) DrawBackGroundLineVSA
 			}
 		}
 
@@ -96,7 +96,7 @@ bool Ppu::IsSprite0Hit(Memory *mem, int scanline)
 		else if (flip_v)
 			loc = (y + (7 - i)) * SCREEN_WIDTH + ((x + j) & 255);
 
-		if ((pixels[loc] & 0xFF) != 0xFE)
+		if ((pixels[loc] & 0xFF) != 0xFE) //alpha trick, all pixels are initialized with 0xFE alpha, which means they have 0xFE alpha when unchanged by sprites/bg
 		{
 			return true;
 		}

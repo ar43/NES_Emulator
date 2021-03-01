@@ -168,14 +168,14 @@ uint8_t Memory::ReadCPU(size_t loc)
 void Memory::WritePPU(size_t loc, uint8_t byte)
 {
 	//mirroring
-	if (scrolling == 0)
+	if (nametable_mirroring == 0)
 	{
 		if (loc >= 0x2800 && loc < 0x3000)
 		{
 			loc &= 0x27FF;
 		}
 	}
-	else if (scrolling == 1)
+	else if (nametable_mirroring == 1)
 	{
 		if (loc >= 0x2400 && loc < 0x2800)
 		{
@@ -211,14 +211,14 @@ void Memory::WritePPU(size_t loc, uint8_t byte)
 uint8_t Memory::ReadPPU(size_t loc)
 {
 	//mirroring
-	if (scrolling == 0)
+	if (nametable_mirroring == 0)
 	{
 		if (loc >= 0x2800 && loc < 0x3000)
 		{
 			loc &= 0x27FF;
 		}
 	}
-	else if (scrolling == 1)
+	else if (nametable_mirroring == 1)
 	{
 		if (loc >= 0x2400 && loc < 0x2800)
 		{
@@ -256,9 +256,9 @@ bool Memory::LoadNES(NesData *nes_data)
 	mapper.number = nes_data->header.mapper_num;
 
 	if (utility::IsBitSet(nes_data->header.flags6, 0))
-		scrolling = 0;
+		nametable_mirroring = 0;
 	else if(utility::IsBitSet(nes_data->header.flags6, 3))
-		scrolling = 2;
+		nametable_mirroring = 2;
 	
 	//this should probably be made with functions... this can get really messy with many mappers
 	switch (mapper.number)
