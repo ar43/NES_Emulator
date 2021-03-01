@@ -14,6 +14,8 @@ Machine::Machine()
 void Machine::Init()
 {
 	memory.AttachStuff(&ppu.registers, input.joypad);
+	ppu.display.Init();
+	apu.Init();
 }
 
 void Machine::RunROM(std::string path)
@@ -35,6 +37,12 @@ void Machine::PollInterrupts()
 		ppu.display.Render(&memory);
 		cpu.HandleNMI(&memory);
 		memory.trigger_nmi_interrupt = false;
+	}
+	else if (memory.trigger_irq_interrupt && !cpu.registers[(size_t)RegId::P]->get_flag(flags::Flags::I))
+	{
+		cpu.HandleIRQ(&memory);
+		memory.trigger_irq_interrupt = false;
+		logger::PrintLine(logger::LogType::DEBUG, "IRQ request");
 	}
 	else if (machine_status.reset)
 	{

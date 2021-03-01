@@ -144,6 +144,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\logger\logger.cpp" />
+    <ClCompile Include="src\machine\apu\apu.cpp" />
     <ClCompile Include="src\machine\cpu\cpu.cpp" />
     <ClCompile Include="src\machine\cpu\flags.cpp" />
     <ClCompile Include="src\machine\cpu\is_load.cpp" />
@@ -170,6 +171,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\logger\logger.h" />
+    <ClInclude Include="src\machine\apu\apu.h" />
     <ClInclude Include="src\machine\cpu\addressingmode.h" />
     <ClInclude Include="src\machine\cpu\cpu.h" />
     <ClInclude Include="src\machine\cpu\flags.h" />

@@ -277,6 +277,39 @@ void Cpu::HandleNMI(Memory *mem)
 	p->set_flag(flags::Flags::I);
 }
 
+void Cpu::HandleIRQ(Memory *mem)
+{
+	//logger::PrintLine(logger::LogType::INFO, "NMI INTERRUPT detected");
+	AddCycles(7);
+
+	auto p = registers[(size_t)RegId::P];
+	auto sp = registers[(size_t)RegId::SP];
+	auto pc = registers[(size_t)RegId::PC];
+	//p->set_flag(flags::Flags::B);
+	uint8_t ms = (pc->get() >> 8) & 0xFF;
+	uint8_t ls = pc->get() & 0xFF;
+
+	//push pc on stack
+	mem->WriteCPU(sp->get()+STACK_OFFSET, ms);
+	sp->decrement();
+	mem->WriteCPU(sp->get()+STACK_OFFSET, ls);
+	sp->decrement();
+
+	//push flags on stack
+	int to_write = p->get();
+	utility::SetBit(&to_write, 5, 1);
+	utility::SetBit(&to_write, 4, 0);
+	mem->WriteCPU(sp->get()+STACK_OFFSET, to_write);
+	sp->decrement();
+
+	//jump to IRQ addr
+	uint8_t new_ls = mem->ReadCPU(0xFFFE);
+	uint8_t new_ms = mem->ReadCPU(0xFFFF);
+	int new_pc = (new_ms << 8) | new_ls;
+	pc->set(new_pc);
+	p->set_flag(flags::Flags::I);
+}
+
 void Cpu::ExecuteInstruction(Memory *mem)
 {
 	int old_pc = registers[(size_t)RegId::PC]->get();

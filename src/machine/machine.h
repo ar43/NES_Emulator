@@ -6,6 +6,7 @@
 #include "../timing/frame.h"
 #include "misc/machine_status.h"
 #include "input/input.h"
+#include "apu/apu.h"
 #include <memory>
 
 class Machine
@@ -15,6 +16,7 @@ public:
 	Cpu cpu;
 	Memory memory;
 	Ppu ppu;
+	Apu apu;
 	Input input;
 	std::unique_ptr<NesData> nes_data;
 	MachineStatus machine_status;

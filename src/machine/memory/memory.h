@@ -59,6 +59,7 @@ public:
 	
 	bool add_dma_cycles = false;
 	bool trigger_nmi_interrupt = false;
+	bool trigger_irq_interrupt = false;
 	uint8_t oam_data[OAM_MEM_SIZE];
 	uint8_t pixel_values[2][256 * 64];
 	Joypad* joypad;

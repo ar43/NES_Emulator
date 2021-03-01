@@ -79,6 +79,12 @@
     <Filter Include="Source Files\Machine\Input">
       <UniqueIdentifier>{37f31363-ad2a-47a7-afeb-d3479980eb15}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Machine\APU">
+      <UniqueIdentifier>{91e307ef-6ded-4898-9eed-8469bee7b37b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Machine\APU">
+      <UniqueIdentifier>{e7ff69b8-20b2-4f83-bc5b-8109cad5b566}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -152,6 +158,9 @@
     </ClCompile>
     <ClCompile Include="src\machine\input\joypad.cpp">
       <Filter>Source Files\Machine\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="src\machine\apu\apu.cpp">
+      <Filter>Source Files\Machine\APU</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -235,6 +244,9 @@
     </ClInclude>
     <ClInclude Include="src\machine\misc\constants.h">
       <Filter>Header Files\Machine\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machine\apu\apu.h">
+      <Filter>Header Files\Machine\APU</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

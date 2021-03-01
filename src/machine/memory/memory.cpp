@@ -79,6 +79,28 @@ void Memory::WriteCPU(size_t loc, uint8_t byte)
 	{
 		joypad[0].Write(byte);
 		joypad[1].Write(byte);
+	} //sound below
+	else if (loc == 0x4010)
+	{
+		if (utility::IsBitSet(byte, 7))
+		{
+			trigger_irq_interrupt = true;
+		}
+		else
+		{
+			trigger_irq_interrupt = false;
+		}
+	}
+	else if (loc == 0x4017)
+	{
+		if ((byte & 0xC0) == 0)
+		{
+			trigger_irq_interrupt = true;
+		}
+		else
+		{
+			trigger_irq_interrupt = false;
+		}
 	}
 
 	cpu_data[loc] = byte;

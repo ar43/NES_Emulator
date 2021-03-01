@@ -27,6 +27,7 @@ public:
 	void ExecuteInstruction(Memory* mem);
 	void HandleReset(Memory* mem, int reset);
 	void HandleNMI(Memory* mem);
+	void HandleIRQ(Memory* mem);
 
 	std::string output_string;
 	
