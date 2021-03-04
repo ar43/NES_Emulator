@@ -27,6 +27,7 @@ public:
 	bool LoadNES(std::string path);
 	void PollInterrupts();
 	void RunROM(std::string path);
+	void TestPlay();
 private:
 	void Run();
 };

@@ -13,7 +13,7 @@ Machine::Machine()
 
 void Machine::Init()
 {
-	memory.AttachStuff(&ppu.registers, input.joypad);
+	memory.AttachStuff(&ppu.registers, input.joypad, &apu);
 	ppu.display.Init();
 	apu.Init();
 }
@@ -78,13 +78,21 @@ void Machine::Run()
 				cpu.ExecuteInstruction(&memory);
 				uint16_t budget = (uint16_t)(cpu.GetCycles() - old_cycle);
 				ppu.Step(&memory, budget);
+				apu.Step(&memory, budget);
 				cycle_accumulator += budget;
 			}
+			TestPlay();
 			frame.end(ppu.display.GetWindow());
 			
 		}
 		
 	}
+}
+
+void Machine::TestPlay()
+{
+	SDL_QueueAudio(1, apu.pulse_channel[0].snd_buf.data(), apu.pulse_channel[0].snd_buf.size() * sizeof(float));
+	apu.pulse_channel[0].snd_buf.clear();
 }
 
 bool Machine::LoadNES(std::string path)

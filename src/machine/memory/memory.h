@@ -20,6 +20,7 @@ enum class ConstAddr
 
 struct NesData;
 class Joypad;
+class Apu;
 
 struct Mapper
 {
@@ -51,7 +52,7 @@ public:
 
 	bool LoadNES(NesData *nes_data);
 
-	void AttachStuff(PpuRegisters* ppu_registers, Joypad *joypad);
+	void AttachStuff(PpuRegisters* ppu_registers, Joypad *joypad, Apu *apu);
 	PpuRegisters *ppu_registers;
 
 	void BuildPixelValues();
@@ -63,6 +64,7 @@ public:
 	uint8_t oam_data[OAM_MEM_SIZE];
 	uint8_t pixel_values[2][256 * 64];
 	Joypad* joypad;
+	Apu* apu;
 
 	int nametable_mirroring = 1; //0 vertical mirroring, 1 horizontal mirroring, 2 other
 	int sprite0_hit_y = 0;

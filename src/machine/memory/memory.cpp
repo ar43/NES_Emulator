@@ -3,7 +3,10 @@
 #include "../misc/nes_data.h"
 #include "../../utility/utility.h"
 #include "../input/joypad.h"
+#include "../apu/apu.h"
 #include <assert.h>
+
+int lentable[] = { 10,254, 20,  2, 40,  4, 80,  6, 160,  8, 60, 10, 14, 12, 26, 14,12, 16, 24, 18, 48, 20, 96, 22, 192, 24, 72, 26, 16, 28, 32, 30 };
 
 void Memory::WriteCPU(size_t loc, uint8_t byte)
 {
@@ -80,7 +83,7 @@ void Memory::WriteCPU(size_t loc, uint8_t byte)
 		joypad[0].Write(byte);
 		joypad[1].Write(byte);
 	} //sound below
-	else if (loc == 0x4010)
+	/*else if (loc == 0x4010)
 	{
 		if (utility::IsBitSet(byte, 7))
 		{
@@ -90,17 +93,77 @@ void Memory::WriteCPU(size_t loc, uint8_t byte)
 		{
 			trigger_irq_interrupt = false;
 		}
-	}
-	else if (loc == 0x4017)
+	}*/
+	else if (loc == 0x4000)
 	{
-		if ((byte & 0xC0) == 0)
+		apu->pulse_channel[0].duty_cycle = (byte >> 6) & 3;
+		apu->pulse_channel[0].length_counter_halt = utility::IsBitSet(byte, 5);
+		apu->pulse_channel[0].c = utility::IsBitSet(byte, 4);
+		apu->pulse_channel[0].envelope_divider = byte & 15;
+	}
+	else if (loc == 0x4002)
+	{
+		apu->pulse_channel[0].timer &= 0x700;
+		apu->pulse_channel[0].timer |= byte;
+		apu->pulse_channel[0].timer_target = apu->pulse_channel[0].timer;
+	}
+	else if (loc == 0x4003)
+	{
+		apu->pulse_channel[0].timer |= (byte << 8) & 0x700;
+		apu->pulse_channel[0].len = lentable[(byte >> 3) & 0x1f];
+		apu->pulse_channel[0].env_start = true;
+		apu->pulse_channel[0].timer_target = apu->pulse_channel[0].timer;
+	}
+	else if (loc == 0x4004)
+	{
+		apu->pulse_channel[1].duty_cycle = (byte >> 6) & 3;
+		apu->pulse_channel[1].length_counter_halt = utility::IsBitSet(byte, 5);
+		apu->pulse_channel[1].c = utility::IsBitSet(byte, 4);
+		apu->pulse_channel[1].envelope_divider = byte & 15;
+	}
+	else if (loc == 0x4006)
+	{
+		apu->pulse_channel[1].timer &= 0x700;
+		apu->pulse_channel[1].timer |= byte;
+		apu->pulse_channel[1].timer_target = apu->pulse_channel[0].timer;
+	}
+	else if (loc == 0x4007)
+	{
+		apu->pulse_channel[1].timer |= (byte << 8) & 0x700;
+		apu->pulse_channel[1].len = lentable[(byte >> 3) & 0x1f];
+		apu->pulse_channel[1].env_start = true;
+		apu->pulse_channel[1].timer_target = apu->pulse_channel[0].timer;
+	}
+	else if (loc == 0x4015)
+	{
+		bool pulse1enable = utility::IsBitSet(byte, 0);
+		bool pulse2enable = utility::IsBitSet(byte, 1);
+		if (!pulse1enable)
 		{
-			trigger_irq_interrupt = true;
+			apu->pulse_channel[0].enable = false;
+			apu->pulse_channel[0].len = 0;
 		}
 		else
 		{
-			trigger_irq_interrupt = false;
+			apu->pulse_channel[0].enable = true;
 		}
+		if (!pulse2enable)
+		{
+			apu->pulse_channel[1].enable = false;
+			apu->pulse_channel[1].len = 0;
+		}
+		else
+		{
+			apu->pulse_channel[1].enable = true;
+		}
+	}
+	else if (loc == 0x4017)
+	{
+		if (utility::IsBitSet(byte, 6))
+		{
+			apu->frame_counter.interrupt = true;
+		}
+		apu->frame_counter.mode = utility::IsBitSet(byte, 7);
 	}
 
 	cpu_data[loc] = byte;
@@ -182,6 +245,19 @@ uint8_t Memory::ReadCPU(size_t loc)
 	else if (loc == 0x4017)
 	{
 		cpu_data[loc] = joypad[1].Read();
+	}
+	else if (loc == 0x4015)
+	{
+		cpu_data[loc] = 0;
+		if (apu->pulse_channel[0].len > 0)
+		{
+			cpu_data[loc] = cpu_data[loc] | 1;
+		}
+		if (apu->frame_counter.interrupt == false)
+		{
+			apu->frame_counter.interrupt = true;
+			cpu_data[loc] = cpu_data[loc] | 1 << 7;
+		}
 	}
 
 	return cpu_data[loc];
@@ -342,10 +418,11 @@ bool Memory::LoadNES(NesData *nes_data)
 	return true;
 }
 
-void Memory::AttachStuff(PpuRegisters *ppu_registers, Joypad *joypad)
+void Memory::AttachStuff(PpuRegisters *ppu_registers, Joypad *joypad, Apu *apu)
 {
 	this->ppu_registers = ppu_registers;
 	this->joypad = joypad;
+	this->apu = apu;
 }
 
 void Memory::BuildPixelValues()
