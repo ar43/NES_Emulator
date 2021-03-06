@@ -1,8 +1,7 @@
 #pragma once
 #include <vector>
-class PulseChannel
+struct PulseChannel
 {
-public:
 	bool is_pulse1 = false;
 	bool enable = false;
 	int len = 0;
@@ -31,4 +30,5 @@ public:
 
 	void ClockEnv();
 	void ClockSL();
+	void Think();
 };

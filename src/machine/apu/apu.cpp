@@ -60,6 +60,7 @@ void Apu::Step(Memory *mem, uint16_t budget)
 void Apu::Reset()
 {
 	canTick = false;
+	sample_timer = 20;
 }
 
 void Apu::Tick(Memory *mem)
@@ -79,60 +80,40 @@ void Apu::Tick(Memory *mem)
 
 	for (int i = 0; i < 2; i++)
 	{
-		if (pulse_channel[i].c)
-			pulse_channel[i]._amp = pulse_channel[i].envelope_divider;
-		else
-			pulse_channel[i]._amp = pulse_channel[i].envelope_vol;
-
-		//handle timer
-		if (pulse_channel[i].timer <= 0) 
-		{
-			pulse_channel[i].timer = pulse_channel[i].timer_target;
-
-			//tick duty pointer
-			++pulse_channel[i].duty_index %= 8;
-		}
-		else 
-		{
-			pulse_channel[i].timer--;
-		}
-
-		//	handle duty
-		int duty = pulse_channel[i].duty_cycle;
-		if (APU_DUTY_TABLE[duty][pulse_channel[i].duty_index] == 1)
-			pulse_channel[i].freq = pulse_channel[i]._amp;
-		else
-			pulse_channel[i].freq = 0;
+		pulse_channel[i].Think();
 	}
 	
 
 	if (sample_timer == 0)
 	{
 		sample_timer = 20;
-
-		snd_buf.push_back(0);
-		if (!mute)
-		{
-			int pulse1 = 0;
-			int pulse2 = 0;
-			if (pulse_channel[0].len && pulse_channel[0].enable && !pulse_channel[0].muted_by_sweep)
-			{
-				pulse1 = pulse_channel[0].freq;
-			}
-			if (pulse_channel[1].len && pulse_channel[1].enable && !pulse_channel[1].muted_by_sweep)
-			{
-				pulse2 = pulse_channel[1].freq;
-			}
-			
-			snd_buf.back() = pulseTable[pulse1 + pulse2];
-		}
-		
+		GenerateSample();
 	}
 	else
 	{
 		sample_timer--;
 	}
 	
+}
+
+void Apu::GenerateSample()
+{
+	snd_buf.push_back(0);
+	if (!mute)
+	{
+		int pulse1 = 0;
+		int pulse2 = 0;
+		if (pulse_channel[0].len && pulse_channel[0].enable && !pulse_channel[0].muted_by_sweep)
+		{
+			pulse1 = pulse_channel[0].freq;
+		}
+		if (pulse_channel[1].len && pulse_channel[1].enable && !pulse_channel[1].muted_by_sweep)
+		{
+			pulse2 = pulse_channel[1].freq;
+		}
+
+		snd_buf.back() = pulseTable[pulse1 + pulse2];
+	}
 }
 
 void Apu::InitPulseTable()

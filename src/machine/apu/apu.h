@@ -16,6 +16,7 @@ public:
 	void Frame0Tick(Memory *mem);
 	void Frame1Tick();
 	void InitPulseTable();
+	void GenerateSample();
 
 	bool mute = false;
 

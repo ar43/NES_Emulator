@@ -1,4 +1,5 @@
 #include "pulse_channel.h"
+#include "../misc/constants.h"
 
 void PulseChannel::ClockEnv()
 {
@@ -27,6 +28,30 @@ void PulseChannel::ClockEnv()
 		envelope = 15;
 		envelope_div = envelope_divider;
 	}
+}
+
+void PulseChannel::Think()
+{
+	if (c)
+		_amp = envelope_divider;
+	else
+		_amp = envelope_vol;
+
+	if (timer <= 0) 
+	{
+		timer = timer_target;
+
+		duty_index = (duty_index + 1) & 7;
+	}
+	else 
+	{
+		timer--;
+	}
+
+	if (APU_DUTY_TABLE[duty_cycle][duty_index] == 1)
+		freq = _amp;
+	else
+		freq = 0;
 }
 
 void PulseChannel::ClockSL()
