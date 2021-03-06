@@ -5,8 +5,7 @@
 #include "../input/joypad.h"
 #include "../apu/apu.h"
 #include <assert.h>
-
-int lentable[] = { 10,254, 20,  2, 40,  4, 80,  6, 160,  8, 60, 10, 14, 12, 26, 14,12, 16, 24, 18, 48, 20, 96, 22, 192, 24, 72, 26, 16, 28, 32, 30 };
+#include "../misc/constants.h"
 
 void Memory::WriteCPU(size_t loc, uint8_t byte)
 {
@@ -110,7 +109,7 @@ void Memory::WriteCPU(size_t loc, uint8_t byte)
 	else if (loc == 0x4003)
 	{
 		apu->pulse_channel[0].timer |= (byte << 8) & 0x700;
-		apu->pulse_channel[0].len = lentable[(byte >> 3) & 0x1f];
+		apu->pulse_channel[0].len = APU_LEN_TABLE[(byte >> 3) & 0x1f];
 		apu->pulse_channel[0].env_start = true;
 		apu->pulse_channel[0].timer_target = apu->pulse_channel[0].timer;
 	}
@@ -130,7 +129,7 @@ void Memory::WriteCPU(size_t loc, uint8_t byte)
 	else if (loc == 0x4007)
 	{
 		apu->pulse_channel[1].timer |= (byte << 8) & 0x700;
-		apu->pulse_channel[1].len = lentable[(byte >> 3) & 0x1f];
+		apu->pulse_channel[1].len = APU_LEN_TABLE[(byte >> 3) & 0x1f];
 		apu->pulse_channel[1].env_start = true;
 		apu->pulse_channel[1].timer_target = apu->pulse_channel[0].timer;
 	}
@@ -159,10 +158,7 @@ void Memory::WriteCPU(size_t loc, uint8_t byte)
 	}
 	else if (loc == 0x4017)
 	{
-		if (utility::IsBitSet(byte, 6))
-		{
-			apu->frame_counter.interrupt = true;
-		}
+		apu->frame_counter.interrupt_inhibit = utility::IsBitSet(byte, 6);
 		apu->frame_counter.mode = utility::IsBitSet(byte, 7);
 	}
 
@@ -253,11 +249,15 @@ uint8_t Memory::ReadCPU(size_t loc)
 		{
 			cpu_data[loc] = cpu_data[loc] | 1;
 		}
-		if (apu->frame_counter.interrupt == false)
+		if (apu->pulse_channel[1].len > 0)
 		{
-			apu->frame_counter.interrupt = true;
+			cpu_data[loc] = cpu_data[loc] | (1 << 1);
+		}
+		if (trigger_irq_interrupt)
+		{
 			cpu_data[loc] = cpu_data[loc] | 1 << 7;
 		}
+		trigger_irq_interrupt = false;
 	}
 
 	return cpu_data[loc];

@@ -12,3 +12,11 @@ constexpr int NUM_SPRITES = 64;
 constexpr int BYTES_PER_SPRITE = 4;
 constexpr int TILES_X = 32;
 constexpr int TILES_Y = 30;
+
+constexpr int APU_LEN_TABLE[] = { 10,254, 20,  2, 40,  4, 80,  6, 160,  8, 60, 10, 14, 12, 26, 14,12, 16, 24, 18, 48, 20, 96, 22, 192, 24, 72, 26, 16, 28, 32, 30 };
+constexpr uint8_t APU_DUTY_TABLE[4][8] = {
+	{0, 0, 0, 0, 0, 0, 0, 1 },
+	{0, 0, 0, 0, 0, 0, 1, 1 },
+	{0, 0, 0, 0, 1, 1, 1, 1 },
+	{1, 1, 1, 1, 1, 1, 0, 0 }
+};

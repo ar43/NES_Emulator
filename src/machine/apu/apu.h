@@ -18,9 +18,11 @@ public:
 
 	FrameCounter frame_counter;
 	PulseChannel pulse_channel[2];
+
+	std::vector<float> snd_buf;
 private:
 	bool canTick = false;
 	int cycles = 0;
-	int take_sample = 20;
-	bool take_sample_clock = false;
+	int sample_timer = 20;
+	
 };

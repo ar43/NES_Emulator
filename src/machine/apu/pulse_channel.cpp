@@ -11,11 +11,11 @@ void PulseChannel::ClockEnv()
 			if (envelope > 0)
 			{
 				envelope--;
-				envelopeVol = envelope;
+				envelope_vol = envelope;
 			}
 			else
 			{
-				envelopeVol = envelope;
+				envelope_vol = envelope;
 				if (length_counter_halt)
 					envelope = 15;
 			}

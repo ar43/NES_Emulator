@@ -16,16 +16,16 @@ void Apu::Init()
 
 	SDL_AudioSpec AudioSettings = {0};
 
-	// NOTE: Sound test
-	int SamplesPerSecond = 44100;
-	int ToneHz = 440;
-	float ToneVolume = 0.002f;
-	uint32_t RunningSampleIndex = 0;
-	int SquareWavePeriod = SamplesPerSecond / ToneHz;
-	int HalfSquareWavePeriod = SquareWavePeriod / 2;
-	int BytesPerSample = sizeof(float);
+	//// NOTE: Sound test
+	//int SamplesPerSecond = 44100;
+	//int ToneHz = 440;
+	//float ToneVolume = 0.002f;
+	//uint32_t RunningSampleIndex = 0;
+	//int SquareWavePeriod = SamplesPerSecond / ToneHz;
+	//int HalfSquareWavePeriod = SquareWavePeriod / 2;
+	//int BytesPerSample = sizeof(float);
 
-	AudioSettings.freq = SamplesPerSecond;
+	AudioSettings.freq = 44100;
 	AudioSettings.format = AUDIO_F32;
 	AudioSettings.channels = 1;
 	AudioSettings.samples = 1024;
@@ -60,13 +60,6 @@ void Apu::Reset()
 	canTick = false;
 }
 
-uint8_t duties[4][8] = {
-{0, 0, 0, 0, 0, 0, 0, 1 },
-{0, 0, 0, 0, 0, 0, 1, 1 },
-{0, 0, 0, 0, 1, 1, 1, 1 },
-{1, 1, 1, 1, 1, 1, 0, 0 }
-};
-
 void Apu::Tick(Memory *mem)
 {
 	if (!canTick)
@@ -87,118 +80,92 @@ void Apu::Tick(Memory *mem)
 		if (pulse_channel[i].c)
 			pulse_channel[i]._amp = pulse_channel[i].envelope_divider;
 		else
-			pulse_channel[i]._amp = pulse_channel[i].envelopeVol;
+			pulse_channel[i]._amp = pulse_channel[i].envelope_vol;
 
-		//	handle timer
-		if (pulse_channel[i].timer <= 0x00) {
+		//handle timer
+		if (pulse_channel[i].timer <= 0) 
+		{
 			pulse_channel[i].timer = pulse_channel[i].timer_target;
 
-			//	tick duty pointer
+			//tick duty pointer
 			++pulse_channel[i].duty_index %= 8;
 		}
-		else {
+		else 
+		{
 			pulse_channel[i].timer--;
 		}
 
 		//	handle duty
 		int duty = pulse_channel[i].duty_cycle;
-		if (duties[duty][pulse_channel[i].duty_index] == 1)
+		if (APU_DUTY_TABLE[duty][pulse_channel[i].duty_index] == 1)
 			pulse_channel[i].freq = pulse_channel[i]._amp;
 		else
 			pulse_channel[i].freq = 0;
 	}
 	
 
-	if (take_sample == 0)
+	if (sample_timer == 0)
 	{
-		if (!take_sample_clock)
-		{
-			take_sample = 20;
-		}
-		else
-		{
-			take_sample = 20;
-		}
+		sample_timer = 20;
 
-		take_sample_clock = !take_sample_clock;
-
+		snd_buf.push_back(0);
+		float pulse1 = 0;
+		float pulse2 = 0;
 		if (pulse_channel[0].len && pulse_channel[0].enable)
 		{
-			pulse_channel[0].snd_buf.push_back((float)pulse_channel[0].freq / 100);
+			pulse1 = (float)pulse_channel[0].freq;
 		}
-		else
+		if (pulse_channel[1].len && pulse_channel[1].enable)
 		{
-			pulse_channel[0].snd_buf.push_back(0);
+			pulse2 = (float)pulse_channel[1].freq;
 		}
+		snd_buf.back() = 0.00752f * (pulse1 + pulse2);
 	}
 	else
 	{
-		take_sample--;
+		sample_timer--;
 	}
 	
 }
 
 void Apu::Frame0Tick(Memory *mem)
 {
-	if (cycles == 3729)
+	if (cycles == 3729 || cycles == 11186)
 	{
 		pulse_channel[0].ClockEnv();
 		pulse_channel[1].ClockEnv();
 	}
-	else if (cycles == 7457)
+	else if (cycles == 7457 || cycles == 14915)
 	{
 		pulse_channel[0].ClockEnv();
 		pulse_channel[0].ClockSL();
 		pulse_channel[1].ClockEnv();
 		pulse_channel[1].ClockSL();
 	}
-	else if (cycles == 11186)
+	if (cycles >= 14915)
 	{
-		pulse_channel[0].ClockEnv();
-		pulse_channel[1].ClockEnv();
-	}
-	else if (cycles >= 14915)
-	{
-		pulse_channel[0].ClockEnv();
-		pulse_channel[0].ClockSL();
-		pulse_channel[1].ClockEnv();
-		pulse_channel[1].ClockSL();
 		cycles = 0;
-		if (frame_counter.interrupt)
+		if (!frame_counter.interrupt_inhibit)
 			mem->trigger_irq_interrupt = true;
-
 	}
 }
 
 void Apu::Frame1Tick()
 {
-	if (cycles == 3729)
+	if (cycles == 3729 || cycles == 11186)
 	{
 		pulse_channel[0].ClockEnv();
 		pulse_channel[1].ClockEnv();
 	}
-	else if (cycles == 7457)
-	{
-		pulse_channel[0].ClockEnv();
-		pulse_channel[0].ClockSL();
-		pulse_channel[1].ClockEnv();
-		pulse_channel[1].ClockSL();
-	}
-	else if (cycles == 11186)
-	{
-		pulse_channel[0].ClockEnv();
-		pulse_channel[1].ClockEnv();
-	}
-	else if (cycles == 14915)
-	{
-
-	}
-	else if (cycles >= 18641)
+	else if (cycles == 7457 || cycles == 18641)
 	{
 		pulse_channel[0].ClockEnv();
 		pulse_channel[0].ClockSL();
 		pulse_channel[1].ClockEnv();
 		pulse_channel[1].ClockSL();
+	}
+	if (cycles >= 18641)
+	{
 		cycles = 0;
 	}
 }

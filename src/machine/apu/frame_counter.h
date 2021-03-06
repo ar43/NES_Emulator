@@ -4,5 +4,5 @@ class FrameCounter
 {
 public:
 	bool mode = false;
-	bool interrupt = false;
+	bool interrupt_inhibit = true;
 };

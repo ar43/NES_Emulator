@@ -1,6 +1,6 @@
 #include "palette.h"
-#include "../logger/logger.h"
-#include "../machine/memory/memory.h"
+#include "../../../logger/logger.h"
+#include "../../memory/memory.h"
 #include <fstream>
 #include <cassert>
 

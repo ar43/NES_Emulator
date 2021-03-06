@@ -46,6 +46,7 @@ void Machine::PollInterrupts()
 	}
 	else if (machine_status.reset)
 	{
+		memory.WriteCPU(0x4015, 00); //silence the apu
 		ppu.HandleReset();
 		cpu.HandleReset(&memory, machine_status.reset);
 		machine_status.reset = 0;
@@ -91,8 +92,8 @@ void Machine::Run()
 
 void Machine::TestPlay()
 {
-	SDL_QueueAudio(1, apu.pulse_channel[0].snd_buf.data(), apu.pulse_channel[0].snd_buf.size() * sizeof(float));
-	apu.pulse_channel[0].snd_buf.clear();
+	SDL_QueueAudio(1, apu.snd_buf.data(), apu.snd_buf.size() * sizeof(float));
+	apu.snd_buf.clear();
 }
 
 bool Machine::LoadNES(std::string path)
