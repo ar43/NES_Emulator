@@ -99,6 +99,14 @@ void Memory::WriteCPU(size_t loc, uint8_t byte)
 		apu->pulse_channel[0].length_counter_halt = utility::IsBitSet(byte, 5);
 		apu->pulse_channel[0].c = utility::IsBitSet(byte, 4);
 		apu->pulse_channel[0].envelope_divider = byte & 15;
+		apu->pulse_channel[0].sweep_reload = true;
+	}
+	else if (loc == 0x4001)
+	{
+		apu->pulse_channel[0].sweep_enable = utility::IsBitSet(byte, 7);
+		apu->pulse_channel[0].sweep_negate = utility::IsBitSet(byte, 3);
+		apu->pulse_channel[0].sweep_period = (byte >> 4) & 7;
+		apu->pulse_channel[0].sweep_shift = byte & 7;
 	}
 	else if (loc == 0x4002)
 	{
@@ -119,6 +127,14 @@ void Memory::WriteCPU(size_t loc, uint8_t byte)
 		apu->pulse_channel[1].length_counter_halt = utility::IsBitSet(byte, 5);
 		apu->pulse_channel[1].c = utility::IsBitSet(byte, 4);
 		apu->pulse_channel[1].envelope_divider = byte & 15;
+	}
+	else if (loc == 0x4005)
+	{
+		apu->pulse_channel[1].sweep_enable = utility::IsBitSet(byte, 7);
+		apu->pulse_channel[1].sweep_negate = utility::IsBitSet(byte, 3);
+		apu->pulse_channel[1].sweep_period = (byte >> 4) & 7;
+		apu->pulse_channel[1].sweep_shift = byte & 7;
+		apu->pulse_channel[1].sweep_reload = true;
 	}
 	else if (loc == 0x4006)
 	{

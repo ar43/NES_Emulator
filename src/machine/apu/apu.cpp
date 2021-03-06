@@ -32,6 +32,7 @@ void Apu::Init()
 
 	SDL_OpenAudio(&AudioSettings, 0);
 	SDL_PauseAudio(0);
+	pulse_channel[0].is_pulse1 = true;
 	//int BytesToWrite = 735*BytesPerSample*60; //in one frame we need to play 735 samples. we need to take every 40th sample to achieve that
 	//
 	//void *SoundBuffer = malloc(BytesToWrite);
@@ -113,11 +114,11 @@ void Apu::Tick(Memory *mem)
 		{
 			float pulse1 = 0;
 			float pulse2 = 0;
-			if (pulse_channel[0].len && pulse_channel[0].enable)
+			/*if (pulse_channel[0].len && pulse_channel[0].enable && !pulse_channel[0].muted_by_sweep)
 			{
 				pulse1 = (float)pulse_channel[0].freq;
-			}
-			if (pulse_channel[1].len && pulse_channel[1].enable)
+			}*/
+			if (pulse_channel[1].len && pulse_channel[1].enable && !pulse_channel[1].muted_by_sweep)
 			{
 				pulse2 = (float)pulse_channel[1].freq;
 			}
