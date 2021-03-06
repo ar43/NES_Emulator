@@ -90,6 +90,19 @@ void Input::Poll(MachineStatus *machine_status, SDL_Window *window, Display* dis
 				break;
 			}
 
+			case SDLK_F5:
+			{
+				if (!(*machine_status->mute))
+				{
+					*machine_status->mute = true;
+				}
+				else
+				{
+					*machine_status->mute = false;
+				}
+				break;
+			}
+
 			default:
 				break;
 			}

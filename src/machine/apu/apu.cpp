@@ -109,17 +109,21 @@ void Apu::Tick(Memory *mem)
 		sample_timer = 20;
 
 		snd_buf.push_back(0);
-		float pulse1 = 0;
-		float pulse2 = 0;
-		if (pulse_channel[0].len && pulse_channel[0].enable)
+		if (!mute)
 		{
-			pulse1 = (float)pulse_channel[0].freq;
+			float pulse1 = 0;
+			float pulse2 = 0;
+			if (pulse_channel[0].len && pulse_channel[0].enable)
+			{
+				pulse1 = (float)pulse_channel[0].freq;
+			}
+			if (pulse_channel[1].len && pulse_channel[1].enable)
+			{
+				pulse2 = (float)pulse_channel[1].freq;
+			}
+			snd_buf.back() = 0.00752f * (pulse1 + pulse2);
 		}
-		if (pulse_channel[1].len && pulse_channel[1].enable)
-		{
-			pulse2 = (float)pulse_channel[1].freq;
-		}
-		snd_buf.back() = 0.00752f * (pulse1 + pulse2);
+		
 	}
 	else
 	{

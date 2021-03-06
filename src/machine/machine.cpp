@@ -53,10 +53,16 @@ void Machine::PollInterrupts()
 	}
 }
 
+void Machine::InitStatus()
+{
+	machine_status.speedup = &frame.capTimer.bypass;
+	machine_status.mute = &apu.mute;
+}
+
 void Machine::Run()
 {
 	frame.init();
-	machine_status.speedup = &frame.capTimer.bypass;
+	InitStatus();
 	SDL_Delay(20);
 	while (machine_status.running)
 	{

@@ -16,6 +16,8 @@ public:
 	void Frame0Tick(Memory *mem);
 	void Frame1Tick();
 
+	bool mute = false;
+
 	FrameCounter frame_counter;
 	PulseChannel pulse_channel[2];
 
