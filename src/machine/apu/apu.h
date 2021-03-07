@@ -26,9 +26,10 @@ public:
 	float pulseTable[31];
 
 	std::vector<float> snd_buf;
+	int cycles = 0;
 private:
 	bool canTick = false;
-	int cycles = 0;
+	
 	int sample_timer = 20;
 	
 };

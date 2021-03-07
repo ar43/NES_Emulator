@@ -117,9 +117,11 @@ void Memory::WriteCPU(size_t loc, uint8_t byte)
 	else if (loc == 0x4003)
 	{
 		apu->pulse_channel[0].timer |= (byte << 8) & 0x700;
-		apu->pulse_channel[0].len = APU_LEN_TABLE[(byte >> 3) & 0x1f];
+		if(apu->pulse_channel[0].enable)
+			apu->pulse_channel[0].len = APU_LEN_TABLE[(byte >> 3) & 0x1f];
 		apu->pulse_channel[0].env_start = true;
 		apu->pulse_channel[0].timer_target = apu->pulse_channel[0].timer;
+		apu->pulse_channel[0].duty_index = 0;
 	}
 	else if (loc == 0x4004)
 	{
@@ -145,9 +147,11 @@ void Memory::WriteCPU(size_t loc, uint8_t byte)
 	else if (loc == 0x4007)
 	{
 		apu->pulse_channel[1].timer |= (byte << 8) & 0x700;
-		apu->pulse_channel[1].len = APU_LEN_TABLE[(byte >> 3) & 0x1f];
+		if(apu->pulse_channel[1].enable)
+			apu->pulse_channel[1].len = APU_LEN_TABLE[(byte >> 3) & 0x1f];
 		apu->pulse_channel[1].env_start = true;
 		apu->pulse_channel[1].timer_target = apu->pulse_channel[1].timer;
+		apu->pulse_channel[1].duty_index = 0;
 	}
 	else if (loc == 0x4015)
 	{
@@ -176,6 +180,14 @@ void Memory::WriteCPU(size_t loc, uint8_t byte)
 	{
 		apu->frame_counter.interrupt_inhibit = utility::IsBitSet(byte, 6);
 		apu->frame_counter.mode = utility::IsBitSet(byte, 7);
+		if (apu->frame_counter.mode)
+		{
+			apu->pulse_channel[0].ClockEnv();
+			apu->pulse_channel[0].ClockSL();
+			apu->pulse_channel[1].ClockEnv();
+			apu->pulse_channel[1].ClockSL();
+		}
+		apu->cycles = -1;
 	}
 
 	cpu_data[loc] = byte;
