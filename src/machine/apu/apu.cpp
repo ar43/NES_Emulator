@@ -112,7 +112,25 @@ void Apu::GenerateSample()
 			pulse2 = pulse_channel[1].freq;
 		}
 
-		snd_buf.back() = pulseTable[pulse1 + pulse2];
+		//filter
+		static float HPA_Prev = 0;
+		static float HPB_Prev = 0;
+		static float LP_Out = 0;
+		static float HPB_Out = 0;
+		static float HPA_Out = 0;
+		float sample = pulseTable[pulse1 + pulse2];
+		float LP_In = sample;
+		LP_Out = (LP_In - LP_Out) * 0.815686f;
+		
+		HPA_Out = HPA_Out * 0.996039f + LP_Out - HPA_Prev;
+		HPA_Prev = LP_Out;
+
+		HPB_Out = HPB_Out * 0.999835f + HPA_Out - HPB_Prev;
+		HPB_Prev = HPA_Out;
+
+
+		float output = HPB_Out;
+		snd_buf.back() = output;
 	}
 }
 
