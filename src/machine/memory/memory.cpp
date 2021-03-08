@@ -89,7 +89,7 @@ void Memory::WriteCPU(size_t loc, uint8_t byte)
 		apu->pulse_channel[0].length_counter_halt = utility::IsBitSet(byte, 5);
 		apu->pulse_channel[0].c = utility::IsBitSet(byte, 4);
 		apu->pulse_channel[0].envelope_divider = byte & 15;
-		apu->pulse_channel[0].env_start = true;
+		//apu->pulse_channel[0].env_start = true;
 	}
 	else if (loc == 0x4001)
 	{
@@ -110,6 +110,7 @@ void Memory::WriteCPU(size_t loc, uint8_t byte)
 		apu->pulse_channel[0].timer_target = prev | ((byte & 0x07) << 8);
 		if(apu->pulse_channel[0].enable)
 			apu->pulse_channel[0].len = APU_LEN_TABLE[(byte >> 3) & 0x1f];
+		apu->pulse_channel[0].timer = apu->pulse_channel[0].timer_target;
 		apu->pulse_channel[0].env_start = true;
 		apu->pulse_channel[0].duty_index = 0;
 	}
@@ -119,7 +120,7 @@ void Memory::WriteCPU(size_t loc, uint8_t byte)
 		apu->pulse_channel[1].length_counter_halt = utility::IsBitSet(byte, 5);
 		apu->pulse_channel[1].c = utility::IsBitSet(byte, 4);
 		apu->pulse_channel[1].envelope_divider = byte & 15;
-		apu->pulse_channel[1].env_start = true;
+		//apu->pulse_channel[1].env_start = true;
 	}
 	else if (loc == 0x4005)
 	{
@@ -140,6 +141,7 @@ void Memory::WriteCPU(size_t loc, uint8_t byte)
 		apu->pulse_channel[1].timer_target = prev | ((byte & 0x07) << 8);
 		if(apu->pulse_channel[1].enable)
 			apu->pulse_channel[1].len = APU_LEN_TABLE[(byte >> 3) & 0x1f];
+		apu->pulse_channel[1].timer = apu->pulse_channel[1].timer_target;
 		apu->pulse_channel[1].env_start = true;
 		apu->pulse_channel[1].duty_index = 0;
 	}

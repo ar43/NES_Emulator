@@ -54,6 +54,16 @@ void PulseChannel::Think()
 		freq = 0;
 }
 
+bool PulseChannel::IsMutedBySweep()
+{
+	if (timer_target < 8)
+		return true;
+	else if (!sweep_negate && timer_target + (timer_target >> sweep_shift) >= 0x800)
+		return true;
+	else
+		return false;
+}
+
 void PulseChannel::ClockSL()
 {
 	
@@ -61,40 +71,32 @@ void PulseChannel::ClockSL()
 		len--;
 
 	//sweep
-	if (sweep_enable)
+
+	if (sweep_reload)
+	{
+		sweep_divider = sweep_period;
+		sweep_reload = false;
+	}
+	else if (sweep_divider > 0)
 	{
 		sweep_divider--;
-		if (sweep_divider < 0)
+	}
+	else
+	{
+		sweep_divider = sweep_period;
+		if( sweep_enable && !IsMutedBySweep() )
 		{
-			int post = 0; 
 			if (sweep_negate)
 			{
-				post -= timer_target >> sweep_shift;
+				timer_target -= (timer_target >> sweep_shift);
 				if (is_pulse1)
-					post++;
+					timer_target++;
 			}
 			else
 			{
-				post += timer_target >> sweep_shift;
+				timer_target += (timer_target >> sweep_shift);
 			}
-
-			if (post >= 0x7ff && !sweep_negate || timer_target <= 8)
-			{
-				//_amp = 0;
-				//sweep_enable = false;
-				muted_by_sweep = true;
-			}
-			else
-			{
-				muted_by_sweep = false;
-				timer_target += post;
-			}
-
-		}
-		if (sweep_divider < 0 || sweep_reload)
-		{
-			sweep_reload = false;
-			sweep_divider = sweep_period;
+				
 		}
 	}
 }

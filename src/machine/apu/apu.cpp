@@ -103,11 +103,11 @@ void Apu::GenerateSample()
 	{
 		int pulse1 = 0;
 		int pulse2 = 0;
-		if (pulse_channel[0].len && pulse_channel[0].enable && !pulse_channel[0].muted_by_sweep)
+		if (pulse_channel[0].len && pulse_channel[0].enable && !pulse_channel[0].IsMutedBySweep())
 		{
 			pulse1 = pulse_channel[0].freq;
 		}
-		if (pulse_channel[1].len && pulse_channel[1].enable && !pulse_channel[1].muted_by_sweep)
+		if (pulse_channel[1].len && pulse_channel[1].enable && !pulse_channel[1].IsMutedBySweep())
 		{
 			pulse2 = pulse_channel[1].freq;
 		}

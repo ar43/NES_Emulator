@@ -27,11 +27,12 @@ public:
 	bool sweep_negate = false;
 	int sweep_shift = 0;
 	bool sweep_reload = false;
-	bool muted_by_sweep = false;
 
+	int timer = 0;
 	void ClockEnv();
 	void ClockSL();
 	void Think();
+	bool IsMutedBySweep();
 private:
-	int timer = 0;
+	
 };
