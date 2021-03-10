@@ -9,6 +9,7 @@ public:
 	{
 		addr[0] = 0;
 		addr[1] = 0;
+		w = nullptr;
 	}
 	void Write(uint8_t value);
 	void Clear();

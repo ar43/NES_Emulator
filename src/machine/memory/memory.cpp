@@ -426,7 +426,7 @@ uint8_t Memory::ReadPPU(size_t loc)
 	{
 		loc &= 0x3f1f;
 	}
-	else if (loc == 0x3f10 || loc == 0x3f14 || loc == 0x3f18 || loc == 0x3f1C)
+	if (loc == 0x3f10 || loc == 0x3f14 || loc == 0x3f18 || loc == 0x3f1C)
 	{
 		loc -= 0x10;
 	}

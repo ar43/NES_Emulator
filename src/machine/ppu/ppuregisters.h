@@ -11,7 +11,7 @@ struct PpuRegisters
 	PpuCtrl ppuctrl;
 	PpuMask ppumask;
 	PpuStatus ppustatus;
-	uint8_t oamaddr;
+	uint8_t oamaddr = 0;
 	uint8_t oamdata;
 	PpuScroll ppuscroll;
 	PpuAddr ppuaddr;

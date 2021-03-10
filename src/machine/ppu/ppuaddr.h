@@ -8,6 +8,7 @@ public:
 	{
 		addr[0] = 0;
 		addr[1] = 0;
+		w = nullptr;
 	}
 	int GetAddr();
 	void Write(uint8_t value, int *t, int *v);

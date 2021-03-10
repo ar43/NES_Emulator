@@ -25,7 +25,7 @@ class Apu;
 struct Mapper
 {
 	std::string name;
-	int number;
+	int number = -1;
 	bool chr_ram = false;
 };
 
@@ -67,7 +67,6 @@ public:
 	Apu* apu;
 
 	int nametable_mirroring = 1; //0 vertical mirroring, 1 horizontal mirroring, 2 other
-	int sprite0_hit_y = 0;
 
 private:
 	uint8_t cpu_data[CPU_MEM_SIZE];
