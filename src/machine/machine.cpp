@@ -49,6 +49,7 @@ void Machine::PollInterrupts()
 		memory.WriteCPU(0x4015, 00); //silence the apu
 		ppu.HandleReset();
 		cpu.HandleReset(&memory, machine_status.reset);
+		apu.Reset();
 		machine_status.reset = 0;
 	}
 }
@@ -88,18 +89,12 @@ void Machine::Run()
 				apu.Step(budget);
 				cycle_accumulator += budget;
 			}
-			TestPlay();
+			apu.Play();
 			frame.end(ppu.display.GetWindow());
 			
 		}
 		
 	}
-}
-
-void Machine::TestPlay()
-{
-	SDL_QueueAudio(1, apu.snd_buf.data(), apu.snd_buf.size() * sizeof(float));
-	apu.snd_buf.clear();
 }
 
 bool Machine::LoadNES(std::string path)

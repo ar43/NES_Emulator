@@ -6,7 +6,7 @@
 
 Apu::Apu()
 {
-	Reset();
+	
 }
 
 void Apu::Init(bool* irq_pointer)
@@ -26,6 +26,7 @@ void Apu::Init(bool* irq_pointer)
 	pulse_channel[0].is_pulse1 = true;
 	InitSoundTables();
 	trigger_irq_interrupt = irq_pointer;
+	Reset();
 }
 
 void Apu::Step(uint16_t budget)
@@ -41,6 +42,15 @@ void Apu::Reset()
 	canTick = false;
 	sample_timer = 20;
 	noise_channel.Init();
+	//force re-sync
+	snd_buf.clear();
+	SDL_ClearQueuedAudio(1);
+}
+
+void Apu::Play()
+{
+	SDL_QueueAudio(1, snd_buf.data(), snd_buf.size() * sizeof(float));
+	snd_buf.clear();
 }
 
 void Apu::Tick()

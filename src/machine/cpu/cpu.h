@@ -18,8 +18,7 @@ public:
 
 	void RunTest(Memory *mem, int count);
 
-	std::array<Register*, static_cast<size_t>(RegId::NUM_REGISTERS)> registers;
-	
+	Register* registers[static_cast<size_t>(RegId::NUM_REGISTERS)];
 	void AddCycles(uint32_t num);
 	uint64_t GetCycles();
 	

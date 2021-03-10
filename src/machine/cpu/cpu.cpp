@@ -358,7 +358,7 @@ void Cpu::AddCycles(uint32_t num)
 
 void Cpu::InitRegisters()
 {
-	for (size_t i = 0; i < registers.size();i++)
+	for (size_t i = 0; i < static_cast<size_t>(RegId::NUM_REGISTERS);i++)
 	{
 		if ((RegId)i == RegId::PC)
 		{

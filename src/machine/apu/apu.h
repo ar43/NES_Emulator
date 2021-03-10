@@ -19,6 +19,7 @@ public:
 	void Frame1Tick();
 	void InitSoundTables();
 	void GenerateSample();
+	void Play();
 
 	bool mute = false;
 
@@ -27,8 +28,6 @@ public:
 	TriangleChannel triangle_channel;
 	NoiseChannel noise_channel;
 	
-
-	std::vector<float> snd_buf;
 	int cycles = 0;
 private:
 	bool canTick = false;
@@ -39,5 +38,5 @@ private:
 	float tnd_table[203];
 
 	bool* trigger_irq_interrupt;
-	
+	std::vector<float> snd_buf;
 };
