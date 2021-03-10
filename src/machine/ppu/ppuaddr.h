@@ -16,6 +16,5 @@ public:
 	void Clear();
 	int* w;
 private:
-	std::array<uint8_t, 2> addr;
-	
+	uint8_t addr[2];
 };

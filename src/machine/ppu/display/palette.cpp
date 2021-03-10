@@ -14,7 +14,7 @@ bool Palette::Load(std::string name)
 		return false;
 	}
 
-	ifs.read((char*)palette.data(), palette.size());
+	ifs.read((char*)palette, PALETTE_SIZE);
 	if (!ifs)
 	{
 		logger::PrintLine(logger::LogType::INTERNAL_ERROR, "Bad .pal file format! File too short.");

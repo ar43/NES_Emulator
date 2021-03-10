@@ -21,3 +21,4 @@ constexpr uint8_t APU_DUTY_TABLE[4][8] = {
 	{1, 1, 1, 1, 1, 1, 0, 0 }
 };
 constexpr int APU_NOISE_FREQ_TABLE[] = { 4, 8, 16, 32, 64, 96, 128, 160, 202, 254, 380, 508, 762, 1016, 2034, 4068 };
+constexpr size_t PALETTE_SIZE = 192;
