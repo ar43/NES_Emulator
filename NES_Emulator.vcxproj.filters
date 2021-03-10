@@ -168,6 +168,9 @@
     <ClCompile Include="src\machine\apu\triangle_channel.cpp">
       <Filter>Source Files\Machine\APU</Filter>
     </ClCompile>
+    <ClCompile Include="src\machine\apu\frame_counter.cpp">
+      <Filter>Source Files\Machine\APU</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\logger\logger.h">

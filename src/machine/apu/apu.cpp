@@ -9,21 +9,12 @@ Apu::Apu()
 	Reset();
 }
 
-void Apu::Init()
+void Apu::Init(bool* irq_pointer)
 {
 	SDL_setenv("SDL_AUDIODRIVER", "directsound", 1);
 	SDL_InitSubSystem(SDL_INIT_AUDIO);
 
 	SDL_AudioSpec AudioSettings = {0};
-
-	//// NOTE: Sound test
-	//int SamplesPerSecond = 44100;
-	//int ToneHz = 440;
-	//float ToneVolume = 0.002f;
-	//uint32_t RunningSampleIndex = 0;
-	//int SquareWavePeriod = SamplesPerSecond / ToneHz;
-	//int HalfSquareWavePeriod = SquareWavePeriod / 2;
-	//int BytesPerSample = sizeof(float);
 
 	AudioSettings.freq = 44100;
 	AudioSettings.format = AUDIO_F32;
@@ -34,26 +25,14 @@ void Apu::Init()
 	SDL_PauseAudio(0);
 	pulse_channel[0].is_pulse1 = true;
 	InitSoundTables();
-	//int BytesToWrite = 735*BytesPerSample*60; //in one frame we need to play 735 samples. we need to take every 40th sample to achieve that
-	//
-	//void *SoundBuffer = malloc(BytesToWrite);
-	//float *SampleOut = (float *)SoundBuffer;
-	//int SampleCount = BytesToWrite/BytesPerSample;
-
-	//for(int SampleIndex = 0; SampleIndex < SampleCount; ++SampleIndex)
-	//{
-	//	float SampleValue = ((RunningSampleIndex++ / HalfSquareWavePeriod) % 2) ? ToneVolume : -ToneVolume;
-	//	*SampleOut++ = SampleValue;
-	//}
-
-	//SDL_QueueAudio(1, SoundBuffer, BytesToWrite);
+	trigger_irq_interrupt = irq_pointer;
 }
 
-void Apu::Step(Memory *mem, uint16_t budget)
+void Apu::Step(uint16_t budget)
 {
 	for (auto i = 0; i < budget; i++)
 	{
-		Tick(mem);
+		Tick();
 	}
 }
 
@@ -63,7 +42,7 @@ void Apu::Reset()
 	sample_timer = 20;
 }
 
-void Apu::Tick(Memory *mem)
+void Apu::Tick()
 {
 	if (!canTick)
 	{
@@ -75,7 +54,7 @@ void Apu::Tick(Memory *mem)
 	cycles++;
 
 	if (!frame_counter.mode)
-		Frame0Tick(mem);
+		Frame0Tick();
 	else
 		Frame1Tick();
 
@@ -153,28 +132,22 @@ void Apu::InitSoundTables()
 	}
 }
 
-void Apu::Frame0Tick(Memory *mem)
+void Apu::Frame0Tick()
 {
 	if (cycles == 3729 || cycles == 11186)
 	{
-		pulse_channel[0].ClockQuarter();
-		pulse_channel[1].ClockQuarter();
-		triangle_channel.ClockQuarter();
+		frame_counter.ClockQuarter(pulse_channel,&triangle_channel);
 	}
 	else if (cycles == 7457 || cycles == 14915)
 	{
-		pulse_channel[0].ClockQuarter();
-		pulse_channel[0].ClockHalf();
-		pulse_channel[1].ClockQuarter();
-		pulse_channel[1].ClockHalf();
-		triangle_channel.ClockQuarter();
-		triangle_channel.ClockHalf();
+		frame_counter.ClockQuarter(pulse_channel,&triangle_channel);
+		frame_counter.ClockHalf(pulse_channel,&triangle_channel);
 	}
 	if (cycles >= 14915)
 	{
 		cycles = 0;
 		if (!frame_counter.interrupt_inhibit)
-			mem->trigger_irq_interrupt = true;
+			*trigger_irq_interrupt = true;
 	}
 }
 
@@ -182,18 +155,12 @@ void Apu::Frame1Tick()
 {
 	if (cycles == 3729 || cycles == 11186)
 	{
-		pulse_channel[0].ClockQuarter();
-		pulse_channel[1].ClockQuarter();
-		triangle_channel.ClockQuarter();
+		frame_counter.ClockQuarter(pulse_channel,&triangle_channel);
 	}
 	else if (cycles == 7457 || cycles == 18641)
 	{
-		pulse_channel[0].ClockQuarter();
-		pulse_channel[0].ClockHalf();
-		pulse_channel[1].ClockQuarter();
-		pulse_channel[1].ClockHalf();
-		triangle_channel.ClockQuarter();
-		triangle_channel.ClockHalf();
+		frame_counter.ClockQuarter(pulse_channel,&triangle_channel);
+		frame_counter.ClockHalf(pulse_channel,&triangle_channel);
 	}
 	if (cycles >= 18641)
 	{

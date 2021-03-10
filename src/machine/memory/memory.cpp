@@ -207,10 +207,8 @@ void Memory::WriteCPU(size_t loc, uint8_t byte)
 		apu->frame_counter.mode = utility::IsBitSet(byte, 7);
 		if (apu->frame_counter.mode)
 		{
-			apu->pulse_channel[0].ClockQuarter();
-			apu->pulse_channel[0].ClockHalf();
-			apu->pulse_channel[1].ClockQuarter();
-			apu->pulse_channel[1].ClockHalf();
+			apu->frame_counter.ClockQuarter(apu->pulse_channel,&apu->triangle_channel);
+			apu->frame_counter.ClockHalf(apu->pulse_channel,&apu->triangle_channel);
 		}
 		apu->cycles = -1;
 	}

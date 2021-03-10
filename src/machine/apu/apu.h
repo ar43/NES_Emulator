@@ -11,10 +11,10 @@ class Apu
 public:
 	Apu();
 	void Reset();
-	void Init();
-	void Step(Memory *mem, uint16_t budget);
-	void Tick(Memory *mem);
-	void Frame0Tick(Memory *mem);
+	void Init(bool* irq_pointer);
+	void Step(uint16_t budget);
+	void Tick();
+	void Frame0Tick();
 	void Frame1Tick();
 	void InitSoundTables();
 	void GenerateSample();
@@ -36,5 +36,7 @@ private:
 	
 	float pulse_table[31];
 	float tnd_table[203];
+
+	bool* trigger_irq_interrupt;
 	
 };

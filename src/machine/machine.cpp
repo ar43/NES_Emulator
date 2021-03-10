@@ -15,7 +15,7 @@ void Machine::Init()
 {
 	memory.AttachStuff(&ppu.registers, input.joypad, &apu);
 	ppu.display.Init();
-	apu.Init();
+	apu.Init(&memory.trigger_irq_interrupt);
 }
 
 void Machine::RunROM(std::string path)
@@ -85,7 +85,7 @@ void Machine::Run()
 				cpu.ExecuteInstruction(&memory);
 				uint16_t budget = (uint16_t)(cpu.GetCycles() - old_cycle);
 				ppu.Step(&memory, budget);
-				apu.Step(&memory, budget);
+				apu.Step(budget);
 				cycle_accumulator += budget;
 			}
 			TestPlay();

@@ -145,6 +145,7 @@
   <ItemGroup>
     <ClCompile Include="src\logger\logger.cpp" />
     <ClCompile Include="src\machine\apu\apu.cpp" />
+    <ClCompile Include="src\machine\apu\frame_counter.cpp" />
     <ClCompile Include="src\machine\apu\pulse_channel.cpp" />
     <ClCompile Include="src\machine\apu\triangle_channel.cpp" />
     <ClCompile Include="src\machine\cpu\cpu.cpp" />
