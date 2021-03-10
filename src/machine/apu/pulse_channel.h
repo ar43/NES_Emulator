@@ -29,9 +29,9 @@ public:
 	bool sweep_reload = false;
 
 	int timer = 0;
-	void ClockEnv();
-	void ClockSL();
-	void Think();
+	void ClockQuarter();
+	void ClockHalf();
+	void Clock();
 	bool IsMutedBySweep();
 private:
 	

@@ -83,6 +83,7 @@ void Memory::WriteCPU(size_t loc, uint8_t byte)
 		joypad[1].Write(byte);
 	} 
 	//sound below
+	//pulse 1
 	else if (loc == 0x4000)
 	{
 		apu->pulse_channel[0].duty_cycle = (byte >> 6) & 3;
@@ -114,6 +115,7 @@ void Memory::WriteCPU(size_t loc, uint8_t byte)
 		apu->pulse_channel[0].env_start = true;
 		apu->pulse_channel[0].duty_index = 0;
 	}
+	//pulse 2
 	else if (loc == 0x4004)
 	{
 		apu->pulse_channel[1].duty_cycle = (byte >> 6) & 3;
@@ -145,11 +147,33 @@ void Memory::WriteCPU(size_t loc, uint8_t byte)
 		apu->pulse_channel[1].env_start = true;
 		apu->pulse_channel[1].duty_index = 0;
 	}
+	//triangle
+	else if (loc == 0x4008)
+	{
+		apu->triangle_channel.linear_control = utility::IsBitSet(byte, 7);
+		apu->triangle_channel.length_enabled = !apu->triangle_channel.linear_control;
+		apu->triangle_channel.linear_load = byte & 0x7F;
+	}
+	else if (loc == 0x400A)
+	{
+		const int prev = apu->triangle_channel.freq_timer & 0xFF00;
+		apu->triangle_channel.freq_timer = prev | byte;
+	}
+	else if (loc == 0x400B)
+	{
+		const int prev = apu->triangle_channel.freq_timer & 0x00FF;
+		apu->triangle_channel.freq_timer = prev | ((byte & 0x07) << 8);
+		if (apu->triangle_channel.enable)
+			apu->triangle_channel.length_counter = APU_LEN_TABLE[(byte >> 3) & 0x1f];
+		apu->triangle_channel.linear_reload = true;
+	}
+	//misc apu
 	else if (loc == 0x4015)
 	{
-		bool pulse1enable = utility::IsBitSet(byte, 0);
-		bool pulse2enable = utility::IsBitSet(byte, 1);
-		if (!pulse1enable)
+		const bool pulse1_enable = utility::IsBitSet(byte, 0);
+		const bool pulse2_enable = utility::IsBitSet(byte, 1);
+		const bool triangle_enable = utility::IsBitSet(byte, 2);
+		if (!pulse1_enable)
 		{
 			apu->pulse_channel[0].enable = false;
 			apu->pulse_channel[0].len = 0;
@@ -158,7 +182,7 @@ void Memory::WriteCPU(size_t loc, uint8_t byte)
 		{
 			apu->pulse_channel[0].enable = true;
 		}
-		if (!pulse2enable)
+		if (!pulse2_enable)
 		{
 			apu->pulse_channel[1].enable = false;
 			apu->pulse_channel[1].len = 0;
@@ -167,6 +191,15 @@ void Memory::WriteCPU(size_t loc, uint8_t byte)
 		{
 			apu->pulse_channel[1].enable = true;
 		}
+		if (!triangle_enable)
+		{
+			apu->triangle_channel.enable = false;
+			apu->triangle_channel.length_counter = 0;
+		}
+		else
+		{
+			apu->triangle_channel.enable = true;
+		}
 	}
 	else if (loc == 0x4017)
 	{
@@ -174,10 +207,10 @@ void Memory::WriteCPU(size_t loc, uint8_t byte)
 		apu->frame_counter.mode = utility::IsBitSet(byte, 7);
 		if (apu->frame_counter.mode)
 		{
-			apu->pulse_channel[0].ClockEnv();
-			apu->pulse_channel[0].ClockSL();
-			apu->pulse_channel[1].ClockEnv();
-			apu->pulse_channel[1].ClockSL();
+			apu->pulse_channel[0].ClockQuarter();
+			apu->pulse_channel[0].ClockHalf();
+			apu->pulse_channel[1].ClockQuarter();
+			apu->pulse_channel[1].ClockHalf();
 		}
 		apu->cycles = -1;
 	}
@@ -272,6 +305,10 @@ uint8_t Memory::ReadCPU(size_t loc)
 		if (apu->pulse_channel[1].len > 0)
 		{
 			cpu_data[loc] = cpu_data[loc] | (1 << 1);
+		}
+		if (apu->triangle_channel.length_counter > 0)
+		{
+			cpu_data[loc] = cpu_data[loc] | (1 << 2);
 		}
 		if (trigger_irq_interrupt)
 		{

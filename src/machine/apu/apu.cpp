@@ -33,7 +33,7 @@ void Apu::Init()
 	SDL_OpenAudio(&AudioSettings, 0);
 	SDL_PauseAudio(0);
 	pulse_channel[0].is_pulse1 = true;
-	InitPulseTable();
+	InitSoundTables();
 	//int BytesToWrite = 735*BytesPerSample*60; //in one frame we need to play 735 samples. we need to take every 40th sample to achieve that
 	//
 	//void *SoundBuffer = malloc(BytesToWrite);
@@ -68,6 +68,7 @@ void Apu::Tick(Memory *mem)
 	if (!canTick)
 	{
 		canTick = true;
+		triangle_channel.Clock(); //clocks even on non-APU times
 		return;
 	}
 	canTick = false;
@@ -80,9 +81,9 @@ void Apu::Tick(Memory *mem)
 
 	for (int i = 0; i < 2; i++)
 	{
-		pulse_channel[i].Think();
+		pulse_channel[i].Clock();
 	}
-	
+	triangle_channel.Clock();
 
 	if (sample_timer == 0)
 	{
@@ -103,6 +104,7 @@ void Apu::GenerateSample()
 	{
 		int pulse1 = 0;
 		int pulse2 = 0;
+		int triangle = 0;
 		if (pulse_channel[0].len && pulse_channel[0].enable && !pulse_channel[0].IsMutedBySweep())
 		{
 			pulse1 = pulse_channel[0].freq;
@@ -111,6 +113,10 @@ void Apu::GenerateSample()
 		{
 			pulse2 = pulse_channel[1].freq;
 		}
+		if (triangle_channel.enable) //possibly need to check for length_counter > 0 ? idk it sounds good anyways, lookout for bugs
+		{
+			triangle = triangle_channel.output;
+		}
 
 		//filter
 		static float HPA_Prev = 0;
@@ -118,8 +124,9 @@ void Apu::GenerateSample()
 		static float LP_Out = 0;
 		static float HPB_Out = 0;
 		static float HPA_Out = 0;
-		float sample = pulseTable[pulse1 + pulse2];
-		float LP_In = sample;
+		float pulse_out = pulse_table[pulse1 + pulse2];
+		float tnd_out = tnd_table[triangle * 3];
+		float LP_In = pulse_out + tnd_out;
 		LP_Out = (LP_In - LP_Out) * 0.815686f;
 		
 		HPA_Out = HPA_Out * 0.996039f + LP_Out - HPA_Prev;
@@ -134,11 +141,15 @@ void Apu::GenerateSample()
 	}
 }
 
-void Apu::InitPulseTable()
+void Apu::InitSoundTables()
 {
 	for (auto i = 0; i < 31; i++)
 	{
-		pulseTable[i] = 95.52f / (8128.0f / i + 100.0f);
+		pulse_table[i] = 95.52f / (8128.0f / i + 100.0f);
+	}
+	for (auto i = 0; i < 203; i++)
+	{
+		tnd_table[i] = 163.67f / (24329.0f / i + 100.0f);
 	}
 }
 
@@ -146,15 +157,18 @@ void Apu::Frame0Tick(Memory *mem)
 {
 	if (cycles == 3729 || cycles == 11186)
 	{
-		pulse_channel[0].ClockEnv();
-		pulse_channel[1].ClockEnv();
+		pulse_channel[0].ClockQuarter();
+		pulse_channel[1].ClockQuarter();
+		triangle_channel.ClockQuarter();
 	}
 	else if (cycles == 7457 || cycles == 14915)
 	{
-		pulse_channel[0].ClockEnv();
-		pulse_channel[0].ClockSL();
-		pulse_channel[1].ClockEnv();
-		pulse_channel[1].ClockSL();
+		pulse_channel[0].ClockQuarter();
+		pulse_channel[0].ClockHalf();
+		pulse_channel[1].ClockQuarter();
+		pulse_channel[1].ClockHalf();
+		triangle_channel.ClockQuarter();
+		triangle_channel.ClockHalf();
 	}
 	if (cycles >= 14915)
 	{
@@ -168,15 +182,18 @@ void Apu::Frame1Tick()
 {
 	if (cycles == 3729 || cycles == 11186)
 	{
-		pulse_channel[0].ClockEnv();
-		pulse_channel[1].ClockEnv();
+		pulse_channel[0].ClockQuarter();
+		pulse_channel[1].ClockQuarter();
+		triangle_channel.ClockQuarter();
 	}
 	else if (cycles == 7457 || cycles == 18641)
 	{
-		pulse_channel[0].ClockEnv();
-		pulse_channel[0].ClockSL();
-		pulse_channel[1].ClockEnv();
-		pulse_channel[1].ClockSL();
+		pulse_channel[0].ClockQuarter();
+		pulse_channel[0].ClockHalf();
+		pulse_channel[1].ClockQuarter();
+		pulse_channel[1].ClockHalf();
+		triangle_channel.ClockQuarter();
+		triangle_channel.ClockHalf();
 	}
 	if (cycles >= 18641)
 	{

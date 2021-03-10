@@ -1,7 +1,7 @@
 #include "pulse_channel.h"
 #include "../misc/constants.h"
 
-void PulseChannel::ClockEnv()
+void PulseChannel::ClockQuarter()
 {
 	if (!env_start)
 	{
@@ -30,7 +30,7 @@ void PulseChannel::ClockEnv()
 	}
 }
 
-void PulseChannel::Think()
+void PulseChannel::Clock()
 {
 	if (c)
 		_amp = envelope_divider;
@@ -64,7 +64,7 @@ bool PulseChannel::IsMutedBySweep()
 		return false;
 }
 
-void PulseChannel::ClockSL()
+void PulseChannel::ClockHalf()
 {
 	
 	if (!length_counter_halt &&len)
