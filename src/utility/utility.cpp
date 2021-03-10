@@ -72,8 +72,6 @@ namespace utility
 
     void SetBit(int *value, int pos, bool which)
     {
-        assert(pos >= 0);
-
         if (which)
         {
             *value |= 1 << pos;
@@ -86,8 +84,18 @@ namespace utility
 
     void SetBit(uint8_t *value, int pos, bool which)
     {
-        assert(pos >= 0);
+        if (which)
+        {
+            *value |= 1 << pos;
+        }
+        else
+        {
+            *value &= ~(1 << pos);
+        }
+    }
 
+    void SetBit(uint32_t *value, int pos, bool which)
+    {
         if (which)
         {
             *value |= 1 << pos;

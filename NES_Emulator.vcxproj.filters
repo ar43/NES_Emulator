@@ -171,6 +171,9 @@
     <ClCompile Include="src\machine\apu\frame_counter.cpp">
       <Filter>Source Files\Machine\APU</Filter>
     </ClCompile>
+    <ClCompile Include="src\machine\apu\noise_channel.cpp">
+      <Filter>Source Files\Machine\APU</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\logger\logger.h">
@@ -264,6 +267,9 @@
       <Filter>Header Files\Machine\APU</Filter>
     </ClInclude>
     <ClInclude Include="src\machine\apu\triangle_channel.h">
+      <Filter>Header Files\Machine\APU</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machine\apu\noise_channel.h">
       <Filter>Header Files\Machine\APU</Filter>
     </ClInclude>
   </ItemGroup>

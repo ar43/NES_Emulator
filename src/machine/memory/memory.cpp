@@ -167,12 +167,32 @@ void Memory::WriteCPU(size_t loc, uint8_t byte)
 			apu->triangle_channel.length_counter = APU_LEN_TABLE[(byte >> 3) & 0x1f];
 		apu->triangle_channel.linear_reload = true;
 	}
+	//noise channel
+	else if (loc == 0x400C)
+	{
+		apu->noise_channel.decay_loop = utility::IsBitSet(byte, 5);
+		apu->noise_channel.length_enabled = !utility::IsBitSet(byte, 5);
+		apu->noise_channel.decay_enabled = !utility::IsBitSet(byte, 4);
+		apu->noise_channel.decay_v = byte & 0x0F;
+	}
+	else if (loc == 0x400E)
+	{
+		apu->noise_channel.freq_timer = APU_NOISE_FREQ_TABLE[byte & 0x0F];
+		apu->noise_channel.shift_mode = utility::IsBitSet(byte, 7);
+	}
+	else if (loc == 0x400F)
+	{
+		if(apu->noise_channel.enable)
+			apu->noise_channel.length_counter = APU_LEN_TABLE[(byte >> 3) & 0x1f];
+		apu->noise_channel.decay_reset_flag = true;
+	}
 	//misc apu
 	else if (loc == 0x4015)
 	{
 		const bool pulse1_enable = utility::IsBitSet(byte, 0);
 		const bool pulse2_enable = utility::IsBitSet(byte, 1);
 		const bool triangle_enable = utility::IsBitSet(byte, 2);
+		const bool noise_enable = utility::IsBitSet(byte, 3);
 		if (!pulse1_enable)
 		{
 			apu->pulse_channel[0].enable = false;
@@ -182,6 +202,7 @@ void Memory::WriteCPU(size_t loc, uint8_t byte)
 		{
 			apu->pulse_channel[0].enable = true;
 		}
+
 		if (!pulse2_enable)
 		{
 			apu->pulse_channel[1].enable = false;
@@ -191,6 +212,7 @@ void Memory::WriteCPU(size_t loc, uint8_t byte)
 		{
 			apu->pulse_channel[1].enable = true;
 		}
+
 		if (!triangle_enable)
 		{
 			apu->triangle_channel.enable = false;
@@ -200,6 +222,16 @@ void Memory::WriteCPU(size_t loc, uint8_t byte)
 		{
 			apu->triangle_channel.enable = true;
 		}
+
+		if (!noise_enable)
+		{
+			apu->noise_channel.enable = false;
+			apu->noise_channel.length_counter = 0;
+		}
+		else
+		{
+			apu->noise_channel.enable = true;
+		}
 	}
 	else if (loc == 0x4017)
 	{
@@ -207,8 +239,8 @@ void Memory::WriteCPU(size_t loc, uint8_t byte)
 		apu->frame_counter.mode = utility::IsBitSet(byte, 7);
 		if (apu->frame_counter.mode)
 		{
-			apu->frame_counter.ClockQuarter(apu->pulse_channel,&apu->triangle_channel);
-			apu->frame_counter.ClockHalf(apu->pulse_channel,&apu->triangle_channel);
+			apu->frame_counter.ClockQuarter(apu->pulse_channel,&apu->triangle_channel, &apu->noise_channel);
+			apu->frame_counter.ClockHalf(apu->pulse_channel,&apu->triangle_channel, &apu->noise_channel);
 		}
 		apu->cycles = -1;
 	}
@@ -307,6 +339,10 @@ uint8_t Memory::ReadCPU(size_t loc)
 		if (apu->triangle_channel.length_counter > 0)
 		{
 			cpu_data[loc] = cpu_data[loc] | (1 << 2);
+		}
+		if (apu->noise_channel.length_counter > 0)
+		{
+			cpu_data[loc] = cpu_data[loc] | (1 << 3);
 		}
 		if (trigger_irq_interrupt)
 		{

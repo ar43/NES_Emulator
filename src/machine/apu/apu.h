@@ -3,6 +3,7 @@
 #include "frame_counter.h"
 #include "pulse_channel.h"
 #include "triangle_channel.h"
+#include "noise_channel.h"
 
 class Memory;
 
@@ -24,7 +25,7 @@ public:
 	FrameCounter frame_counter;
 	PulseChannel pulse_channel[2];
 	TriangleChannel triangle_channel;
-	
+	NoiseChannel noise_channel;
 	
 
 	std::vector<float> snd_buf;

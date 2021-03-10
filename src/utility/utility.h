@@ -7,5 +7,6 @@ namespace utility
     int IsBitSetInt(int value, int pos);
     void SetBit(int *value, int pos, bool which);
     void SetBit(uint8_t *value, int pos, bool which);
+    void SetBit(uint32_t *value, int pos, bool which);
     int GetOtherNametable(int nametable, int scrolling);
 }

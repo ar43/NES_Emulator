@@ -40,6 +40,7 @@ void Apu::Reset()
 {
 	canTick = false;
 	sample_timer = 20;
+	noise_channel.Init();
 }
 
 void Apu::Tick()
@@ -63,6 +64,7 @@ void Apu::Tick()
 		pulse_channel[i].Clock();
 	}
 	triangle_channel.Clock();
+	noise_channel.Clock();
 
 	if (sample_timer == 0)
 	{
@@ -84,6 +86,7 @@ void Apu::GenerateSample()
 		int pulse1 = 0;
 		int pulse2 = 0;
 		int triangle = 0;
+		int noise = 0;
 		if (pulse_channel[0].len && pulse_channel[0].enable && !pulse_channel[0].IsMutedBySweep())
 		{
 			pulse1 = pulse_channel[0].freq;
@@ -96,6 +99,10 @@ void Apu::GenerateSample()
 		{
 			triangle = triangle_channel.output;
 		}
+		if (noise_channel.length_counter && noise_channel.enable)
+		{
+			noise = noise_channel.output;
+		}
 
 		//filter
 		static float HPA_Prev = 0;
@@ -104,7 +111,7 @@ void Apu::GenerateSample()
 		static float HPB_Out = 0;
 		static float HPA_Out = 0;
 		float pulse_out = pulse_table[pulse1 + pulse2];
-		float tnd_out = tnd_table[triangle * 3];
+		float tnd_out = tnd_table[triangle * 3 + noise * 2];
 		float LP_In = pulse_out + tnd_out;
 		LP_Out = (LP_In - LP_Out) * 0.815686f;
 		
@@ -136,12 +143,12 @@ void Apu::Frame0Tick()
 {
 	if (cycles == 3729 || cycles == 11186)
 	{
-		frame_counter.ClockQuarter(pulse_channel,&triangle_channel);
+		frame_counter.ClockQuarter(pulse_channel,&triangle_channel, &noise_channel);
 	}
 	else if (cycles == 7457 || cycles == 14915)
 	{
-		frame_counter.ClockQuarter(pulse_channel,&triangle_channel);
-		frame_counter.ClockHalf(pulse_channel,&triangle_channel);
+		frame_counter.ClockQuarter(pulse_channel,&triangle_channel, &noise_channel);
+		frame_counter.ClockHalf(pulse_channel,&triangle_channel, &noise_channel);
 	}
 	if (cycles >= 14915)
 	{
@@ -155,12 +162,12 @@ void Apu::Frame1Tick()
 {
 	if (cycles == 3729 || cycles == 11186)
 	{
-		frame_counter.ClockQuarter(pulse_channel,&triangle_channel);
+		frame_counter.ClockQuarter(pulse_channel,&triangle_channel, &noise_channel);
 	}
 	else if (cycles == 7457 || cycles == 18641)
 	{
-		frame_counter.ClockQuarter(pulse_channel,&triangle_channel);
-		frame_counter.ClockHalf(pulse_channel,&triangle_channel);
+		frame_counter.ClockQuarter(pulse_channel,&triangle_channel, &noise_channel);
+		frame_counter.ClockHalf(pulse_channel,&triangle_channel, &noise_channel);
 	}
 	if (cycles >= 18641)
 	{
