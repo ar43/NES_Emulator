@@ -253,7 +253,7 @@ void Display::DrawBackgroundTileLine(Memory *mem, uint8_t bank, uint8_t index, S
         int loc = line * SCREEN_WIDTH + (x + j);
         if (value == 0)
             continue;
-        if (loc >= SCREEN_HEIGHT*SCREEN_WIDTH || x+j > 255 || loc < 0 || x+j < 0 || !mem->ppu_registers->ppumask.IsBitSet(MaskBits::SHOW_SPRITES_LEFT) && (x+j) < 8)
+        if (loc >= SCREEN_HEIGHT*SCREEN_WIDTH || x+j > 255 || loc < 0 || x+j < 0 || !mem->ppu_registers->ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND_LEFT) && (x+j) < 8)
             continue;
         pixels[loc] = color_pointer[value].r << 24 | color_pointer[value].g << 16 | color_pointer[value].b << 8 | 0xFF;
         //counter++;
