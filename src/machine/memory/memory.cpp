@@ -4,9 +4,8 @@
 #include "../../utility/utility.h"
 #include "../input/joypad.h"
 #include "../apu/apu.h"
-#include <assert.h>
 #include "../misc/constants.h"
-
+#include <assert.h>
 void Memory::WriteCPU(size_t loc, uint8_t byte)
 {
 	//mirroring
@@ -45,7 +44,7 @@ void Memory::WriteCPU(size_t loc, uint8_t byte)
 		auto after = ppuctrl->IsBitSet(ControllerBits::GEN_NMI);
 		if (before == false && after == true && ppustatus->IsBitSet(StatusBits::VBLANK))
 		{
-			trigger_nmi_interrupt = true;
+			nmi_pending = true;
 		}
 	}
 	else if (loc == (size_t)ConstAddr::PPUMASK)
@@ -186,6 +185,27 @@ void Memory::WriteCPU(size_t loc, uint8_t byte)
 			apu->noise_channel.length_counter = APU_LEN_TABLE[(byte >> 3) & 0x1f];
 		apu->noise_channel.decay_reset_flag = true;
 	}
+	//dmc channel
+	else if (loc == 0x4010)
+	{
+		apu->dmc_channel.dmcirq_enabled = utility::IsBitSet(byte, 7);
+		apu->dmc_channel.dmc_loop = utility::IsBitSet(byte, 6);
+		apu->dmc_channel.freq_timer = APU_DMC_FREQ_TABLE[byte & 15] / 2; //CPU cycles to APU cycles
+		if (!apu->dmc_channel.dmcirq_enabled)
+			apu->dmc_channel.dmcirq_pending = false;
+	}
+	else if (loc == 0x4011)
+	{
+		apu->dmc_channel.output = byte & 0x7F;
+	}
+	else if (loc == 0x4012)
+	{
+		apu->dmc_channel.addrload = 0xC000 | (byte << 6);
+	}
+	else if (loc == 0x4013)
+	{
+		apu->dmc_channel.lengthload = (byte << 4) + 1;
+	}
 	//misc apu
 	else if (loc == 0x4015)
 	{
@@ -193,6 +213,7 @@ void Memory::WriteCPU(size_t loc, uint8_t byte)
 		const bool pulse2_enable = utility::IsBitSet(byte, 1);
 		const bool triangle_enable = utility::IsBitSet(byte, 2);
 		const bool noise_enable = utility::IsBitSet(byte, 3);
+		const bool dmc_enable = utility::IsBitSet(byte, 4);
 		if (!pulse1_enable)
 		{
 			apu->pulse_channel[0].enable = false;
@@ -232,6 +253,19 @@ void Memory::WriteCPU(size_t loc, uint8_t byte)
 		{
 			apu->noise_channel.enable = true;
 		}
+		if (!dmc_enable)
+		{
+			apu->dmc_channel.length = 0;
+		}
+		else
+		{
+			if (apu->dmc_channel.length == 0)
+			{
+				apu->dmc_channel.length = apu->dmc_channel.lengthload;
+				apu->dmc_channel.addr = apu->dmc_channel.addrload;
+			}
+		}
+		apu->dmc_channel.dmcirq_pending = false;
 	}
 	else if (loc == 0x4017)
 	{
@@ -344,11 +378,19 @@ uint8_t Memory::ReadCPU(size_t loc)
 		{
 			cpu_data[loc] = cpu_data[loc] | (1 << 3);
 		}
-		if (trigger_irq_interrupt)
+		if (apu->dmc_channel.length > 0)
+		{
+			cpu_data[loc] = cpu_data[loc] | (1 << 4);
+		}
+		if (irq_pending)
+		{
+			cpu_data[loc] = cpu_data[loc] | 1 << 6;
+		}
+		if (apu->dmc_channel.dmcirq_pending)
 		{
 			cpu_data[loc] = cpu_data[loc] | 1 << 7;
 		}
-		trigger_irq_interrupt = false;
+		irq_pending = false;
 	}
 
 	return cpu_data[loc];
@@ -514,6 +556,7 @@ void Memory::AttachStuff(PpuRegisters *ppu_registers, Joypad *joypad, Apu *apu)
 	this->ppu_registers = ppu_registers;
 	this->joypad = joypad;
 	this->apu = apu;
+	dmcirq_pending = &apu->dmc_channel.dmcirq_pending;
 }
 
 void Memory::BuildPixelValues()

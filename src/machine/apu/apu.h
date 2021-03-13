@@ -4,6 +4,7 @@
 #include "pulse_channel.h"
 #include "triangle_channel.h"
 #include "noise_channel.h"
+#include "dmc_channel.h"
 
 class Memory;
 
@@ -13,8 +14,8 @@ public:
 	Apu();
 	void Reset();
 	void Init(bool* irq_pointer);
-	void Step(uint16_t budget);
-	void Tick();
+	void Step(Memory *mem, uint16_t budget);
+	void Tick(Memory *mem);
 	void Frame0Tick();
 	void Frame1Tick();
 	void InitSoundTables();
@@ -27,6 +28,7 @@ public:
 	PulseChannel pulse_channel[2];
 	TriangleChannel triangle_channel;
 	NoiseChannel noise_channel;
+	DmcChannel dmc_channel;
 	
 	int cycles = 0;
 private:
@@ -37,6 +39,6 @@ private:
 	float pulse_table[31];
 	float tnd_table[203];
 
-	bool* trigger_irq_interrupt;
+	bool* irq_pending;
 	std::vector<float> snd_buf;
 };

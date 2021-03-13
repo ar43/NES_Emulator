@@ -25,15 +25,15 @@ void Apu::Init(bool* irq_pointer)
 	SDL_PauseAudio(0);
 	pulse_channel[0].is_pulse1 = true;
 	InitSoundTables();
-	trigger_irq_interrupt = irq_pointer;
+	irq_pending = irq_pointer;
 	Reset();
 }
 
-void Apu::Step(uint16_t budget)
+void Apu::Step(Memory *mem, uint16_t budget)
 {
 	for (auto i = 0; i < budget; i++)
 	{
-		Tick();
+		Tick(mem);
 	}
 }
 
@@ -53,7 +53,7 @@ void Apu::Play()
 	snd_buf.clear();
 }
 
-void Apu::Tick()
+void Apu::Tick(Memory *mem)
 {
 	if (!canTick)
 	{
@@ -75,6 +75,7 @@ void Apu::Tick()
 	}
 	triangle_channel.Clock();
 	noise_channel.Clock();
+	dmc_channel.Clock(mem);
 
 	if (sample_timer == 0)
 	{
@@ -97,6 +98,7 @@ void Apu::GenerateSample()
 		int pulse2 = 0;
 		int triangle = 0;
 		int noise = 0;
+		int dmc = dmc_channel.output;
 		if (pulse_channel[0].len && pulse_channel[0].enable && !pulse_channel[0].IsMutedBySweep())
 		{
 			pulse1 = pulse_channel[0].freq;
@@ -113,6 +115,7 @@ void Apu::GenerateSample()
 		{
 			noise = noise_channel.output;
 		}
+		
 
 		//filter
 		static float HPA_Prev = 0;
@@ -121,7 +124,7 @@ void Apu::GenerateSample()
 		static float HPB_Out = 0;
 		static float HPA_Out = 0;
 		float pulse_out = pulse_table[pulse1 + pulse2];
-		float tnd_out = tnd_table[triangle * 3 + noise * 2];
+		float tnd_out = tnd_table[triangle * 3 + noise * 2 + dmc];
 		float LP_In = pulse_out + tnd_out;
 		LP_Out = (LP_In - LP_Out) * 0.815686f;
 		
@@ -164,7 +167,7 @@ void Apu::Frame0Tick()
 	{
 		cycles = 0;
 		if (!frame_counter.interrupt_inhibit)
-			*trigger_irq_interrupt = true;
+			*irq_pending = true;
 	}
 }
 

@@ -145,6 +145,7 @@
   <ItemGroup>
     <ClCompile Include="src\logger\logger.cpp" />
     <ClCompile Include="src\machine\apu\apu.cpp" />
+    <ClCompile Include="src\machine\apu\dmc_channel.cpp" />
     <ClCompile Include="src\machine\apu\frame_counter.cpp" />
     <ClCompile Include="src\machine\apu\noise_channel.cpp" />
     <ClCompile Include="src\machine\apu\pulse_channel.cpp" />
@@ -176,6 +177,7 @@
   <ItemGroup>
     <ClInclude Include="src\logger\logger.h" />
     <ClInclude Include="src\machine\apu\apu.h" />
+    <ClInclude Include="src\machine\apu\dmc_channel.h" />
     <ClInclude Include="src\machine\apu\frame_counter.h" />
     <ClInclude Include="src\machine\apu\noise_channel.h" />
     <ClInclude Include="src\machine\apu\pulse_channel.h" />

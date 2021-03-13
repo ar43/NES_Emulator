@@ -50,13 +50,13 @@ void Ppu::Step(Memory *mem, uint16_t budget)
 			registers.ppustatus.SetBit(StatusBits::SPRITE0_HIT,false);
 			if (registers.ppuctrl.IsBitSet(ControllerBits::GEN_NMI))
 			{
-				mem->trigger_nmi_interrupt = true;
+				mem->nmi_pending = true;
 			}
 		}
 		else if (scanline >= 262)
 		{
 			scanline = 0;
-			mem->trigger_nmi_interrupt = false;
+			mem->nmi_pending = false;
 			registers.ppustatus.SetBit(StatusBits::SPRITE0_HIT,false);
 			registers.ppustatus.SetBit(StatusBits::SPRITE_OVERFLOW,false);
 			registers.ppustatus.SetBit(StatusBits::VBLANK,false);

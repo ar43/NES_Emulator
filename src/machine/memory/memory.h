@@ -59,8 +59,11 @@ public:
 	void BuildPixelValue(uint8_t bank, uint8_t index);
 	
 	bool add_dma_cycles = false;
-	bool trigger_nmi_interrupt = false;
-	bool trigger_irq_interrupt = false;
+
+	bool nmi_pending = false;
+	bool irq_pending = false;
+	bool *dmcirq_pending = nullptr;
+
 	uint8_t oam_data[OAM_MEM_SIZE];
 	uint8_t pixel_values[2][256 * 64];
 	Joypad* joypad;

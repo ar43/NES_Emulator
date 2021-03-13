@@ -15,7 +15,7 @@ void Machine::Init()
 {
 	memory.AttachStuff(&ppu.registers, input.joypad, &apu);
 	ppu.display.Init();
-	apu.Init(&memory.trigger_irq_interrupt);
+	apu.Init(&memory.irq_pending);
 }
 
 void Machine::RunROM(std::string path)
@@ -32,16 +32,16 @@ void Machine::RunROM(std::string path)
 
 void Machine::PollInterrupts()
 {
-	if (memory.trigger_nmi_interrupt)
+	if (memory.nmi_pending)
 	{
 		ppu.display.Render(&memory);
 		cpu.HandleNMI(&memory);
-		memory.trigger_nmi_interrupt = false;
+		memory.nmi_pending = false;
 	}
-	else if (memory.trigger_irq_interrupt && !cpu.registers[(size_t)RegId::P]->get_flag(flags::Flags::I))
+	else if ((memory.irq_pending == true || *memory.dmcirq_pending == true) && !cpu.registers[(size_t)RegId::P]->get_flag(flags::Flags::I))
 	{
 		cpu.HandleIRQ(&memory);
-		memory.trigger_irq_interrupt = false;
+		memory.irq_pending = false;
 		logger::PrintLine(logger::LogType::DEBUG, "IRQ request");
 	}
 	else if (machine_status.reset)
@@ -86,7 +86,7 @@ void Machine::Run()
 				cpu.ExecuteInstruction(&memory);
 				uint16_t budget = (uint16_t)(cpu.GetCycles() - old_cycle);
 				ppu.Step(&memory, budget);
-				apu.Step(budget);
+				apu.Step(&memory, budget);
 				cycle_accumulator += budget;
 			}
 			apu.Play();
