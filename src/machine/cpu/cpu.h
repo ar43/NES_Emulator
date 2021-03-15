@@ -6,6 +6,8 @@
 
 constexpr size_t STACK_OFFSET = 0x100;
 
+class Bus;
+
 class Cpu
 {
 public:
@@ -16,17 +18,18 @@ public:
 	std::string CYCToString();
 	std::string GetFetchBuffer();
 
-	void RunTest(Memory *mem, int count);
-
 	Register* registers[static_cast<size_t>(RegId::NUM_REGISTERS)];
 	void AddCycles(uint32_t num);
 	uint64_t GetCycles();
 	
 
-	void ExecuteInstruction(Memory* mem);
-	void HandleReset(Memory* mem, int reset);
-	void HandleNMI(Memory* mem);
-	void HandleIRQ(Memory* mem);
+	void ExecuteInstruction(Bus* bus);
+	void HandleReset(Bus* bus, int reset);
+	void HandleNMI(Bus* bus);
+	void HandleIRQ(Bus* bus);
+
+	void WriteRam(size_t loc, uint8_t byte);
+	uint8_t ReadRam(size_t loc);
 
 	std::string output_string;
 	
@@ -34,7 +37,7 @@ private:
 
 	Instruction* instruction_set[256];
 
-	void AddInstruction(std::string name, uint8_t opcode, AddressingMode mode, uint8_t bytes, uint8_t cycles, void (*f)(Cpu*, Memory*, int, AddressingMode mode), bool extra_cycle = false);
+	void AddInstruction(std::string name, uint8_t opcode, AddressingMode mode, uint8_t bytes, uint8_t cycles, void (*f)(Cpu*, Bus*, int, AddressingMode mode), bool extra_cycle = false);
 	Instruction* GetInstruction(uint8_t opcode);
 
 	void LoadInstructionSet();
@@ -52,12 +55,14 @@ private:
 
 	void InitRegisters();
 
-	uint8_t Fetch(Memory *mem);
+	uint8_t Fetch(Bus *bus);
 	std::string fetch_buffer;
 	
-	int ResolveAddressing(Memory* mem, Instruction* ins);
+	int ResolveAddressing(Bus *bus, Instruction* ins);
 
 	uint64_t cycle_counter = 0;
 	bool add_extra_cycle = false;
+
+	uint8_t RAM[0x800]; //2KB internal ram
 	
 };

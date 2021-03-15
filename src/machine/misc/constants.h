@@ -1,6 +1,11 @@
 #pragma once
 #include <cstdint>
 
+constexpr size_t CPU_MEM_SIZE = 0x10000;
+constexpr size_t PPU_MEM_SIZE = 0x4000;
+constexpr size_t OAM_MEM_SIZE = 0x100;
+constexpr size_t CHR_ROM_SIZE = 0x2000;
+
 constexpr uint32_t SCREEN_WIDTH = 256;
 constexpr uint32_t SCREEN_HEIGHT = 240;
 constexpr int PIXEL_PER_TILE = 64;

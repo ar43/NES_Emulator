@@ -4,12 +4,12 @@
 
 struct MachineStatus;
 class Display;
-class Memory;
+class Bus;
 
 class Input
 {
 public:
-	void Poll(MachineStatus *machine_status, SDL_Window *window, Display* display, Memory *memory);
+	void Poll(MachineStatus *machine_status, SDL_Window *window, Display* display);
 	void PollPause(MachineStatus *machine_status);
 	Joypad joypad[2];
 private:

@@ -7,4 +7,5 @@ struct MachineStatus
 	bool* speedup = nullptr;
 	bool* mute = nullptr;
 	int reset = 2;
+	bool force_render = false;
 };

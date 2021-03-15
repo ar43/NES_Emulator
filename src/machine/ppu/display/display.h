@@ -4,7 +4,8 @@
 #include "palette.h"
 #include "../../misc/constants.h"
 
-class Memory;
+class Bus;
+struct PpuRegisters;
 
 class Display
 {
@@ -21,22 +22,26 @@ public:
 
 	Palette palette;
 	
-	void Render(Memory *mem);
+	void Render(PpuRegisters *ppu_registers, uint8_t * oam_data);
 
 	void SetScale(uint8_t scale);
 	uint8_t GetScale();
 
-	void DrawBackgroundLineHSA(Memory* mem, uint8_t x_shift, uint8_t y_shift, int nametable, uint8_t bank, int line);
-	void DrawBackgroundLineVSB(Memory* mem, uint8_t x_shift, uint8_t y_shift, int nametable, uint8_t bank, int line);
-	void DrawBackgroundLineHSB(Memory* mem, uint8_t x_shift, uint8_t y_shift, int nametable, uint8_t bank, int line);
+	void DrawBackgroundLineHSA(Bus *bus, uint8_t x_shift, uint8_t y_shift, int nametable, uint8_t bank, int line, bool toggle, bool show_left);
+	void DrawBackgroundLineVSB(Bus *bus, uint8_t x_shift, uint8_t y_shift, int nametable, uint8_t bank, int line, bool toggle, bool show_left);
+	void DrawBackgroundLineHSB(Bus *bus, uint8_t x_shift, uint8_t y_shift, int nametable, uint8_t bank, int line, bool toggle, bool show_left);
+
+	void BuildPixelValues(Bus *bus);
+	void BuildPixelValue(Bus *bus, uint8_t bank, uint8_t index);
 
 	//void DrawSpritesLine(Memory* mem, bool behind, int line);
 	
 
 	SDL_Window* GetWindow();
-	void RenderStart(Memory *mem);
+	void RenderStart(Bus *bus,PpuRegisters *ppu_registers, uint8_t * oam_data);
 	SDL_Surface* surface;
 	SDL_Event e;
+	uint8_t pixel_values[2][256 * 64];
 private:
 	uint8_t scale = 4;
 	SDL_Window* window;
@@ -47,13 +52,13 @@ private:
 	//void DrawSpriteLine(Memory* mem, uint8_t bank, uint8_t index, uint8_t palette_id, bool flip_h, bool flip_v, int x, int line);
 
 	void RenderEnd();
-	void DrawChrRom(Memory *mem);
+	void DrawChrRom(Bus *bus);
 
-	void DrawBackgroundTileLine(Memory *mem, uint8_t bank, uint8_t index, SDL_Color *color_pointer, uint8_t read_line, int x, int line);
-	void GetBackgroundMetaTileColor(Memory *mem, SDL_Color *color, int x, int y, int nametable);
+	void DrawBackgroundTileLine(uint8_t bank, uint8_t index, SDL_Color *color_pointer, uint8_t read_line, int x, int line, bool show_background_left);
+	void GetBackgroundMetaTileColor(Bus *bus, SDL_Color *color, int x, int y, int nametable);
 
-	void DrawSprites(Memory* mem, bool behind);
-	void DrawSprite(Memory* mem, uint8_t bank, uint8_t index, uint8_t palette_id, bool flip_h, bool flip_v, int x, int y);
+	void DrawSprites(PpuRegisters *ppu_registers, uint8_t *oam_data, bool behind);
+	void DrawSprite(uint8_t bank, uint8_t index, uint8_t palette_id, bool flip_h, bool flip_v, int x, int y, bool draw_left);
 	
 	//uint32_t* pixels;
 };

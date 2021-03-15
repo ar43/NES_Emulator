@@ -1,5 +1,6 @@
 #pragma once
-class Memory;
+
+class Bus;
 
 class DmcChannel
 {
@@ -17,7 +18,7 @@ public:
 	
 
 
-	void Clock(Memory *mem);
+	void Clock(Bus *bus);
 private:
 	int freq_counter = 0;
 	bool output_unit_silent = true;

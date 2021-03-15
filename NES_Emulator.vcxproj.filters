@@ -31,12 +31,6 @@
     <Filter Include="Header Files\Machine\CPU">
       <UniqueIdentifier>{77367788-a295-4e50-871f-332c167d545e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Machine\Memory">
-      <UniqueIdentifier>{30c103df-325b-4594-bbb5-c461ceb56027}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Machine\Memory">
-      <UniqueIdentifier>{1f53001b-9049-4fa2-ac7f-8090dd434f0c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Machine\Misc">
       <UniqueIdentifier>{0e184d4c-c869-407f-885c-bdd2f91d8204}</UniqueIdentifier>
     </Filter>
@@ -85,6 +79,18 @@
     <Filter Include="Header Files\Machine\APU">
       <UniqueIdentifier>{e7ff69b8-20b2-4f83-bc5b-8109cad5b566}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Machine\Bus">
+      <UniqueIdentifier>{30c103df-325b-4594-bbb5-c461ceb56027}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Machine\Bus">
+      <UniqueIdentifier>{1f53001b-9049-4fa2-ac7f-8090dd434f0c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Machine\Mapper">
+      <UniqueIdentifier>{0161be1d-90ad-4acd-bd18-b03f08092512}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Machine\Mapper">
+      <UniqueIdentifier>{fd953f1c-41fa-4b0a-b99a-3bd8b9742ac9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -95,9 +101,6 @@
     </ClCompile>
     <ClCompile Include="src\machine\cpu\cpu.cpp">
       <Filter>Source Files\Machine\CPU</Filter>
-    </ClCompile>
-    <ClCompile Include="src\machine\memory\memory.cpp">
-      <Filter>Source Files\Machine\Memory</Filter>
     </ClCompile>
     <ClCompile Include="src\machine\cpu\flags.cpp">
       <Filter>Source Files\Machine\CPU</Filter>
@@ -177,6 +180,15 @@
     <ClCompile Include="src\machine\apu\dmc_channel.cpp">
       <Filter>Source Files\Machine\APU</Filter>
     </ClCompile>
+    <ClCompile Include="src\machine\bus\bus.cpp">
+      <Filter>Source Files\Machine\Bus</Filter>
+    </ClCompile>
+    <ClCompile Include="src\machine\mapper\mapper.cpp">
+      <Filter>Source Files\Machine\Mapper</Filter>
+    </ClCompile>
+    <ClCompile Include="src\machine\mapper\nrom.cpp">
+      <Filter>Source Files\Machine\Mapper</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\logger\logger.h">
@@ -190,9 +202,6 @@
     </ClInclude>
     <ClInclude Include="src\machine\cpu\register.h">
       <Filter>Header Files\Machine\CPU</Filter>
-    </ClInclude>
-    <ClInclude Include="src\machine\memory\memory.h">
-      <Filter>Header Files\Machine\Memory</Filter>
     </ClInclude>
     <ClInclude Include="src\machine\cpu\flags.h">
       <Filter>Header Files\Machine\CPU</Filter>
@@ -277,6 +286,15 @@
     </ClInclude>
     <ClInclude Include="src\machine\apu\dmc_channel.h">
       <Filter>Header Files\Machine\APU</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machine\bus\bus.h">
+      <Filter>Header Files\Machine\Bus</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machine\mapper\mapper.h">
+      <Filter>Header Files\Machine\Mapper</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machine\mapper\nrom.h">
+      <Filter>Header Files\Machine\Mapper</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

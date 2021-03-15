@@ -7,9 +7,13 @@ int main(int argc, char *args[])
 
 	auto machine = new Machine();
 	machine->Init();
-	
-	//machine->RunCPUTest(5000);
-	if(argc == 2)
+	if (argc >= 3)
+	{
+		if (std::string(args[2]).compare(std::string("-force_render")) == 0)
+			machine->machine_status.force_render = true;
+	}
+
+	if(argc >= 2)
 		machine->RunROM(std::string(args[1]));
 	
 	delete machine;

@@ -1,8 +1,8 @@
 #include "palette.h"
 #include "../../../logger/logger.h"
-#include "../../memory/memory.h"
 #include <fstream>
 #include <cassert>
+#include "../../bus/bus.h"
 
 bool Palette::Load(std::string name)
 {
@@ -26,27 +26,27 @@ bool Palette::Load(std::string name)
 	return true;
 }
 
-void Palette::LoadBackground(Memory* mem)
+void Palette::LoadBackground(Bus * bus)
 {
 	int counter = 0;
-	universal_background = mem->ReadPPU(0x3F00);
+	universal_background = bus->ReadPPU(0x3F00);
 	for (int i = 0x3F01; i <= 0x3F0F; i++)
 	{
 		if (i == 0x3F04 || i == 0x3F08 || i == 0x3F0C)
 			continue;
-		background[counter / 3][counter % 3] = mem->ReadPPU(i);
+		background[counter / 3][counter % 3] = bus->ReadPPU(i);
 		counter++;
 	}
 }
 
-void Palette::LoadSprite(Memory* mem)
+void Palette::LoadSprite(Bus * bus)
 {
 	int counter = 0;
 	for (int i = 0x3F11; i <= 0x3F1F; i++)
 	{
 		if (i == 0x3F14 || i == 0x3F18 || i == 0x3F1C)
 			continue;
-		sprite[counter / 3][counter % 3] = mem->ReadPPU(i);
+		sprite[counter / 3][counter % 3] = bus->ReadPPU(i);
 		counter++;
 	}
 }

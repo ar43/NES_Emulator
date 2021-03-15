@@ -3,7 +3,7 @@
 #include "../../logger/logger.h"
 #include "../ppu/display/display.h"
 
-void Input::Poll(MachineStatus *machine_status, SDL_Window *window, Display* display, Memory *memory)
+void Input::Poll(MachineStatus *machine_status, SDL_Window *window, Display* display)
 {
     while (SDL_PollEvent(&e) != 0)
     {
@@ -86,7 +86,7 @@ void Input::Poll(MachineStatus *machine_status, SDL_Window *window, Display* dis
 
 			case SDLK_F4:
 			{
-				display->Render(memory);
+				machine_status->force_render = !machine_status->force_render;
 				break;
 			}
 

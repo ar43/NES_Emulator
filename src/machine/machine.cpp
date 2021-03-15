@@ -1,6 +1,7 @@
 #include "machine.h"
 #include "../logger/logger.h"
 #include "../utility/utility.h"
+#include "mapper/nrom.h"
 #include <fstream>
 #include <memory>
 
@@ -13,42 +14,95 @@ Machine::Machine()
 
 void Machine::Init()
 {
-	memory.AttachStuff(&ppu.registers, input.joypad, &apu);
+	bus.AttachComponents(&cpu, input.joypad, &apu, &ppu);
 	ppu.display.Init();
-	apu.Init(&memory.irq_pending);
+	apu.Init(&bus.irq_pending);
+	ppu.force_render = &machine_status.force_render;
 }
 
 void Machine::RunROM(std::string path)
 {
-	if (LoadNES(path))
+	if (ParseINES(path))
 	{
-		if (memory.LoadNES(nes_data.get()))
+		if (LoadCartridge(nes_data.get()))
 		{
-			memory.BuildPixelValues();
+			ppu.display.BuildPixelValues(&bus);
 			Run();
 		}
 	}
 }
 
+bool Machine::LoadCartridge(NesData *nes_data)
+{
+	switch (nes_data->header.mapper_num)
+	{
+
+	case 0:
+	{
+		int nametable_mirroring = 1;
+		if (utility::IsBitSet(nes_data->header.flags6, 0))
+			nametable_mirroring = 0;
+		else if(utility::IsBitSet(nes_data->header.flags6, 3))
+			nametable_mirroring = 2;
+
+		assert(nes_data->header.PRG_ROM_size <= 2);
+		assert(nes_data->header.CHR_ROM_size == 1 || nes_data->header.CHR_ROM_size == 0);
+		char* dat1 = nullptr;
+		char* dat2 = nullptr;
+		char* dat_chr = nullptr;
+
+		if (nes_data->header.PRG_ROM_size == 1)
+		{
+			dat1 = nes_data->prg_rom.at(0).get();
+		}
+		else
+		{
+			dat1 = nes_data->prg_rom.at(0).get();
+			dat2 = nes_data->prg_rom.at(1).get();
+		}
+
+		if (nes_data->header.CHR_ROM_size == 1)
+		{
+			dat_chr = nes_data->chr_rom.at(0).get();
+		}
+
+		mapper = std::unique_ptr<Nrom>(new Nrom(nametable_mirroring,(uint8_t*)dat1,(uint8_t*)dat2,(uint8_t*)dat_chr));
+		bus.AttachMapper(mapper.get());
+		
+		break;
+	}
+	default :
+	{
+		logger::PrintLine(logger::LogType::INTERNAL_ERROR, "Memory::LoadNES - Unsupported mapper");
+		return false;
+	}
+
+	}
+
+	//int initial_pc = cpu_data[0xFFFD]*256+cpu_data[0xFFFC];
+	logger::PrintLine(logger::LogType::INFO, "Mapper name: " + mapper->name);
+
+	return true;
+}
+
 void Machine::PollInterrupts()
 {
-	if (memory.nmi_pending)
+	if (bus.nmi_pending)
 	{
-		ppu.display.Render(&memory);
-		cpu.HandleNMI(&memory);
-		memory.nmi_pending = false;
+		ppu.display.Render(&ppu.registers,ppu.oam_data);
+		cpu.HandleNMI(&bus);
+		bus.nmi_pending = false;
 	}
-	else if ((memory.irq_pending == true || *memory.dmcirq_pending == true) && !cpu.registers[(size_t)RegId::P]->get_flag(flags::Flags::I))
+	else if ((bus.irq_pending == true || *bus.dmcirq_pending == true) && !cpu.registers[(size_t)RegId::P]->get_flag(flags::Flags::I))
 	{
-		cpu.HandleIRQ(&memory);
-		memory.irq_pending = false;
+		cpu.HandleIRQ(&bus);
 		logger::PrintLine(logger::LogType::DEBUG, "IRQ request");
 	}
 	else if (machine_status.reset)
 	{
-		memory.WriteCPU(0x4015, 00); //silence the apu
+		bus.WriteCPU(0x4015, 00); //silence the apu
 		ppu.HandleReset();
-		cpu.HandleReset(&memory, machine_status.reset);
+		cpu.HandleReset(&bus, machine_status.reset);
 		apu.Reset();
 		machine_status.reset = 0;
 	}
@@ -77,16 +131,16 @@ void Machine::Run()
 
 		if (frame.capTimer.tick(&frame))
 		{
-			input.Poll(&machine_status, ppu.display.GetWindow(), &ppu.display, &memory);
+			input.Poll(&machine_status, ppu.display.GetWindow(), &ppu.display);
 			cycle_accumulator = 0;
 			while (cycle_accumulator < 29780)
 			{
 				uint64_t old_cycle = cpu.GetCycles();
 				PollInterrupts();
-				cpu.ExecuteInstruction(&memory);
+				cpu.ExecuteInstruction(&bus);
 				uint16_t budget = (uint16_t)(cpu.GetCycles() - old_cycle);
-				ppu.Step(&memory, budget);
-				apu.Step(&memory, budget);
+				ppu.Step(&bus, budget);
+				apu.Step(&bus, budget);
 				cycle_accumulator += budget;
 			}
 			apu.Play();
@@ -97,7 +151,7 @@ void Machine::Run()
 	}
 }
 
-bool Machine::LoadNES(std::string path)
+bool Machine::ParseINES(std::string path)
 {
 	std::size_t found = path.find(".nes");
 	if (found == std::string::npos)

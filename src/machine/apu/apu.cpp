@@ -2,11 +2,284 @@
 #include <SDL.h>
 #include <string>
 #include "../../logger/logger.h"
-#include "../memory/memory.h"
+#include "../bus/bus.h"
+#include "../../utility/utility.h"
 
 Apu::Apu()
 {
 	
+}
+
+void Apu::WriteRegisters(size_t loc, uint8_t byte)
+{
+
+	switch (loc)
+	{
+		//pulse 1
+		case 0x4000:
+		{
+			pulse_channel[0].duty_cycle = (byte >> 6) & 3;
+			pulse_channel[0].length_counter_halt = utility::IsBitSet(byte, 5);
+			pulse_channel[0].c = utility::IsBitSet(byte, 4);
+			pulse_channel[0].envelope_divider = byte & 15;
+			break;
+		}
+		case 0x4001:
+		{
+			pulse_channel[0].sweep_enable = utility::IsBitSet(byte, 7);
+			pulse_channel[0].sweep_negate = utility::IsBitSet(byte, 3);
+			pulse_channel[0].sweep_period = (byte >> 4) & 7;
+			pulse_channel[0].sweep_shift = byte & 7;
+			pulse_channel[0].sweep_reload = true;
+			break;
+		}
+		case 0x4002:
+		{
+			const int prev = pulse_channel[0].timer_target & 0xFF00; 
+			pulse_channel[0].timer_target = prev | byte;
+			break;
+		}
+		case 0x4003:
+		{
+			const int prev = pulse_channel[0].timer_target & 0x00FF; 
+			pulse_channel[0].timer_target = prev | ((byte & 0x07) << 8);
+			if(pulse_channel[0].enable)
+				pulse_channel[0].len = APU_LEN_TABLE[(byte >> 3) & 0x1f];
+			pulse_channel[0].timer = pulse_channel[0].timer_target;
+			pulse_channel[0].env_start = true;
+			pulse_channel[0].duty_index = 0;
+			break;
+		}
+		//pulse 2
+		case 0x4004:
+		{
+			pulse_channel[1].duty_cycle = (byte >> 6) & 3;
+			pulse_channel[1].length_counter_halt = utility::IsBitSet(byte, 5);
+			pulse_channel[1].c = utility::IsBitSet(byte, 4);
+			pulse_channel[1].envelope_divider = byte & 15;
+			break;
+		}
+		case 0x4005:
+		{
+			pulse_channel[1].sweep_enable = utility::IsBitSet(byte, 7);
+			pulse_channel[1].sweep_negate = utility::IsBitSet(byte, 3);
+			pulse_channel[1].sweep_period = (byte >> 4) & 7;
+			pulse_channel[1].sweep_shift = byte & 7;
+			pulse_channel[1].sweep_reload = true;
+			break;
+		}
+		case 0x4006:
+		{
+			const int prev = pulse_channel[1].timer_target & 0xFF00; 
+			pulse_channel[1].timer_target = prev | byte;
+			break;
+		}
+		case 0x4007:
+		{
+			const int prev = pulse_channel[1].timer_target & 0x00FF; 
+			pulse_channel[1].timer_target = prev | ((byte & 0x07) << 8);
+			if(pulse_channel[1].enable)
+				pulse_channel[1].len = APU_LEN_TABLE[(byte >> 3) & 0x1f];
+			pulse_channel[1].timer = pulse_channel[1].timer_target;
+			pulse_channel[1].env_start = true;
+			pulse_channel[1].duty_index = 0;
+			break;
+		}
+		//triangle
+		case 0x4008:
+		{
+			triangle_channel.linear_control = utility::IsBitSet(byte, 7);
+			triangle_channel.length_enabled = !triangle_channel.linear_control;
+			triangle_channel.linear_load = byte & 0x7F;
+			break;
+		}
+		case 0x4009:
+		{
+			//unused
+			break;
+		}
+		case 0x400A:
+		{
+			const int prev = triangle_channel.freq_timer & 0xFF00;
+			triangle_channel.freq_timer = prev | byte;
+			break;
+		}
+		case 0x400B:
+		{
+			const int prev = triangle_channel.freq_timer & 0x00FF;
+			triangle_channel.freq_timer = prev | ((byte & 0x07) << 8);
+			if (triangle_channel.enable)
+				triangle_channel.length_counter = APU_LEN_TABLE[(byte >> 3) & 0x1f];
+			triangle_channel.linear_reload = true;
+			break;
+		}
+		//noise channel
+		case 0x400C:
+		{
+			noise_channel.decay_loop = utility::IsBitSet(byte, 5);
+			noise_channel.length_enabled = !utility::IsBitSet(byte, 5);
+			noise_channel.decay_enabled = !utility::IsBitSet(byte, 4);
+			noise_channel.decay_v = byte & 0x0F;
+			break;
+		}
+		case 0x400D:
+		{
+			//unused
+			break;
+		}
+		case 0x400E:
+		{
+			noise_channel.freq_timer = APU_NOISE_FREQ_TABLE[byte & 0x0F];
+			noise_channel.shift_mode = utility::IsBitSet(byte, 7);
+			break;
+		}
+		case 0x400F:
+		{
+			if(noise_channel.enable)
+				noise_channel.length_counter = APU_LEN_TABLE[(byte >> 3) & 0x1f];
+			noise_channel.decay_reset_flag = true;
+			break;
+		}
+		//dmc channel
+		case 0x4010:
+		{
+			dmc_channel.dmcirq_enabled = utility::IsBitSet(byte, 7);
+			dmc_channel.dmc_loop = utility::IsBitSet(byte, 6);
+			dmc_channel.freq_timer = APU_DMC_FREQ_TABLE[byte & 15] / 2; //CPU cycles to APU cycles
+			if (!dmc_channel.dmcirq_enabled)
+				dmc_channel.dmcirq_pending = false;
+			break;
+		}
+		case 0x4011:
+		{
+			dmc_channel.output = byte & 0x7F;
+			break;
+		}
+		case 0x4012:
+		{
+			dmc_channel.addrload = 0xC000 | (byte << 6);
+			break;
+		}
+		case 0x4013:
+		{
+			dmc_channel.lengthload = (byte << 4) + 1;
+			break;
+		}
+		//misc apu
+		case 0x4015:
+		{
+			const bool pulse1_enable = utility::IsBitSet(byte, 0);
+			const bool pulse2_enable = utility::IsBitSet(byte, 1);
+			const bool triangle_enable = utility::IsBitSet(byte, 2);
+			const bool noise_enable = utility::IsBitSet(byte, 3);
+			const bool dmc_enable = utility::IsBitSet(byte, 4);
+			if (!pulse1_enable)
+			{
+				pulse_channel[0].enable = false;
+				pulse_channel[0].len = 0;
+			}
+			else
+			{
+				pulse_channel[0].enable = true;
+			}
+
+			if (!pulse2_enable)
+			{
+				pulse_channel[1].enable = false;
+				pulse_channel[1].len = 0;
+			}
+			else
+			{
+				pulse_channel[1].enable = true;
+			}
+
+			if (!triangle_enable)
+			{
+				triangle_channel.enable = false;
+				triangle_channel.length_counter = 0;
+			}
+			else
+			{
+				triangle_channel.enable = true;
+			}
+
+			if (!noise_enable)
+			{
+				noise_channel.enable = false;
+				noise_channel.length_counter = 0;
+			}
+			else
+			{
+				noise_channel.enable = true;
+			}
+			if (!dmc_enable)
+			{
+				dmc_channel.length = 0;
+			}
+			else
+			{
+				if (dmc_channel.length == 0)
+				{
+					dmc_channel.length = dmc_channel.lengthload;
+					dmc_channel.addr = dmc_channel.addrload;
+				}
+			}
+			dmc_channel.dmcirq_pending = false;
+			break;
+		}
+		case 0x4017:
+		{
+			frame_counter.interrupt_inhibit = utility::IsBitSet(byte, 6);
+			frame_counter.mode = utility::IsBitSet(byte, 7);
+			if (frame_counter.mode)
+			{
+				frame_counter.ClockQuarter(pulse_channel,&triangle_channel, &noise_channel);
+				frame_counter.ClockHalf(pulse_channel,&triangle_channel, &noise_channel);
+			}
+			cycles = -1;
+			break;
+		}
+		default:
+		{
+			logger::PrintLine(logger::LogType::FATAL_ERROR, "Apu::WriteRegisters - Bad APU addr");
+			break;
+		}
+	}
+}
+
+uint8_t Apu::ReadStatus()
+{
+	uint8_t ret = 0;
+	if (pulse_channel[0].len > 0)
+	{
+		ret = ret | 1;
+	}
+	if (pulse_channel[1].len > 0)
+	{
+		ret = ret | (1 << 1);
+	}
+	if (triangle_channel.length_counter > 0)
+	{
+		ret = ret | (1 << 2);
+	}
+	if (noise_channel.length_counter > 0)
+	{
+		ret = ret | (1 << 3);
+	}
+	if (dmc_channel.length > 0)
+	{
+		ret = ret | (1 << 4);
+	}
+	if (*irq_pending)
+	{
+		ret = ret | 1 << 6;
+	}
+	if (dmc_channel.dmcirq_pending)
+	{
+		ret = ret | 1 << 7;
+	}
+	*irq_pending = false;
+	return ret;
 }
 
 void Apu::Init(bool* irq_pointer)
@@ -29,11 +302,11 @@ void Apu::Init(bool* irq_pointer)
 	Reset();
 }
 
-void Apu::Step(Memory *mem, uint16_t budget)
+void Apu::Step(Bus *bus, uint16_t budget)
 {
 	for (auto i = 0; i < budget; i++)
 	{
-		Tick(mem);
+		Tick(bus);
 	}
 }
 
@@ -53,7 +326,7 @@ void Apu::Play()
 	snd_buf.clear();
 }
 
-void Apu::Tick(Memory *mem)
+void Apu::Tick(Bus *bus)
 {
 	if (!canTick)
 	{
@@ -75,7 +348,7 @@ void Apu::Tick(Memory *mem)
 	}
 	triangle_channel.Clock();
 	noise_channel.Clock();
-	dmc_channel.Clock(mem);
+	dmc_channel.Clock(bus);
 
 	if (sample_timer == 0)
 	{

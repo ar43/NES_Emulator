@@ -150,6 +150,7 @@
     <ClCompile Include="src\machine\apu\noise_channel.cpp" />
     <ClCompile Include="src\machine\apu\pulse_channel.cpp" />
     <ClCompile Include="src\machine\apu\triangle_channel.cpp" />
+    <ClCompile Include="src\machine\bus\bus.cpp" />
     <ClCompile Include="src\machine\cpu\cpu.cpp" />
     <ClCompile Include="src\machine\cpu\flags.cpp" />
     <ClCompile Include="src\machine\cpu\is_load.cpp" />
@@ -158,7 +159,8 @@
     <ClCompile Include="src\machine\input\input.cpp" />
     <ClCompile Include="src\machine\input\joypad.cpp" />
     <ClCompile Include="src\machine\machine.cpp" />
-    <ClCompile Include="src\machine\memory\memory.cpp" />
+    <ClCompile Include="src\machine\mapper\mapper.cpp" />
+    <ClCompile Include="src\machine\mapper\nrom.cpp" />
     <ClCompile Include="src\machine\misc\instruction.cpp" />
     <ClCompile Include="src\machine\ppu\display\display.cpp" />
     <ClCompile Include="src\machine\ppu\display\palette.cpp" />
@@ -182,6 +184,7 @@
     <ClInclude Include="src\machine\apu\noise_channel.h" />
     <ClInclude Include="src\machine\apu\pulse_channel.h" />
     <ClInclude Include="src\machine\apu\triangle_channel.h" />
+    <ClInclude Include="src\machine\bus\bus.h" />
     <ClInclude Include="src\machine\cpu\addressingmode.h" />
     <ClInclude Include="src\machine\cpu\cpu.h" />
     <ClInclude Include="src\machine\cpu\flags.h" />
@@ -190,7 +193,8 @@
     <ClInclude Include="src\machine\input\input.h" />
     <ClInclude Include="src\machine\input\joypad.h" />
     <ClInclude Include="src\machine\machine.h" />
-    <ClInclude Include="src\machine\memory\memory.h" />
+    <ClInclude Include="src\machine\mapper\mapper.h" />
+    <ClInclude Include="src\machine\mapper\nrom.h" />
     <ClInclude Include="src\machine\misc\constants.h" />
     <ClInclude Include="src\machine\misc\instruction.h" />
     <ClInclude Include="src\machine\misc\machine_status.h" />

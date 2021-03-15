@@ -1,8 +1,8 @@
 #include "dmc_channel.h"
-#include "../memory/memory.h"
+#include "../bus/bus.h"
 
 
-void DmcChannel::Clock(Memory *mem)
+void DmcChannel::Clock(Bus *bus)
 {
 	if (freq_counter)
 	{
@@ -33,7 +33,7 @@ void DmcChannel::Clock(Memory *mem)
 
 	if (length > 0 && is_sample_buffer_empty)
 	{
-		sample_buffer = mem->ReadCPU(addr);
+		sample_buffer = bus->ReadCPUSafe(addr);
 		is_sample_buffer_empty = false;
 		addr++;
 		if (addr > 0xFFFF)

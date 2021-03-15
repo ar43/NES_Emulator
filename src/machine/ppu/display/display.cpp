@@ -1,7 +1,8 @@
 #include "display.h"
 #include "../../../logger/logger.h"
 #include "../../../utility/utility.h"
-#include "../../memory/memory.h"
+#include "../../bus/bus.h"
+#include "../ppuregisters.h"
 #include <cassert>
 #include <cmath>
 
@@ -93,7 +94,7 @@ void Display::SetScale(uint8_t scale)
 //    }
 //}
 
-void Display::DrawSprite(Memory *mem, uint8_t bank, uint8_t index, uint8_t palette_id, bool flip_h, bool flip_v, int x, int y)
+void Display::DrawSprite(uint8_t bank, uint8_t index, uint8_t palette_id, bool flip_h, bool flip_v, int x, int y, bool draw_left)
 {
     assert(index <= 255 && index >= 0 && bank >= 0 && bank <= 1);
     SDL_Color colors[4];
@@ -113,7 +114,7 @@ void Display::DrawSprite(Memory *mem, uint8_t bank, uint8_t index, uint8_t palet
         for (int j = 0; j < TILE_WIDTH; j++)
         {
 
-            uint8_t value = mem->pixel_values[bank][index*PIXEL_PER_TILE + i*TILE_WIDTH+j];
+            uint8_t value = pixel_values[bank][index*PIXEL_PER_TILE + i*TILE_WIDTH+j];
             if (value == 0)
                 continue;
 
@@ -139,7 +140,7 @@ void Display::DrawSprite(Memory *mem, uint8_t bank, uint8_t index, uint8_t palet
             }
 
             loc = y_calc * SCREEN_WIDTH + x_calc;
-            if (x_calc >= SCREEN_WIDTH || x_calc < 0 || y_calc >= SCREEN_HEIGHT || y_calc < 0 || !mem->ppu_registers->ppumask.IsBitSet(MaskBits::SHOW_SPRITES_LEFT) && x_calc < 8)
+            if (x_calc >= SCREEN_WIDTH || x_calc < 0 || y_calc >= SCREEN_HEIGHT || y_calc < 0 || !draw_left && x_calc < 8)
                 continue;
             
             pixels[loc] = colors[value].r << 24 | colors[value].g << 16 | colors[value].b << 8 | 0xFF;
@@ -148,10 +149,10 @@ void Display::DrawSprite(Memory *mem, uint8_t bank, uint8_t index, uint8_t palet
     }
 }
 
-void Display::RenderStart(Memory *mem)
+void Display::RenderStart(Bus *bus, PpuRegisters *ppu_registers, uint8_t * oam_data)
 {
-    palette.LoadSprite(mem);
-    palette.LoadBackground(mem);
+    palette.LoadSprite(bus);
+    palette.LoadBackground(bus);
     SDL_Color color;
     palette.GetColor(&color, palette.universal_background);
 
@@ -160,64 +161,65 @@ void Display::RenderStart(Memory *mem)
     SDL_FillRect(surface, NULL,SDL_MapRGB(surface->format,color.r,color.g,color.b));
     if (texture != nullptr)
         SDL_DestroyTexture(texture);
-    DrawSprites(mem,true);
+    DrawSprites(ppu_registers,oam_data,true);
 }
 
-void Display::DrawChrRom(Memory *mem)
+void Display::DrawChrRom(Bus * bus)
 {
     /*for(int j = 0; j < 16;j++)
     { 
-        for (int i = 0; i < 16; i++)
-        {
-            DrawBackgroundTile(mem, 0, i+j*16, 8*i, j*8);
-        }
+    for (int i = 0; i < 16; i++)
+    {
+    DrawBackgroundTile(mem, 0, i+j*16, 8*i, j*8);
+    }
     }
     for(int j = 0; j < 16;j++)
     { 
-        for (int i = 0; i < 16; i++)
-        {
-            DrawBackgroundTile(mem, 1, i+j*16, 8*i+128, j*8);
-        }
+    for (int i = 0; i < 16; i++)
+    {
+    DrawBackgroundTile(mem, 1, i+j*16, 8*i+128, j*8);
+    }
     }*/
 }
 
-void Display::DrawSprites(Memory *mem, bool behind)
+void Display::DrawSprites(PpuRegisters *ppu_registers, uint8_t *oam_data, bool behind)
 {
-    bool toggle = mem->ppu_registers->ppumask.IsBitSet(MaskBits::SHOW_SPRITES);
+    bool toggle = ppu_registers->ppumask.IsBitSet(MaskBits::SHOW_SPRITES);
+    bool show_left = ppu_registers->ppumask.IsBitSet(MaskBits::SHOW_SPRITES_LEFT);
     if (!toggle)
         return;
 
-    if (mem->ppu_registers->ppuctrl.IsBitSet(ControllerBits::SPRITE_SIZE))
+    if (ppu_registers->ppuctrl.IsBitSet(ControllerBits::SPRITE_SIZE))
         logger::PrintLine(logger::LogType::FATAL_ERROR, "Unimplemented 8-16 sprite mode");
 
-    int nametable = mem->ppu_registers->ppuctrl.GetNametable(mem->ppu_registers->v);
-    uint8_t bank = mem->ppu_registers->ppuctrl.IsBitSet(ControllerBits::SPRITE_PATTERN);
+    int nametable = ppu_registers->ppuctrl.GetNametable(ppu_registers->v);
+    uint8_t bank = ppu_registers->ppuctrl.IsBitSet(ControllerBits::SPRITE_PATTERN);
 
     for (int i = NUM_SPRITES-1; i >= 0; i--)
     {
         uint8_t index = i * 4;
-        uint8_t attributes = mem->oam_data[index + 2];
+        uint8_t attributes = oam_data[index + 2];
         if (utility::IsBitSet(attributes, 5) != behind)
             continue;
         
-        uint8_t y = mem->oam_data[index];
+        uint8_t y = oam_data[index];
         if (y >= 0xEF)
             continue;
-        uint8_t x = mem->oam_data[index + 3];
-        uint8_t tile_id = mem->oam_data[index + 1];
+        uint8_t x = oam_data[index + 3];
+        uint8_t tile_id = oam_data[index + 1];
         
         uint8_t palette_id = attributes & 3;
         
         bool flip_h = utility::IsBitSet(attributes, 6);
         bool flip_v = utility::IsBitSet(attributes, 7);
-        DrawSprite(mem, bank, tile_id, palette_id, flip_h, flip_v, x, y+1);
+        DrawSprite(bank, tile_id, palette_id, flip_h, flip_v, x, y+1, show_left);
     }
 }
 
-void Display::GetBackgroundMetaTileColor(Memory *mem, SDL_Color *color, int x, int y, int nametable)
+void Display::GetBackgroundMetaTileColor(Bus *bus, SDL_Color *color, int x, int y, int nametable)
 {
     int index = (y / 4) * 8 + (x / 4);
-    uint8_t byte = mem->ReadPPU(nametable + 960 + index);
+    uint8_t byte = bus->ReadPPU(nametable + 960 + index);
     bool x_odd = (bool)((x / 2) % 2);
     bool y_odd = (bool)((y / 2) % 2);
     if (x_odd && y_odd)
@@ -242,27 +244,26 @@ void Display::GetBackgroundMetaTileColor(Memory *mem, SDL_Color *color, int x, i
     palette.GetColor(&color[3], palette.background[index][2]);
 }
 
-void Display::DrawBackgroundTileLine(Memory *mem, uint8_t bank, uint8_t index, SDL_Color* color_pointer, uint8_t read_line, int x, int line)
+void Display::DrawBackgroundTileLine(uint8_t bank, uint8_t index, SDL_Color* color_pointer, uint8_t read_line, int x, int line, bool show_background_left)
 {
     assert(index <= 255 && index >= 0 && bank >= 0 && bank <= 1);
     uint32_t* pixels = (uint32_t*)surface->pixels;
     
     for (int j = 0; j < TILE_WIDTH; j++)
     {
-        uint8_t value = mem->pixel_values[bank][index*PIXEL_PER_TILE + ((read_line) & 7)*TILE_WIDTH+j];
+        uint8_t value = pixel_values[bank][index*PIXEL_PER_TILE + ((read_line) & 7)*TILE_WIDTH+j];
         int loc = line * SCREEN_WIDTH + (x + j);
         if (value == 0)
             continue;
-        if (loc >= SCREEN_HEIGHT*SCREEN_WIDTH || x+j > 255 || loc < 0 || x+j < 0 || !mem->ppu_registers->ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND_LEFT) && (x+j) < 8)
+        if (loc >= SCREEN_HEIGHT*SCREEN_WIDTH || x+j > 255 || loc < 0 || x+j < 0 || !show_background_left && (x+j) < 8)
             continue;
         pixels[loc] = color_pointer[value].r << 24 | color_pointer[value].g << 16 | color_pointer[value].b << 8 | 0xFF;
         //counter++;
     }
 }
 
-void Display::DrawBackgroundLineHSA(Memory* mem, uint8_t x_shift, uint8_t y_shift, int nametable, uint8_t bank, int line)
+void Display::DrawBackgroundLineHSA(Bus* bus, uint8_t x_shift, uint8_t y_shift, int nametable, uint8_t bank, int line, bool toggle, bool show_left)
 {
-    bool toggle = mem->ppu_registers->ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND);
     if (!toggle)
         return;
 
@@ -271,15 +272,14 @@ void Display::DrawBackgroundLineHSA(Memory* mem, uint8_t x_shift, uint8_t y_shif
     for (int x = test; x < 32; x++)
     {
         int final_x = x * 8 - x_shift;
-        GetBackgroundMetaTileColor(mem, colors, x, (line+y_shift)/8, nametable);
-        uint8_t index = mem->ReadPPU(nametable + ((line+y_shift)/8) * 32 + x);
-        DrawBackgroundTileLine(mem, bank, index, colors, line+y_shift, final_x, line);
+        GetBackgroundMetaTileColor(bus, colors, x, (line+y_shift)/8, nametable);
+        uint8_t index = bus->ReadPPU(nametable + ((line+y_shift)/8) * 32 + x);
+        DrawBackgroundTileLine(bank, index, colors, line+y_shift, final_x, line,show_left);
     }
 }
 
-void Display::DrawBackgroundLineHSB(Memory* mem, uint8_t x_shift, uint8_t y_shift, int nametable, uint8_t bank, int line)
+void Display::DrawBackgroundLineHSB(Bus* bus, uint8_t x_shift, uint8_t y_shift, int nametable, uint8_t bank, int line, bool toggle, bool show_left)
 {
-    bool toggle = mem->ppu_registers->ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND);
     if (!toggle)
         return;
 
@@ -289,15 +289,14 @@ void Display::DrawBackgroundLineHSB(Memory* mem, uint8_t x_shift, uint8_t y_shif
     for (int x = 0; x < test; x++)
     {
         int final_x = x * 8 + 256 - x_shift;
-        GetBackgroundMetaTileColor(mem, colors, x, (line+y_shift)/8, nametable);
-        uint8_t index = mem->ReadPPU(nametable + ((line+y_shift)/8) * 32 + x);
-        DrawBackgroundTileLine(mem, bank, index, colors, line+y_shift, final_x, line);
+        GetBackgroundMetaTileColor(bus, colors, x, (line+y_shift)/8, nametable);
+        uint8_t index = bus->ReadPPU(nametable + ((line+y_shift)/8) * 32 + x);
+        DrawBackgroundTileLine(bank, index, colors, line+y_shift, final_x, line,show_left);
     }
 }
 
-void Display::DrawBackgroundLineVSB(Memory* mem, uint8_t x_shift, uint8_t y_shift, int nametable, uint8_t bank, int line)
+void Display::DrawBackgroundLineVSB(Bus* bus, uint8_t x_shift, uint8_t y_shift, int nametable, uint8_t bank, int line, bool toggle, bool show_left)
 {
-    bool toggle = mem->ppu_registers->ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND);
     if (!toggle)
         return;
 
@@ -309,15 +308,66 @@ void Display::DrawBackgroundLineVSB(Memory* mem, uint8_t x_shift, uint8_t y_shif
     for (int x = test; x < 32; x++)
     {
         int final_x = x * 8 - x_shift;
-        GetBackgroundMetaTileColor(mem, colors, x, (new_line)/8, nametable);
-        uint8_t index = mem->ReadPPU(nametable + ((new_line)/8) * 32 + x);
-        DrawBackgroundTileLine(mem, bank, index, colors, new_line, final_x, line);
+        GetBackgroundMetaTileColor(bus, colors, x, (new_line)/8, nametable);
+        uint8_t index = bus->ReadPPU(nametable + ((new_line)/8) * 32 + x);
+        DrawBackgroundTileLine(bank, index, colors, new_line, final_x, line, show_left);
     }
 }
 
-void Display::Render(Memory *mem)
+void Display::BuildPixelValues(Bus *bus)
 {
-    DrawSprites(mem,false);
+    uint32_t offset = 0;
+
+    for (int bank = 0; bank < 2; bank++)
+    {
+        for (int index = 0; index < TILE_PER_BANK; index++)
+        {
+            if (bank == 1)
+                offset = 0x1000;
+            int counter = 0;
+            for (int i = 0; i < TILE_HEIGHT; i++)
+            {
+                for (int j = 0; j < TILE_WIDTH; j++)
+                {
+                    uint8_t data1 = bus->ReadPPU(offset + BYTES_PER_TILE * index + i);
+                    uint8_t data2 = bus->ReadPPU(offset + BYTES_PER_TILE * index + i + 8);
+                    int bit1 = (int)(data1 & (1 << (7 - j))) != 0;
+                    int bit2 = (int)(data2 & (1 << (7 - j))) != 0;
+                    uint8_t value = 1 * bit1 + 2 * bit2;
+                    pixel_values[bank][index*PIXEL_PER_TILE + counter] = value;
+                    counter++;
+
+                }
+            }
+        }
+    }
+}
+
+void Display::BuildPixelValue(Bus *bus, uint8_t bank, uint8_t index)
+{
+    uint32_t offset = 0;
+    if (bank == 1)
+        offset = 0x1000;
+    int counter = 0;
+    for (int i = 0; i < TILE_HEIGHT; i++)
+    {
+        for (int j = 0; j < TILE_WIDTH; j++)
+        {
+            uint8_t data1 = bus->ReadPPU(offset + BYTES_PER_TILE * index + i);
+            uint8_t data2 = bus->ReadPPU(offset + BYTES_PER_TILE * index + i + 8);
+            int bit1 = (int)(data1 & (1 << (7 - j))) != 0;
+            int bit2 = (int)(data2 & (1 << (7 - j))) != 0;
+            uint8_t value = 1 * bit1 + 2 * bit2;
+            pixel_values[bank][index*PIXEL_PER_TILE + counter] = value;
+            counter++;
+
+        }
+    }
+}
+
+void Display::Render(PpuRegisters *ppu_registers, uint8_t * oam_data)
+{
+    DrawSprites(ppu_registers,oam_data,false);
     RenderEnd();
 }
 
