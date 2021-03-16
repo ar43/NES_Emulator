@@ -12,14 +12,9 @@ void Ppu::Step(Bus *bus, uint16_t budget)
 	{
 		if (scanline <= 239)
 		{
-			if (!registers.ppustatus.IsBitSet(StatusBits::SPRITE0_HIT) && IsSprite0Hit(scanline))
-			{
-				registers.ppustatus.SetBit(StatusBits::SPRITE0_HIT,true);
-			}
-
 			if (scanline == 0)
 			{
-				display.RenderStart(bus,&registers,oam_data);
+				display.RenderStart(bus);
 				y_scroll = registers.ppuscroll.addr[1];
 			}
 				
@@ -38,6 +33,8 @@ void Ppu::Step(Bus *bus, uint16_t budget)
 			{
 				display.DrawBackgroundLineVSB(bus, x_scroll, y_scroll, nametable, bank, scanline,registers.ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND),registers.ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND_LEFT)); //todo: hor + ver scrolling if(x_scroll) DrawBackGroundLineVSA
 			}
+			if(scanline)
+				display.DrawSprites(&registers,oam_data, scanline);
 		}
 
 		cycle -= 341;

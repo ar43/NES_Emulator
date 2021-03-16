@@ -94,11 +94,12 @@ void Display::SetScale(uint8_t scale)
 //    }
 //}
 
-void Display::DrawSprite(uint8_t bank, uint8_t index, uint8_t palette_id, bool flip_h, bool flip_v, int x, int y, bool draw_left)
+bool Display::DrawSprite(uint8_t bank, uint8_t index, uint8_t palette_id, bool flip_h, bool flip_v, int x, int y, bool draw_left, bool behind, int sprite_num, int offset)
 {
     assert(index <= 255 && index >= 0 && bank >= 0 && bank <= 1);
     SDL_Color colors[4];
     palette.GetColor(&colors[0], palette.universal_background);
+    bool ret = false;
 
     for(int i = 0; i < 3;i++)
         palette.GetColor(&colors[i+1], palette.sprite[palette_id][i]);
@@ -108,48 +109,56 @@ void Display::DrawSprite(uint8_t bank, uint8_t index, uint8_t palette_id, bool f
     int loc = 0;
     int x_calc = 0;
     int y_calc = 0;
+    int i = offset;
     //logger::PrintLine(logger::LogType::DEBUG, "loc: " + std::to_string(x) + " " + std::to_string(y));
-    for (int i = 0; i < TILE_HEIGHT; i++)
+    for (int j = 0; j < TILE_WIDTH; j++)
     {
-        for (int j = 0; j < TILE_WIDTH; j++)
+
+        uint8_t value = pixel_values[bank][index*PIXEL_PER_TILE + i*TILE_WIDTH+j];
+        if (value == 0)
+            continue;
+
+        if (!flip_h && !flip_v)
         {
-
-            uint8_t value = pixel_values[bank][index*PIXEL_PER_TILE + i*TILE_WIDTH+j];
-            if (value == 0)
-                continue;
-
-            if (!flip_h && !flip_v)
-            {
-                x_calc = x + j;
-                y_calc = y + i;
-            }
-            else if (flip_h && flip_v)
-            {
-                x_calc = (x + (7 - j));
-                y_calc = (y + (7 - i));
-            }
-            else if(flip_h)
-            {
-                x_calc = (x + (7 - j));
-                y_calc = y + i;
-            }
-            else if (flip_v)
-            {
-                x_calc = x + j;
-                y_calc = (y + (7 - i));
-            }
-
-            loc = y_calc * SCREEN_WIDTH + x_calc;
-            if (x_calc >= SCREEN_WIDTH || x_calc < 0 || y_calc >= SCREEN_HEIGHT || y_calc < 0 || !draw_left && x_calc < 8)
-                continue;
-            
-            pixels[loc] = colors[value].r << 24 | colors[value].g << 16 | colors[value].b << 8 | 0xFF;
-            //counter++;
+            x_calc = x + j;
+            y_calc = y + i;
         }
+        else if (flip_h && flip_v)
+        {
+            x_calc = (x + (7 - j));
+            y_calc = (y + (7 - i));
+        }
+        else if(flip_h)
+        {
+            x_calc = (x + (7 - j));
+            y_calc = y + i;
+        }
+        else if (flip_v)
+        {
+            x_calc = x + j;
+            y_calc = (y + (7 - i));
+        }
+
+        loc = y_calc * SCREEN_WIDTH + x_calc;
+        if (x_calc >= SCREEN_WIDTH || x_calc < 0 || y_calc >= SCREEN_HEIGHT || y_calc < 0 || !draw_left && x_calc < 8) //FD means another sprite already there, FE means clean pixel, FF means bg pixel
+            continue;
+
+        if ((pixels[loc] & 0xff) == 0xFD)
+            continue;
+
+        if (sprite_num == 0)
+            ret = true;
+
+        if (behind && (pixels[loc] & 0xff) != 0xfe)
+            continue;
+            
+        pixels[loc] = colors[value].r << 24 | colors[value].g << 16 | colors[value].b << 8 | 0xFD;
+        //counter++;
     }
+    return ret;
 }
 
-void Display::RenderStart(Bus *bus, PpuRegisters *ppu_registers, uint8_t * oam_data)
+void Display::RenderStart(Bus *bus)
 {
     palette.LoadSprite(bus);
     palette.LoadBackground(bus);
@@ -158,10 +167,9 @@ void Display::RenderStart(Bus *bus, PpuRegisters *ppu_registers, uint8_t * oam_d
 
     SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, 0xfe);
     SDL_RenderClear(renderer);
-    SDL_FillRect(surface, NULL,SDL_MapRGB(surface->format,color.r,color.g,color.b));
+    SDL_FillRect(surface, NULL,color.r << 24 | color.g << 16 | color.b << 8 | 0xFE);
     if (texture != nullptr)
         SDL_DestroyTexture(texture);
-    DrawSprites(ppu_registers,oam_data,true);
 }
 
 void Display::DrawChrRom(Bus * bus)
@@ -182,7 +190,7 @@ void Display::DrawChrRom(Bus * bus)
     }*/
 }
 
-void Display::DrawSprites(PpuRegisters *ppu_registers, uint8_t *oam_data, bool behind)
+void Display::DrawSprites(PpuRegisters *ppu_registers, uint8_t *oam_data, int scanline)
 {
     bool toggle = ppu_registers->ppumask.IsBitSet(MaskBits::SHOW_SPRITES);
     bool show_left = ppu_registers->ppumask.IsBitSet(MaskBits::SHOW_SPRITES_LEFT);
@@ -194,16 +202,22 @@ void Display::DrawSprites(PpuRegisters *ppu_registers, uint8_t *oam_data, bool b
 
     int nametable = ppu_registers->ppuctrl.GetNametable(ppu_registers->v);
     uint8_t bank = ppu_registers->ppuctrl.IsBitSet(ControllerBits::SPRITE_PATTERN);
+    int counter = 0;
 
-    for (int i = NUM_SPRITES-1; i >= 0; i--)
+    for (int i = 0; i < 64; i++)
     {
         uint8_t index = i * 4;
         uint8_t attributes = oam_data[index + 2];
-        if (utility::IsBitSet(attributes, 5) != behind)
-            continue;
+        
         
         uint8_t y = oam_data[index];
         if (y >= 0xEF)
+            continue;
+        y++;
+        if (scanline < y)
+            continue;
+        int offset = scanline - y;
+        if (offset > 7)
             continue;
         uint8_t x = oam_data[index + 3];
         uint8_t tile_id = oam_data[index + 1];
@@ -212,7 +226,17 @@ void Display::DrawSprites(PpuRegisters *ppu_registers, uint8_t *oam_data, bool b
         
         bool flip_h = utility::IsBitSet(attributes, 6);
         bool flip_v = utility::IsBitSet(attributes, 7);
-        DrawSprite(bank, tile_id, palette_id, flip_h, flip_v, x, y+1, show_left);
+        bool behind = utility::IsBitSet(attributes, 5);
+        
+        if (DrawSprite(bank, tile_id, palette_id, flip_h, flip_v, x, y, show_left, behind, i, offset))
+            ppu_registers->ppustatus.SetBit(StatusBits::SPRITE0_HIT,true);
+        counter++;
+        if (counter == 8)
+        {
+            ppu_registers->ppustatus.SetBit(StatusBits::SPRITE_OVERFLOW,true);
+            return;
+        }
+            
     }
 }
 
@@ -256,6 +280,8 @@ void Display::DrawBackgroundTileLine(uint8_t bank, uint8_t index, SDL_Color* col
         if (value == 0)
             continue;
         if (loc >= SCREEN_HEIGHT*SCREEN_WIDTH || x+j > 255 || loc < 0 || x+j < 0 || !show_background_left && (x+j) < 8)
+            continue;
+        if ((pixels[loc] & 0xff) == 0xfd)
             continue;
         pixels[loc] = color_pointer[value].r << 24 | color_pointer[value].g << 16 | color_pointer[value].b << 8 | 0xFF;
         //counter++;
@@ -367,7 +393,6 @@ void Display::BuildPixelValue(Bus *bus, uint8_t bank, uint8_t index)
 
 void Display::Render(PpuRegisters *ppu_registers, uint8_t * oam_data)
 {
-    DrawSprites(ppu_registers,oam_data,false);
     RenderEnd();
 }
 

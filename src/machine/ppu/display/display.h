@@ -36,9 +36,10 @@ public:
 
 	//void DrawSpritesLine(Memory* mem, bool behind, int line);
 	
+	void DrawSprites(PpuRegisters *ppu_registers, uint8_t *oam_data, int scanline);
 
 	SDL_Window* GetWindow();
-	void RenderStart(Bus *bus,PpuRegisters *ppu_registers, uint8_t * oam_data);
+	void RenderStart(Bus *bus);
 	SDL_Surface* surface;
 	SDL_Event e;
 	uint8_t pixel_values[2][256 * 64];
@@ -57,8 +58,8 @@ private:
 	void DrawBackgroundTileLine(uint8_t bank, uint8_t index, SDL_Color *color_pointer, uint8_t read_line, int x, int line, bool show_background_left);
 	void GetBackgroundMetaTileColor(Bus *bus, SDL_Color *color, int x, int y, int nametable);
 
-	void DrawSprites(PpuRegisters *ppu_registers, uint8_t *oam_data, bool behind);
-	void DrawSprite(uint8_t bank, uint8_t index, uint8_t palette_id, bool flip_h, bool flip_v, int x, int y, bool draw_left);
+	
+	bool DrawSprite(uint8_t bank, uint8_t index, uint8_t palette_id, bool flip_h, bool flip_v, int x, int y, bool draw_left, bool behind, int sprite_num, int offset);
 	
 	//uint32_t* pixels;
 };
