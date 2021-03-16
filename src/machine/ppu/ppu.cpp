@@ -5,7 +5,6 @@
 
 void Ppu::Step(Bus *bus, uint16_t budget)
 {
-	static uint8_t y_scroll = 0;
 	budget *= 3;
 	cycle += budget;
 	if (cycle >= 341)
@@ -15,9 +14,9 @@ void Ppu::Step(Bus *bus, uint16_t budget)
 			if (scanline == 0)
 			{
 				display.RenderStart(bus);
-				y_scroll = registers.ppuscroll.addr[1];
-			}
 				
+			}
+			uint8_t y_scroll = registers.ppuscroll.addr[1]; //not quite accurate... its not supposed to change in a frame unless writing to ppuaddr, hopefully this doesnt bug things
 			uint8_t x_scroll = registers.ppuscroll.addr[0];
 			int nametable = registers.ppuctrl.GetNametable(registers.v);
 			//logger::PrintLine(logger::LogType::DEBUG, std::to_string(nametable));
@@ -67,45 +66,6 @@ void Ppu::Step(Bus *bus, uint16_t budget)
 	}
 }
 
-bool Ppu::IsSprite0Hit(int scanline)
-{
-	int y = oam_data[0]+1;
-	if (scanline > y + 7 || scanline < y || y-1 >= 0xEF)
-		return false;
-	int attributes = oam_data[2];
-	int x = oam_data[3];
-	uint8_t index = oam_data[1];
-	bool what = (y == scanline) && x <= cycle && registers.ppumask.IsBitSet(MaskBits::SHOW_SPRITES);
-	uint8_t bank = registers.ppuctrl.IsBitSet(ControllerBits::SPRITE_PATTERN);
-	bool flip_h = utility::IsBitSet(attributes, 6);
-	bool flip_v = utility::IsBitSet(attributes, 7);
-	int i = scanline - y;
-	uint32_t* pixels = (uint32_t*)display.surface->pixels;
-	for (int j = 0; j < TILE_WIDTH; j++)
-	{
-		uint8_t value = display.pixel_values[bank][index*PIXEL_PER_TILE + i*TILE_WIDTH+j];
-
-		if (value == 0)
-			continue;
-		int loc = 0;
-
-		if(!flip_h && !flip_v)
-			loc = (y + i) * SCREEN_WIDTH + ((x + j) & 255);
-		else if (flip_h && flip_v)
-			loc = (y + (7 - i)) * SCREEN_WIDTH + ((x + (7 - j)) & 255);
-		else if(flip_h)
-			loc = (y + i) * SCREEN_WIDTH + ((x + (7 - j)) & 255);
-		else if (flip_v)
-			loc = (y + (7 - i)) * SCREEN_WIDTH + ((x + j) & 255);
-
-		if ((pixels[loc] & 0xFF) != 0xFE) //alpha trick, all pixels are initialized with 0xFE alpha, which means they have 0xFE alpha when unchanged by sprites/bg
-		{
-			return true;
-		}
-	}
-	return false;
-}
-
 void Ppu::HandleReset()
 {
 	cycle = 0;
@@ -115,11 +75,15 @@ void Ppu::HandleReset()
 	registers.oamdma = 0;
 	registers.ppuaddr.Clear();
 	registers.ppuaddr.w = &registers.w;
+	registers.ppuaddr.scrolladdr = registers.ppuscroll.addr;
+	registers.ppuaddr.x = &registers.x;
 	registers.ppuctrl.Set(0,&registers.v);
 	registers.ppudata.Set(0);
 	registers.ppumask.Set(0);
 	registers.ppuscroll.Clear();
 	registers.ppuscroll.w = &registers.w;
+	registers.ppuscroll.x = &registers.x;
+	registers.ppuscroll.t = &registers.t;
 	registers.ppustatus.Set(0);
 	registers.v = 0;
 	registers.t = 0;

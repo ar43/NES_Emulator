@@ -15,16 +15,24 @@ void PpuAddr::Write(uint8_t value, int *t, int *v)
 {
 	auto loc = *w % 2;
 	addr[loc] = value;
-	*w = *w + 1;
 	if (loc == 0)
 	{
-		utility::SetBit(t, 10, utility::IsBitSet(value, 2));
-		utility::SetBit(t, 10, utility::IsBitSet(value, 3));
+		const int temp_t = *t & 0xff;
+		const int temp_value = (value & 0x3F) << 8;
+		*t = temp_t | temp_value;
 	}
 	else if (loc == 1)
 	{
+		const int temp_t = *t & 0xff00;
+		*t = temp_t | value;
 		*v = *t;
+
+		scrolladdr[0] = ((*v & 0x1f) << 3) | *x;
+		scrolladdr[1] = ((*v & 0x7000) >> 12) | ((*v & 0x3e0)>>2);
+
 	}
+	*w = *w + 1;
+	
 }
 
 void PpuAddr::Clear()

@@ -169,6 +169,7 @@
     <ClCompile Include="src\machine\ppu\ppuctrl.cpp" />
     <ClCompile Include="src\machine\ppu\ppudata.cpp" />
     <ClCompile Include="src\machine\ppu\ppumask.cpp" />
+    <ClCompile Include="src\machine\ppu\ppuregisters.cpp" />
     <ClCompile Include="src\machine\ppu\ppuscroll.cpp" />
     <ClCompile Include="src\machine\ppu\ppustatus.cpp" />
     <ClCompile Include="src\main.cpp" />

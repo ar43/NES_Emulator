@@ -200,7 +200,6 @@ void Display::DrawSprites(PpuRegisters *ppu_registers, uint8_t *oam_data, int sc
     if (ppu_registers->ppuctrl.IsBitSet(ControllerBits::SPRITE_SIZE))
         logger::PrintLine(logger::LogType::FATAL_ERROR, "Unimplemented 8-16 sprite mode");
 
-    int nametable = ppu_registers->ppuctrl.GetNametable(ppu_registers->v);
     uint8_t bank = ppu_registers->ppuctrl.IsBitSet(ControllerBits::SPRITE_PATTERN);
     int counter = 0;
 

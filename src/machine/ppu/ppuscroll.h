@@ -15,6 +15,8 @@ public:
 	void Clear();
 	uint8_t addr[2];
 	int* w;
+	int* x;
+	int* t;
 private:
 	
 	

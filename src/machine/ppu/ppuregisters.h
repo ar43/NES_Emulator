@@ -20,4 +20,5 @@ struct PpuRegisters
 	int t = 0;
 	int v = 0;
 	int w = 0;
+	int x = 0;
 };

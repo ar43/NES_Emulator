@@ -15,6 +15,9 @@ public:
 	void Add(uint8_t val);
 	void Clear();
 	int* w;
+	int* x;
+	uint8_t* scrolladdr;
 private:
 	uint8_t addr[2];
+	
 };

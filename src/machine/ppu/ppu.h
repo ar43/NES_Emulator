@@ -31,7 +31,6 @@ public:
 	Display display;
 	void Step(Bus *bus, uint16_t budget);
 	void HandleReset();
-	bool IsSprite0Hit(int scanline);
 
 	void WriteRegisters(Bus *bus, size_t loc, uint8_t byte);
 	uint8_t ReadRegisters(Bus *bus, size_t loc);

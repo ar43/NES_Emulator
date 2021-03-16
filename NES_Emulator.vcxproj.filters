@@ -189,6 +189,9 @@
     <ClCompile Include="src\machine\mapper\nrom.cpp">
       <Filter>Source Files\Machine\Mapper</Filter>
     </ClCompile>
+    <ClCompile Include="src\machine\ppu\ppuregisters.cpp">
+      <Filter>Source Files\Machine\PPU</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\logger\logger.h">
