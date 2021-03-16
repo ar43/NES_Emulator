@@ -233,7 +233,21 @@ void Display::DrawSprites(PpuRegisters *ppu_registers, uint8_t *oam_data, int sc
         counter++;
         if (counter == 8)
         {
-            ppu_registers->ppustatus.SetBit(StatusBits::SPRITE_OVERFLOW,true);
+            for (int j = i+1; j < 64; j++)
+            {
+                uint8_t index2 = j * 4;
+                uint8_t y2 = oam_data[index2];
+                if (y2 >= 0xEF)
+                    continue;
+                y2++;
+                if (scanline < y2)
+                    continue;
+                int offset2 = scanline - y2;
+                if (offset2 > 7)
+                    continue;
+                ppu_registers->ppustatus.SetBit(StatusBits::SPRITE_OVERFLOW,true);
+                return;
+            }
             return;
         }
             
