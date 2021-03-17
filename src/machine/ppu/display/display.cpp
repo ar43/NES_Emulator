@@ -120,32 +120,11 @@ bool Display::DrawSprite(uint8_t bank, uint8_t index, uint8_t palette_id, bool f
         uint8_t value = pixel_values[bank][index*PIXEL_PER_TILE + (i&7)*TILE_WIDTH+j];
         if (value == 0)
             continue;
-        //y_calc = y + i;
+        
         if(flip_h)
             x_calc = (x + (7 - j));
         else
             x_calc = x + j;
-
-        /*if (!flip_h && !flip_v)
-        {
-            x_calc = x + j;
-            y_calc = y + i;
-        }
-        else if (flip_h && flip_v)
-        {
-            x_calc = (x + (7 - j));
-            y_calc = (y + (num - i));
-        }
-        else if(flip_h)
-        {
-            x_calc = (x + (7 - j));
-            y_calc = y + i;
-        }
-        else if (flip_v)
-        {
-            x_calc = x + j;
-            y_calc = (y + (num - i));
-        }*/
 
         loc = y_calc * SCREEN_WIDTH + x_calc;
         if (x_calc >= SCREEN_WIDTH || x_calc < 0 || y_calc >= SCREEN_HEIGHT || y_calc < 0 || !draw_left && x_calc < 8) //FD means another sprite already there, FE means clean pixel, FF means bg pixel
@@ -154,7 +133,7 @@ bool Display::DrawSprite(uint8_t bank, uint8_t index, uint8_t palette_id, bool f
         if ((pixels[loc] & 0xff) == 0xFD)
             continue;
 
-        if (sprite_num == 0 && (pixels[loc] & 0xff) != 0xfe)
+        if (sprite_num == 0 && (pixels[loc] & 0xff) != 0xfe && x_calc != 255) //sprite0 hit
             ret = true;
 
         if (behind && (pixels[loc] & 0xff) != 0xfe)
