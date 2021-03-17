@@ -30,6 +30,8 @@ public:
 	bool *dmcirq_pending = nullptr;
 	bool add_dma_cycles = false;
 
+	bool rebuild_pixels = false;
+
 	//int nametable_mirroring = 1; //0 vertical mirroring, 1 horizontal mirroring, 2 other //this is supposed to be in the mapper
 
 private:

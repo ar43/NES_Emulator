@@ -2,6 +2,7 @@
 #include "../logger/logger.h"
 #include "../utility/utility.h"
 #include "mapper/nrom.h"
+#include "mapper/uxrom.h"
 #include <fstream>
 #include <memory>
 
@@ -42,7 +43,7 @@ bool Machine::LoadCartridge(NesData *nes_data)
 		int nametable_mirroring = 1;
 		if (utility::IsBitSet(nes_data->header.flags6, 0))
 			nametable_mirroring = 0;
-		else if(utility::IsBitSet(nes_data->header.flags6, 3))
+		else if (utility::IsBitSet(nes_data->header.flags6, 3))
 			nametable_mirroring = 2;
 
 		assert(nes_data->header.PRG_ROM_size <= 2);
@@ -66,9 +67,28 @@ bool Machine::LoadCartridge(NesData *nes_data)
 			dat_chr = nes_data->chr_rom.at(0).get();
 		}
 
-		mapper = std::unique_ptr<Nrom>(new Nrom(nametable_mirroring,(uint8_t*)dat1,(uint8_t*)dat2,(uint8_t*)dat_chr));
+		mapper = std::unique_ptr<Nrom>(new Nrom(nametable_mirroring, (uint8_t*)dat1, (uint8_t*)dat2, (uint8_t*)dat_chr));
 		bus.AttachMapper(mapper.get());
-		
+
+		break;
+	}
+	case 2:
+	{
+		int nametable_mirroring = 1;
+		if (utility::IsBitSet(nes_data->header.flags6, 0))
+			nametable_mirroring = 0;
+		else if (utility::IsBitSet(nes_data->header.flags6, 3))
+			nametable_mirroring = 2;
+		assert(nes_data->header.PRG_ROM_size > 0 && nes_data->header.CHR_ROM_size <= 1);
+
+		char* dat_chr = nullptr;
+		if (nes_data->header.CHR_ROM_size == 1)
+		{
+			dat_chr = nes_data->chr_rom.at(0).get();
+		}
+		mapper = std::unique_ptr<Uxrom>(new Uxrom(nametable_mirroring,nes_data->prg_rom,nes_data->header.PRG_ROM_size,(uint8_t*)dat_chr));
+		bus.AttachMapper(mapper.get());
+
 		break;
 	}
 	default :

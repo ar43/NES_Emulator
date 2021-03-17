@@ -161,6 +161,7 @@
     <ClCompile Include="src\machine\machine.cpp" />
     <ClCompile Include="src\machine\mapper\mapper.cpp" />
     <ClCompile Include="src\machine\mapper\nrom.cpp" />
+    <ClCompile Include="src\machine\mapper\uxrom.cpp" />
     <ClCompile Include="src\machine\misc\instruction.cpp" />
     <ClCompile Include="src\machine\ppu\display\display.cpp" />
     <ClCompile Include="src\machine\ppu\display\palette.cpp" />
@@ -196,6 +197,7 @@
     <ClInclude Include="src\machine\machine.h" />
     <ClInclude Include="src\machine\mapper\mapper.h" />
     <ClInclude Include="src\machine\mapper\nrom.h" />
+    <ClInclude Include="src\machine\mapper\uxrom.h" />
     <ClInclude Include="src\machine\misc\constants.h" />
     <ClInclude Include="src\machine\misc\instruction.h" />
     <ClInclude Include="src\machine\misc\machine_status.h" />

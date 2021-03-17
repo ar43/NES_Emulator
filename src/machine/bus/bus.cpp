@@ -146,7 +146,8 @@ void Bus::WritePPU(size_t loc, uint8_t byte)
 	{
 		if (mapper->use_chr_ram && loc < 0x2000)
 		{
-			ppu->display.BuildPixelValue(this, (uint8_t)(loc / 0x1000), (uint8_t)((loc / 2) & 0xff));
+			//ppu->display.BuildPixelValue(this, (uint8_t)(loc / 0x1000), (uint8_t)((loc / 2) & 0xff));
+			rebuild_pixels = true;
 		}
 		return;
 	}

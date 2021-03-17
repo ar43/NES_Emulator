@@ -59,7 +59,7 @@ private:
 	void GetBackgroundMetaTileColor(Bus *bus, SDL_Color *color, int x, int y, int nametable);
 
 	
-	bool DrawSprite(uint8_t bank, uint8_t index, uint8_t palette_id, bool flip_h, bool flip_v, int x, int y, bool draw_left, bool behind, int sprite_num, int offset);
+	bool DrawSprite(uint8_t bank, uint8_t index, uint8_t palette_id, bool flip_h, bool flip_v, int x, int y, bool draw_left, bool behind, int sprite_num, int offset, bool x16);
 	
 	//uint32_t* pixels;
 };

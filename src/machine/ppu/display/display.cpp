@@ -94,7 +94,7 @@ void Display::SetScale(uint8_t scale)
 //    }
 //}
 
-bool Display::DrawSprite(uint8_t bank, uint8_t index, uint8_t palette_id, bool flip_h, bool flip_v, int x, int y, bool draw_left, bool behind, int sprite_num, int offset)
+bool Display::DrawSprite(uint8_t bank, uint8_t index, uint8_t palette_id, bool flip_h, bool flip_v, int x, int y, bool draw_left, bool behind, int sprite_num, int offset, bool x16)
 {
     assert(index <= 255 && index >= 0 && bank >= 0 && bank <= 1);
     SDL_Color colors[4];
@@ -110,11 +110,14 @@ bool Display::DrawSprite(uint8_t bank, uint8_t index, uint8_t palette_id, bool f
     int x_calc = 0;
     int y_calc = 0;
     int i = offset;
+    int num = 7;
+    if (x16)
+        num = 15;
     //logger::PrintLine(logger::LogType::DEBUG, "loc: " + std::to_string(x) + " " + std::to_string(y));
     for (int j = 0; j < TILE_WIDTH; j++)
     {
 
-        uint8_t value = pixel_values[bank][index*PIXEL_PER_TILE + i*TILE_WIDTH+j];
+        uint8_t value = pixel_values[bank][index*PIXEL_PER_TILE + (i&7)*TILE_WIDTH+j];
         if (value == 0)
             continue;
 
@@ -126,7 +129,7 @@ bool Display::DrawSprite(uint8_t bank, uint8_t index, uint8_t palette_id, bool f
         else if (flip_h && flip_v)
         {
             x_calc = (x + (7 - j));
-            y_calc = (y + (7 - i));
+            y_calc = (y + (num - i));
         }
         else if(flip_h)
         {
@@ -136,7 +139,7 @@ bool Display::DrawSprite(uint8_t bank, uint8_t index, uint8_t palette_id, bool f
         else if (flip_v)
         {
             x_calc = x + j;
-            y_calc = (y + (7 - i));
+            y_calc = (y + (num - i));
         }
 
         loc = y_calc * SCREEN_WIDTH + x_calc;
@@ -160,6 +163,11 @@ bool Display::DrawSprite(uint8_t bank, uint8_t index, uint8_t palette_id, bool f
 
 void Display::RenderStart(Bus *bus)
 {
+    if (bus->rebuild_pixels)
+    {
+        BuildPixelValues(bus);
+        bus->rebuild_pixels = false;
+    }
     palette.LoadSprite(bus);
     palette.LoadBackground(bus);
     SDL_Color color;
@@ -197,18 +205,18 @@ void Display::DrawSprites(PpuRegisters *ppu_registers, uint8_t *oam_data, int sc
     if (!toggle)
         return;
 
-    if (ppu_registers->ppuctrl.IsBitSet(ControllerBits::SPRITE_SIZE))
-        logger::PrintLine(logger::LogType::FATAL_ERROR, "Unimplemented 8-16 sprite mode");
+    bool x16 = ppu_registers->ppuctrl.IsBitSet(ControllerBits::SPRITE_SIZE);
 
-    uint8_t bank = ppu_registers->ppuctrl.IsBitSet(ControllerBits::SPRITE_PATTERN);
+    
+    uint8_t bank = 0;
     int counter = 0;
 
     for (int i = 0; i < 64; i++)
     {
         uint8_t index = i * 4;
         uint8_t attributes = oam_data[index + 2];
-        
-        
+        uint8_t tile_id = 0;
+
         uint8_t y = oam_data[index];
         if (y >= 0xEF)
             continue;
@@ -216,23 +224,37 @@ void Display::DrawSprites(PpuRegisters *ppu_registers, uint8_t *oam_data, int sc
         if (scanline < y)
             continue;
         int offset = scanline - y;
-        if (offset > 7)
-            continue;
+        if (!x16)
+        {
+            bank = ppu_registers->ppuctrl.IsBitSet(ControllerBits::SPRITE_PATTERN);
+            if (offset > 7)
+                continue;
+            tile_id = oam_data[index + 1];
+        }
+        else
+        {
+            if (offset > 15)
+                continue;
+            tile_id = oam_data[index + 1] & 0xfe;
+            bank = oam_data[index + 1] & 1;
+            if (offset > 7)
+                tile_id++;
+        }
+
         uint8_t x = oam_data[index + 3];
-        uint8_t tile_id = oam_data[index + 1];
-        
+
         uint8_t palette_id = attributes & 3;
-        
+
         bool flip_h = utility::IsBitSet(attributes, 6);
         bool flip_v = utility::IsBitSet(attributes, 7);
         bool behind = utility::IsBitSet(attributes, 5);
-        
-        if (DrawSprite(bank, tile_id, palette_id, flip_h, flip_v, x, y, show_left, behind, i, offset))
-            ppu_registers->ppustatus.SetBit(StatusBits::SPRITE0_HIT,true);
+
+        if (DrawSprite(bank, tile_id, palette_id, flip_h, flip_v, x, y, show_left, behind, i, offset, x16))
+            ppu_registers->ppustatus.SetBit(StatusBits::SPRITE0_HIT, true);
         counter++;
         if (counter == 8)
         {
-            for (int j = i+1; j < 64; j++)
+            for (int j = i + 1; j < 64; j++)
             {
                 uint8_t index2 = j * 4;
                 uint8_t y2 = oam_data[index2];
@@ -242,15 +264,25 @@ void Display::DrawSprites(PpuRegisters *ppu_registers, uint8_t *oam_data, int sc
                 if (scanline < y2)
                     continue;
                 int offset2 = scanline - y2;
-                if (offset2 > 7)
-                    continue;
-                ppu_registers->ppustatus.SetBit(StatusBits::SPRITE_OVERFLOW,true);
+                if (!x16)
+                {
+                    if (offset2 > 7)
+                        continue;
+                }
+                else
+                {
+                    if (offset2 > 15)
+                        continue;
+                }
+
+                ppu_registers->ppustatus.SetBit(StatusBits::SPRITE_OVERFLOW, true);
                 return;
             }
             return;
         }
-            
     }
+
+    
 }
 
 void Display::GetBackgroundMetaTileColor(Bus *bus, SDL_Color *color, int x, int y, int nametable)
