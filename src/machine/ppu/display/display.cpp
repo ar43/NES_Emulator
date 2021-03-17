@@ -149,7 +149,7 @@ bool Display::DrawSprite(uint8_t bank, uint8_t index, uint8_t palette_id, bool f
         if ((pixels[loc] & 0xff) == 0xFD)
             continue;
 
-        if (sprite_num == 0)
+        if (sprite_num == 0 && (pixels[loc] & 0xff) != 0xfe)
             ret = true;
 
         if (behind && (pixels[loc] & 0xff) != 0xfe)
@@ -250,7 +250,15 @@ void Display::DrawSprites(PpuRegisters *ppu_registers, uint8_t *oam_data, int sc
         bool behind = utility::IsBitSet(attributes, 5);
 
         if (DrawSprite(bank, tile_id, palette_id, flip_h, flip_v, x, y, show_left, behind, i, offset, x16))
-            ppu_registers->ppustatus.SetBit(StatusBits::SPRITE0_HIT, true);
+        {
+            if (!ppu_registers->ppustatus.IsBitSet(StatusBits::SPRITE0_HIT) && ppu_registers->ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND))
+            {
+                //logger::PrintLine(logger::LogType::DEBUG, "SPRITE0_HIT: " + std::to_string(scanline));
+                ppu_registers->ppustatus.SetBit(StatusBits::SPRITE0_HIT, true);
+            }
+            
+        }
+            
         counter++;
         if (counter == 8)
         {

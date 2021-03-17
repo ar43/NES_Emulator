@@ -44,7 +44,6 @@ void Ppu::Step(Bus *bus, uint16_t budget)
 		if (scanline == 241)
 		{
 			registers.ppustatus.SetBit(StatusBits::VBLANK,true);
-			registers.ppustatus.SetBit(StatusBits::SPRITE0_HIT,false);
 			if (registers.ppuctrl.IsBitSet(ControllerBits::GEN_NMI))
 			{
 				bus->nmi_pending = true;
