@@ -137,7 +137,12 @@ bool Display::DrawSprite(uint8_t bank, uint8_t index, uint8_t palette_id, bool f
             ret = true;
 
         if (behind && (pixels[loc] & 0xff) != 0xfe)
+        {
+            pixels[loc] &= 0xffffff00; //sprite rendered behind background is still technically a sprite pixel, it seems
+            pixels[loc] |= 0xFD;
             continue;
+        }
+            
             
         pixels[loc] = colors[value].r << 24 | colors[value].g << 16 | colors[value].b << 8 | 0xFD;
         //counter++;
@@ -185,9 +190,10 @@ void Display::DrawChrRom(Bus * bus)
 void Display::DrawSprites(PpuRegisters *ppu_registers, uint8_t *oam_data, int scanline)
 {
     bool toggle = ppu_registers->ppumask.IsBitSet(MaskBits::SHOW_SPRITES);
-    bool show_left = ppu_registers->ppumask.IsBitSet(MaskBits::SHOW_SPRITES_LEFT);
-    if (!toggle)
+    bool toggle_bg = ppu_registers->ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND);
+    if (!toggle && !toggle_bg)
         return;
+    bool show_left = ppu_registers->ppumask.IsBitSet(MaskBits::SHOW_SPRITES_LEFT);
 
     bool x16 = ppu_registers->ppuctrl.IsBitSet(ControllerBits::SPRITE_SIZE);
 
@@ -238,16 +244,19 @@ void Display::DrawSprites(PpuRegisters *ppu_registers, uint8_t *oam_data, int sc
         
         bool behind = utility::IsBitSet(attributes, 5);
 
-        if (DrawSprite(bank, tile_id, palette_id, flip_h, flip_v, x, y, show_left, behind, i, offset, x16))
+        if (toggle)
         {
-            if (!ppu_registers->ppustatus.IsBitSet(StatusBits::SPRITE0_HIT) && ppu_registers->ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND))
+            if (DrawSprite(bank, tile_id, palette_id, flip_h, flip_v, x, y, show_left, behind, i, offset, x16))
             {
-                //logger::PrintLine(logger::LogType::DEBUG, "SPRITE0_HIT: " + std::to_string(scanline));
-                ppu_registers->ppustatus.SetBit(StatusBits::SPRITE0_HIT, true);
+                if (!ppu_registers->ppustatus.IsBitSet(StatusBits::SPRITE0_HIT) && ppu_registers->ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND))
+                {
+                    //logger::PrintLine(logger::LogType::DEBUG, "SPRITE0_HIT: " + std::to_string(scanline));
+                    ppu_registers->ppustatus.SetBit(StatusBits::SPRITE0_HIT, true);
+                }
+
             }
-            
         }
-            
+        
         counter++;
         if (counter == 8)
         {
