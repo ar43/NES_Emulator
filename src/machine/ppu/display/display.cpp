@@ -382,6 +382,25 @@ void Display::DrawBackgroundLineVSB(Bus* bus, uint8_t x_shift, uint8_t y_shift, 
     }
 }
 
+void Display::DrawBackgroundLineVSA(Bus* bus, uint8_t x_shift, uint8_t y_shift, int nametable, uint8_t bank, int line, bool toggle, bool show_left)
+{
+    if (!toggle)
+        return;
+
+    int new_line = line - (239-y_shift)-1;
+
+    SDL_Color colors[4];
+    nametable = utility::GetOtherNametable(nametable, 0);
+    int test = (int)ceil(double(x_shift) / double(8));
+    for (int x = 0; x < test; x++)
+    {
+        int final_x = x * 8 + 256 - x_shift;
+        GetBackgroundMetaTileColor(bus, colors, x, (new_line)/8, nametable);
+        uint8_t index = bus->ReadPPU(nametable + ((new_line)/8) * 32 + x);
+        DrawBackgroundTileLine(bank, index, colors, new_line, final_x, line, show_left);
+    }
+}
+
 void Display::BuildPixelValues(Bus *bus)
 {
     uint32_t offset = 0;

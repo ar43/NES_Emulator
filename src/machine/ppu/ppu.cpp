@@ -31,6 +31,8 @@ void Ppu::Step(Bus *bus, uint16_t budget)
 			else
 			{
 				display.DrawBackgroundLineVSB(bus, x_scroll, y_scroll, nametable, bank, scanline,registers.ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND),registers.ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND_LEFT)); //todo: hor + ver scrolling if(x_scroll) DrawBackGroundLineVSA
+				if(x_scroll)
+					display.DrawBackgroundLineVSA(bus, x_scroll, y_scroll, nametable, bank, scanline,registers.ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND),registers.ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND_LEFT));
 			}
 			if(scanline)
 				display.DrawSprites(&registers,oam_data, scanline);

@@ -29,6 +29,7 @@ public:
 
 	void DrawBackgroundLineHSA(Bus *bus, uint8_t x_shift, uint8_t y_shift, int nametable, uint8_t bank, int line, bool toggle, bool show_left);
 	void DrawBackgroundLineVSB(Bus *bus, uint8_t x_shift, uint8_t y_shift, int nametable, uint8_t bank, int line, bool toggle, bool show_left);
+	void DrawBackgroundLineVSA(Bus* bus, uint8_t x_shift, uint8_t y_shift, int nametable, uint8_t bank, int line, bool toggle, bool show_left);
 	void DrawBackgroundLineHSB(Bus *bus, uint8_t x_shift, uint8_t y_shift, int nametable, uint8_t bank, int line, bool toggle, bool show_left);
 
 	void BuildPixelValues(Bus *bus);

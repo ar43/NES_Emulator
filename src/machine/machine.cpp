@@ -93,7 +93,7 @@ bool Machine::LoadCartridge(NesData *nes_data)
 	}
 	default :
 	{
-		logger::PrintLine(logger::LogType::INTERNAL_ERROR, "Memory::LoadNES - Unsupported mapper");
+		logger::PrintLine(logger::LogType::INTERNAL_ERROR, "Memory::LoadNES - Unsupported mapper " + std::to_string(nes_data->header.mapper_num));
 		return false;
 	}
 
@@ -116,7 +116,7 @@ void Machine::PollInterrupts()
 	else if ((bus.irq_pending == true || *bus.dmcirq_pending == true) && !cpu.registers[(size_t)RegId::P]->get_flag(flags::Flags::I))
 	{
 		cpu.HandleIRQ(&bus);
-		logger::PrintLine(logger::LogType::DEBUG, "IRQ request");
+		//logger::PrintLine(logger::LogType::DEBUG, "IRQ request");
 	}
 	else if (machine_status.reset)
 	{
