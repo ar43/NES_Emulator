@@ -108,7 +108,7 @@ bool Display::DrawSprite(uint8_t bank, uint8_t index, uint8_t palette_id, bool f
 
     int loc = 0;
     int x_calc = 0;
-    int y_calc = 0;
+    int y_calc = y;
     int i = offset;
     int num = 7;
     if (x16)
@@ -120,8 +120,13 @@ bool Display::DrawSprite(uint8_t bank, uint8_t index, uint8_t palette_id, bool f
         uint8_t value = pixel_values[bank][index*PIXEL_PER_TILE + (i&7)*TILE_WIDTH+j];
         if (value == 0)
             continue;
+        //y_calc = y + i;
+        if(flip_h)
+            x_calc = (x + (7 - j));
+        else
+            x_calc = x + j;
 
-        if (!flip_h && !flip_v)
+        /*if (!flip_h && !flip_v)
         {
             x_calc = x + j;
             y_calc = y + i;
@@ -140,7 +145,7 @@ bool Display::DrawSprite(uint8_t bank, uint8_t index, uint8_t palette_id, bool f
         {
             x_calc = x + j;
             y_calc = (y + (num - i));
-        }
+        }*/
 
         loc = y_calc * SCREEN_WIDTH + x_calc;
         if (x_calc >= SCREEN_WIDTH || x_calc < 0 || y_calc >= SCREEN_HEIGHT || y_calc < 0 || !draw_left && x_calc < 8) //FD means another sprite already there, FE means clean pixel, FF means bg pixel
@@ -223,7 +228,9 @@ void Display::DrawSprites(PpuRegisters *ppu_registers, uint8_t *oam_data, int sc
         y++;
         if (scanline < y)
             continue;
+        bool flip_v = utility::IsBitSet(attributes, 7);
         int offset = scanline - y;
+
         if (!x16)
         {
             bank = ppu_registers->ppuctrl.IsBitSet(ControllerBits::SPRITE_PATTERN);
@@ -237,16 +244,19 @@ void Display::DrawSprites(PpuRegisters *ppu_registers, uint8_t *oam_data, int sc
                 continue;
             tile_id = oam_data[index + 1] & 0xfe;
             bank = oam_data[index + 1] & 1;
-            if (offset > 7)
+            if (!flip_v && offset > 7 || flip_v && offset <= 7)
                 tile_id++;
         }
-
+        y += offset;
+        if (flip_v)
+            offset = 7 - offset;
+        
         uint8_t x = oam_data[index + 3];
 
         uint8_t palette_id = attributes & 3;
 
         bool flip_h = utility::IsBitSet(attributes, 6);
-        bool flip_v = utility::IsBitSet(attributes, 7);
+        
         bool behind = utility::IsBitSet(attributes, 5);
 
         if (DrawSprite(bank, tile_id, palette_id, flip_h, flip_v, x, y, show_left, behind, i, offset, x16))
