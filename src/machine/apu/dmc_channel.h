@@ -15,9 +15,6 @@ public:
 	int length = 0;
 	int addr = 0;
 
-	
-
-
 	void Clock(Bus *bus);
 private:
 	int freq_counter = 0;

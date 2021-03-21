@@ -25,6 +25,8 @@ public:
 	void AttachComponents(Cpu *cpu, Joypad *joypad, Apu *apu, Ppu *ppu);
 	void AttachMapper(Mapper* mapper);
 
+	void Reset();
+
 	bool nmi_pending = false;
 	bool irq_pending = false;
 	bool *dmcirq_pending = nullptr;

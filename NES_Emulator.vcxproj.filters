@@ -195,6 +195,9 @@
     <ClCompile Include="src\machine\mapper\uxrom.cpp">
       <Filter>Source Files\Machine\Mapper</Filter>
     </ClCompile>
+    <ClCompile Include="src\machine\mapper\mmc1.cpp">
+      <Filter>Source Files\Machine\Mapper</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\logger\logger.h">
@@ -303,6 +306,9 @@
       <Filter>Header Files\Machine\Mapper</Filter>
     </ClInclude>
     <ClInclude Include="src\machine\mapper\uxrom.h">
+      <Filter>Header Files\Machine\Mapper</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machine\mapper\mmc1.h">
       <Filter>Header Files\Machine\Mapper</Filter>
     </ClInclude>
   </ItemGroup>

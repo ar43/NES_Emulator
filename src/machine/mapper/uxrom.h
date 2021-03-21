@@ -2,6 +2,7 @@
 #include "mapper.h"
 #include <vector>
 #include <memory>
+#include <cassert>
 class Uxrom: public Mapper
 {
 public:
@@ -11,6 +12,7 @@ public:
 		this->name = "UXROM";
 		this->nametable_mirroring = nametable_mirroring;
 		this->num_banks = num_banks;
+		assert(num_banks <= 16);
 		if (chr_rom != nullptr)
 		{
 			memcpy(this->chr_rom, chr_rom, 0x2000);

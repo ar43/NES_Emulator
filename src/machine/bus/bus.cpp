@@ -22,6 +22,11 @@ void Bus::AttachMapper(Mapper* mapper)
 	this->mapper = mapper;
 }
 
+void Bus::Reset()
+{
+	mapper->ClearRegisters();
+}
+
 void Bus::WriteCPU(size_t loc, uint8_t byte)
 {
 	if (loc <= 0x1FFF) //internal CPU RAM area
@@ -109,14 +114,14 @@ uint8_t Bus::ReadCPUSafe(size_t loc)
 void Bus::WritePPU(size_t loc, uint8_t byte)
 {
 	assert(loc < PPU_MEM_SIZE);
-	if (mapper->nametable_mirroring == 0)
+	if (mapper->nametable_mirroring == 2)
 	{
 		if (loc >= 0x2800 && loc < 0x3000)
 		{
 			loc &= 0x27FF;
 		}
 	}
-	else if (mapper->nametable_mirroring == 1)
+	else if (mapper->nametable_mirroring == 3)
 	{
 		if (loc >= 0x2400 && loc < 0x2800)
 		{
@@ -127,6 +132,11 @@ void Bus::WritePPU(size_t loc, uint8_t byte)
 			loc &= 0x2BFF;
 		}
 	}
+	else
+	{
+		logger::PrintLine(logger::LogType::FATAL_ERROR, "Unsupported nametable mirroring");
+	}
+
 	if (loc >= 0x3000 && loc <= 0x3EFF)
 	{
 		loc &= 0x2EFF;
@@ -160,14 +170,14 @@ void Bus::WritePPU(size_t loc, uint8_t byte)
 uint8_t Bus::ReadPPU(size_t loc)
 {
 	assert(loc < PPU_MEM_SIZE);
-	if (mapper->nametable_mirroring == 0)
+	if (mapper->nametable_mirroring == 2)
 	{
 		if (loc >= 0x2800 && loc < 0x3000)
 		{
 			loc &= 0x27FF;
 		}
 	}
-	else if (mapper->nametable_mirroring == 1)
+	else if (mapper->nametable_mirroring == 3)
 	{
 		if (loc >= 0x2400 && loc < 0x2800)
 		{
