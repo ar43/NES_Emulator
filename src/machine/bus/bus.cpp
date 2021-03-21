@@ -48,9 +48,18 @@ void Bus::WriteCPU(size_t loc, uint8_t byte)
 	}
 	else if (loc <= 0xFFFF) //mapper stuff here (cartridge)
 	{
-		//unimplemented
-		//logger::PrintLine(logger::LogType::WARNING, "Bus::WriteCPU - writing to cartridge ROM");
+		const int old_nametable_mirroring = mapper->nametable_mirroring;
 		mapper->WritePRG(loc, byte);
+		if (old_nametable_mirroring == 3 && mapper->nametable_mirroring == 2)
+		{
+			//logger::PrintLine(logger::LogType::DEBUG, "Nametable mirroring switched from 3 to 2");
+			memcpy(ppu->data + 0x2400, ppu->data + 0x2800, 0x400);
+		}
+		else if (old_nametable_mirroring == 2 && mapper->nametable_mirroring == 3)
+		{
+			//logger::PrintLine(logger::LogType::DEBUG, "Nametable mirroring switched from 2 to 3");
+			memcpy(ppu->data + 0x2800, ppu->data + 0x2400, 0x400);
+		}
 	}
 	else
 	{
