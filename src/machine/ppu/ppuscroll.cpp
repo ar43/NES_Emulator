@@ -25,4 +25,5 @@ void PpuScroll::Clear()
 {
 	addr[0] = 0;
 	addr[1] = 0;
+	addr[2] = 0;
 }

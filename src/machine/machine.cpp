@@ -82,7 +82,7 @@ bool Machine::LoadCartridge(NesData *nes_data)
 			nametable_mirroring = 999;
 		assert(nes_data->header.PRG_ROM_size > 0);
 
-		mapper = std::unique_ptr<Mmc1>(new Mmc1(nametable_mirroring,nes_data->prg_rom,nes_data->header.PRG_ROM_size,nes_data->chr_rom,nes_data->header.CHR_ROM_size,utility::IsBitSet(nes_data->header.flags6,1)));
+		mapper = std::unique_ptr<Mmc1>(new Mmc1(nametable_mirroring,nes_data->prg_rom,nes_data->header.PRG_ROM_size,nes_data->chr_rom,nes_data->header.CHR_ROM_size,utility::IsBitSet(nes_data->header.flags6,1),&bus.rebuild_pixels));
 		bus.AttachMapper(mapper.get());
 
 		break;

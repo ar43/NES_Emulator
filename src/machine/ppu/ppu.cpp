@@ -11,28 +11,30 @@ void Ppu::Step(Bus *bus, uint16_t budget)
 	{
 		if (scanline <= 239)
 		{
+			display.CheckRebuild(bus);
 			if (scanline == 0)
 			{
 				display.RenderStart(bus);
-				
+				registers.ppuscroll.addr[2] = registers.ppuscroll.addr[1];
 			}
-			uint8_t y_scroll = registers.ppuscroll.addr[1]; //not quite accurate... its not supposed to change in a frame unless writing to ppuaddr, hopefully this doesnt bug things
+			if (!registers.ppuscroll.addr[2])
+				registers.ppuaddr.scroll_offset++;
+
 			uint8_t x_scroll = registers.ppuscroll.addr[0];
 			int nametable = registers.ppuctrl.GetNametable(registers.v);
-			//logger::PrintLine(logger::LogType::DEBUG, std::to_string(nametable));
 			uint8_t bank = registers.ppuctrl.IsBitSet(ControllerBits::BACKGROUND_PATTERN);
 
-			if (scanline <= 239 - y_scroll)
+			if (scanline <= 239 - registers.ppuscroll.addr[2])
 			{
-				display.DrawBackgroundLineHSA(bus, x_scroll, y_scroll, nametable, bank, scanline,registers.ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND),registers.ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND_LEFT));
+				display.DrawBackgroundLineHSA(bus, x_scroll, registers.ppuscroll.addr[2], nametable, bank, scanline,registers.ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND),registers.ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND_LEFT));
 				if(x_scroll)
-					display.DrawBackgroundLineHSB(bus, x_scroll, y_scroll, nametable, bank, scanline,registers.ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND),registers.ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND_LEFT));
+					display.DrawBackgroundLineHSB(bus, x_scroll, registers.ppuscroll.addr[2], nametable, bank, scanline,registers.ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND),registers.ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND_LEFT));
 			}
 			else
 			{
-				display.DrawBackgroundLineVSB(bus, x_scroll, y_scroll, nametable, bank, scanline,registers.ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND),registers.ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND_LEFT)); //todo: hor + ver scrolling if(x_scroll) DrawBackGroundLineVSA
+				display.DrawBackgroundLineVSB(bus, x_scroll, registers.ppuscroll.addr[2], nametable, bank, scanline,registers.ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND),registers.ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND_LEFT)); //todo: hor + ver scrolling if(x_scroll) DrawBackGroundLineVSA
 				if(x_scroll)
-					display.DrawBackgroundLineVSA(bus, x_scroll, y_scroll, nametable, bank, scanline,registers.ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND),registers.ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND_LEFT));
+					display.DrawBackgroundLineVSA(bus, x_scroll, registers.ppuscroll.addr[2], nametable, bank, scanline,registers.ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND),registers.ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND_LEFT));
 			}
 			if(scanline)
 				display.DrawSprites(&registers,oam_data, scanline);
@@ -54,6 +56,7 @@ void Ppu::Step(Bus *bus, uint16_t budget)
 			{
 				display.Render(&registers,oam_data);
 			}
+			registers.ppuaddr.scroll_offset = 0;
 		}
 		else if (scanline >= 262)
 		{

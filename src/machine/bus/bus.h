@@ -37,6 +37,7 @@ public:
 	//int nametable_mirroring = 1; //0 vertical mirroring, 1 horizontal mirroring, 2 other //this is supposed to be in the mapper
 
 private:
+	void ChangeNametableMirroring(int old);
 	Joypad* joypad;
 	Apu* apu;
 	Ppu* ppu;

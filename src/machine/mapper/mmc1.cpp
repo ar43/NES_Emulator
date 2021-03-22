@@ -29,10 +29,12 @@ void Mmc1::WritePRG(size_t loc, uint8_t byte)
 				else if (loc <= 0xBFFF)
 				{
 					chr0_register = shift_register.value;
+					*rebuild_pixels = true;
 				}
 				else if (loc <= 0xDFFF)
 				{
 					chr1_register = shift_register.value;
+					*rebuild_pixels = true;
 				}
 				else if (loc <= 0xFFFF)
 				{

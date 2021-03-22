@@ -28,7 +28,12 @@ void PpuAddr::Write(uint8_t value, int *t, int *v)
 		*v = *t;
 
 		scrolladdr[0] = ((*v & 0x1f) << 3) | *x;
-		scrolladdr[1] = ((*v & 0x7000) >> 12) | ((*v & 0x3e0)>>2);
+		scrolladdr[2] = ((*v & 0b111000000000000) >> 12) | ((*v & 0b1111100000)>>2);
+		if (scrolladdr[2] >= scroll_offset)
+		{
+			scrolladdr[2] -= scroll_offset; //fix for legend of zelda..
+		}
+			
 
 	}
 	*w = *w + 1;

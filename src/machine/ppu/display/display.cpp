@@ -150,13 +150,17 @@ bool Display::DrawSprite(uint8_t bank, uint8_t index, uint8_t palette_id, bool f
     return ret;
 }
 
-void Display::RenderStart(Bus *bus)
+void Display::CheckRebuild(Bus * bus)
 {
     if (bus->rebuild_pixels)
     {
         BuildPixelValues(bus);
         bus->rebuild_pixels = false;
     }
+}
+
+void Display::RenderStart(Bus *bus)
+{
     palette.LoadSprite(bus);
     palette.LoadBackground(bus);
     SDL_Color color;
@@ -413,7 +417,8 @@ void Display::DrawBackgroundLineVSA(Bus* bus, uint8_t x_shift, uint8_t y_shift, 
 void Display::BuildPixelValues(Bus *bus)
 {
     uint32_t offset = 0;
-
+    //could optimize this to only run once even for roms that use chr bank switching
+    //right now it will just recalculate each time the chr bank changes (can happen multiple times per render frame)
     for (int bank = 0; bank < 2; bank++)
     {
         for (int index = 0; index < TILE_PER_BANK; index++)

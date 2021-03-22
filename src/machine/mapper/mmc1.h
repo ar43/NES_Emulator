@@ -18,7 +18,7 @@ struct ShiftRegister
 class Mmc1: public Mapper
 {
 public:
-	Mmc1(int nametable_mirroring, std::vector<std::shared_ptr<char>> prg_rom, int num_banks_prg, std::vector<std::shared_ptr<char>> chr_rom, int num_banks_chr, bool battery) 
+	Mmc1(int nametable_mirroring, std::vector<std::shared_ptr<char>> prg_rom, int num_banks_prg, std::vector<std::shared_ptr<char>> chr_rom, int num_banks_chr, bool battery, bool *rebuild_pixels) 
 	{
 		this->number = 1;
 		this->name = "MMC1";
@@ -48,6 +48,7 @@ public:
 			memcpy(this->prg_rom[i], (uint8_t*)prg_rom.at(i).get(), 0x4000);
 		}
 		this->battery = battery;
+		this->rebuild_pixels = rebuild_pixels;
 		//this->control_register |= 0x0C;
 	}
 
@@ -58,7 +59,7 @@ public:
 	uint8_t ReadPRG(size_t loc);
 	bool WritePPU(size_t loc, uint8_t byte);
 	int ReadPPU(size_t loc);
-
+	bool* rebuild_pixels;
 	void ClearRegisters()
 	{
 		control_register = 0x0C;
