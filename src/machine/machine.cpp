@@ -6,6 +6,9 @@
 #include "mapper/mmc1.h"
 #include <fstream>
 #include <memory>
+#include <filesystem>
+#include <sstream>
+#include <algorithm>
 
 #define HI_NIBBLE(b) (((b) >> 4) & 0x0F)
 
@@ -69,7 +72,6 @@ bool Machine::LoadCartridge(NesData *nes_data)
 		}
 
 		mapper = std::unique_ptr<Nrom>(new Nrom(nametable_mirroring, (uint8_t*)dat1, (uint8_t*)dat2, (uint8_t*)dat_chr));
-		bus.AttachMapper(mapper.get());
 
 		break;
 	}
@@ -83,7 +85,6 @@ bool Machine::LoadCartridge(NesData *nes_data)
 		assert(nes_data->header.PRG_ROM_size > 0);
 
 		mapper = std::unique_ptr<Mmc1>(new Mmc1(nametable_mirroring,nes_data->prg_rom,nes_data->header.PRG_ROM_size,nes_data->chr_rom,nes_data->header.CHR_ROM_size,utility::IsBitSet(nes_data->header.flags6,1),&bus.rebuild_pixels));
-		bus.AttachMapper(mapper.get());
 
 		break;
 	}
@@ -102,8 +103,7 @@ bool Machine::LoadCartridge(NesData *nes_data)
 			dat_chr = nes_data->chr_rom.at(0).get();
 		}
 		mapper = std::unique_ptr<Uxrom>(new Uxrom(nametable_mirroring,nes_data->prg_rom,nes_data->header.PRG_ROM_size,(uint8_t*)dat_chr));
-		bus.AttachMapper(mapper.get());
-
+		
 		break;
 	}
 	default :
@@ -115,6 +115,8 @@ bool Machine::LoadCartridge(NesData *nes_data)
 	}
 
 	//int initial_pc = cpu_data[0xFFFD]*256+cpu_data[0xFFFC];
+	bus.AttachMapper(mapper.get());
+	mapper->LoadRAM(nes_data->file_name);
 	logger::PrintLine(logger::LogType::INFO, "Mapper name: " + mapper->name);
 
 	return true;
@@ -185,6 +187,7 @@ void Machine::Run()
 		}
 		
 	}
+	mapper->SaveRAM(nes_data->file_name);
 }
 
 bool Machine::ParseINES(std::string path)
@@ -195,13 +198,13 @@ bool Machine::ParseINES(std::string path)
 		path += ".nes";
 	}
 	
-
 	std::ifstream ifs(path, std::ifstream::in | std::ifstream::binary);
 	if (!ifs.is_open())
 	{
 		logger::PrintLine(logger::LogType::INTERNAL_ERROR, "File does not exist!");
 		return false;
 	}
+	
 	char header[16];
 	ifs.read(header, 16);
 	if (!ifs)
@@ -217,6 +220,16 @@ bool Machine::ParseINES(std::string path)
 		return false;
 	}
 	nes_data = std::unique_ptr<NesData>(new NesData());
+
+	std::filesystem::path p(path);
+	std::stringstream ss;
+	ss << p.stem();
+	nes_data->file_name = ss.str();
+	nes_data->file_name.erase(std::remove(nes_data->file_name.begin(), nes_data->file_name.end(), '\"'), nes_data->file_name.end());
+	if (nes_data->file_name.length() <= 0)
+		logger::PrintLine(logger::LogType::FATAL_ERROR, "Empty filename");
+	std::transform(nes_data->file_name.begin(), nes_data->file_name.end(), nes_data->file_name.begin(), [](unsigned char c){ return std::tolower(c); }); //convert name to lowercase
+
 	nes_data->header.PRG_ROM_size = (uint8_t)header[4];
 	nes_data->header.CHR_ROM_size = (uint8_t)header[5];
 	nes_data->header.flags6 = (uint8_t)header[6];

@@ -60,14 +60,14 @@ namespace logger
 	void PrintLine(LogType logType, std::string msg)
 	{
 		std::cout << GetTimetamp() << " " << TypeToString(logType) << ": " << msg << std::endl;
-#ifdef _DEBUG
+
 		if (logType == LogType::FATAL_ERROR)
 		{
 			WriteTestToFile();
 			__asm{int 3}
+			exit(1);
 		}
 			
-#endif
 	}
 
 	void Print(LogType logType, std::string msg)

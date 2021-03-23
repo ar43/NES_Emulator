@@ -1,6 +1,5 @@
 #pragma once
 #include "mapper.h"
-#include <memory>
 
 class Nrom: public Mapper
 {

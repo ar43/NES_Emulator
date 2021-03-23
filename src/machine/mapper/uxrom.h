@@ -1,8 +1,6 @@
 #pragma once
 #include "mapper.h"
-#include <vector>
-#include <memory>
-#include <cassert>
+
 class Uxrom: public Mapper
 {
 public:
@@ -12,6 +10,8 @@ public:
 		this->name = "UXROM";
 		this->nametable_mirroring = nametable_mirroring;
 		this->num_banks = num_banks;
+		if (this->num_banks > 16)
+			logger::PrintLine(logger::LogType::FATAL_ERROR, "PRG data overflow");
 		assert(num_banks <= 16);
 		if (chr_rom != nullptr)
 		{

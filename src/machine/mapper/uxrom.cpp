@@ -1,5 +1,4 @@
 #include "uxrom.h"
-#include "../../utility/utility.h"
 
 void Uxrom::WritePRG(size_t loc, uint8_t byte)
 {

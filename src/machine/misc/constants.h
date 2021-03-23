@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <string>
 
 constexpr size_t CPU_MEM_SIZE = 0x10000;
 constexpr size_t PPU_MEM_SIZE = 0x4000;
@@ -28,3 +29,5 @@ constexpr uint8_t APU_DUTY_TABLE[4][8] = {
 constexpr int APU_NOISE_FREQ_TABLE[] = { 4, 8, 16, 32, 64, 96, 128, 160, 202, 254, 380, 508, 762, 1016, 2034, 4068 };
 constexpr int APU_DMC_FREQ_TABLE[] = { 428, 380, 340, 320, 286, 254, 226, 214, 190, 160, 142, 128, 106,  84,  72,  54 };
 constexpr size_t PALETTE_SIZE = 192;
+
+constexpr auto BATTERY_PATH = "data/battery";

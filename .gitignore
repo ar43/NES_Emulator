@@ -6,6 +6,9 @@
 # NES roms
 roms/
 
+#EMU specific folders
+data/battery/
+
 # User-specific files
 *.rsuser
 *.suo

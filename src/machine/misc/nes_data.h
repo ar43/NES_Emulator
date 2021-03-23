@@ -39,6 +39,7 @@ struct NesData
 	std::array<char, 512> trainer_data; //kinda useless
 	std::vector<std::shared_ptr<char>> prg_rom;
 	std::vector<std::shared_ptr<char>> chr_rom;
+	std::string file_name = "empty";
 	//std::vector<std::unique_ptr<uint8_t>> playchoice_instrom; this is useless
 	//std::vector<std::unique_ptr<uint8_t>> playchoice_prom;   this is useless
 };

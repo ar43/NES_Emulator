@@ -1,8 +1,5 @@
 #pragma once
 #include "mapper.h"
-#include <vector>
-#include <memory>
-#include <cassert>
 
 struct ShiftRegister
 {
@@ -25,7 +22,8 @@ public:
 		this->nametable_mirroring = nametable_mirroring;
 		this->num_banks_prg = num_banks_prg;
 		this->num_banks_chr = num_banks_chr*2;
-		assert(this->num_banks_prg <= 32 && this->num_banks_chr <= 32);
+		if (this->num_banks_prg > 32 || this->num_banks_chr > 32)
+			logger::PrintLine(logger::LogType::FATAL_ERROR, "PRG / CHR data overflow");
 		if (num_banks_chr > 0)
 		{
 			//memcpy(this->chr_rom, chr_rom, 0x2000);
@@ -51,8 +49,6 @@ public:
 		this->rebuild_pixels = rebuild_pixels;
 		//this->control_register |= 0x0C;
 	}
-
-	bool battery = false;
 	int num_banks_prg = 0;
 	int num_banks_chr = 0;
 	void WritePRG(size_t loc, uint8_t byte);
@@ -60,6 +56,8 @@ public:
 	bool WritePPU(size_t loc, uint8_t byte);
 	int ReadPPU(size_t loc);
 	bool* rebuild_pixels;
+	void SaveRAM(std::string name);
+	void LoadRAM(std::string name);
 	void ClearRegisters()
 	{
 		control_register = 0x0C;

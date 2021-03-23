@@ -1,5 +1,30 @@
 #include "mmc1.h"
+#include "../misc/constants.h"
 #include "../../utility/utility.h"
+
+void Mmc1::SaveRAM(std::string name)
+{
+	if (battery)
+	{
+		std::ofstream(std::string(BATTERY_PATH) + "/" + name + ".sav", std::ios::binary).write((const char*)prg_ram, sizeof(prg_ram));
+		logger::PrintLine(logger::LogType::INFO, "Saved battery data");
+	}
+}
+
+void Mmc1::LoadRAM(std::string name)
+{
+	if (battery)
+	{
+		std::filesystem::create_directories(BATTERY_PATH);
+		std::ifstream ifs(std::string(BATTERY_PATH) + "/" + name + ".sav", std::ifstream::in | std::ifstream::binary);
+		if (!ifs.is_open())
+		{
+			return;
+		}
+		ifs.read((char*)prg_ram, sizeof(prg_ram));
+		logger::PrintLine(logger::LogType::INFO, "Loaded battery data");
+	}
+}
 
 void Mmc1::WritePRG(size_t loc, uint8_t byte)
 {

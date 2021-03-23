@@ -150,9 +150,9 @@ bool Display::DrawSprite(uint8_t bank, uint8_t index, uint8_t palette_id, bool f
     return ret;
 }
 
-void Display::CheckRebuild(Bus * bus)
+void Display::CheckRebuild(Bus * bus, PpuRegisters *ppu_registers)
 {
-    if (bus->rebuild_pixels)
+    if (bus->rebuild_pixels && (ppu_registers->ppumask.IsBitSet(MaskBits::SHOW_SPRITES) || ppu_registers->ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND)))
     {
         BuildPixelValues(bus);
         bus->rebuild_pixels = false;

@@ -11,7 +11,7 @@ void Ppu::Step(Bus *bus, uint16_t budget)
 	{
 		if (scanline <= 239)
 		{
-			display.CheckRebuild(bus);
+			display.CheckRebuild(bus, &registers);
 			if (scanline == 0)
 			{
 				display.RenderStart(bus);
