@@ -16,6 +16,7 @@ enum class ConstAddr
 };
 
 class Bus;
+class Mapper;
 
 class Ppu
 {
@@ -29,7 +30,8 @@ public:
 
 	PpuRegisters registers;
 	Display display;
-	void Step(Bus *bus, uint16_t budget);
+	void Tick(Bus* bus, Mapper* mapper);
+	void Step(Bus* bus, Mapper *mapper, uint16_t budget);
 	void HandleReset();
 
 	void WriteRegisters(Bus *bus, size_t loc, uint8_t byte);

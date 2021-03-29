@@ -1,6 +1,6 @@
 #include "mapper.h"
 
-int Mapper::getNumber()
+int Mapper::GetNumber()
 {
 	return number;
 }

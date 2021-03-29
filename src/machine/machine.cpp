@@ -4,6 +4,7 @@
 #include "mapper/nrom.h"
 #include "mapper/uxrom.h"
 #include "mapper/mmc1.h"
+#include "mapper/mmc3.h"
 #include <fstream>
 #include <memory>
 #include <filesystem>
@@ -106,6 +107,19 @@ bool Machine::LoadCartridge(NesData *nes_data)
 		
 		break;
 	}
+	case 4:
+	{
+		int nametable_mirroring = 3;
+		if (utility::IsBitSet(nes_data->header.flags6, 0))
+			nametable_mirroring = 2;
+		else if (utility::IsBitSet(nes_data->header.flags6, 3))
+			nametable_mirroring = 999;
+		assert(nes_data->header.PRG_ROM_size > 0);
+
+		mapper = std::unique_ptr<Mmc3>(new Mmc3(nametable_mirroring,nes_data->prg_rom,nes_data->header.PRG_ROM_size,nes_data->chr_rom,nes_data->header.CHR_ROM_size,utility::IsBitSet(nes_data->header.flags6,1),&bus.rebuild_pixels));
+
+		break;
+	}
 	default :
 	{
 		logger::PrintLine(logger::LogType::INTERNAL_ERROR, "Memory::LoadNES - Unsupported mapper " + std::to_string(nes_data->header.mapper_num));
@@ -117,6 +131,8 @@ bool Machine::LoadCartridge(NesData *nes_data)
 	//int initial_pc = cpu_data[0xFFFD]*256+cpu_data[0xFFFC];
 	bus.AttachMapper(mapper.get());
 	mapper->LoadRAM(nes_data->file_name);
+	if(mapper->GetNumber() != nes_data->header.mapper_num)
+		logger::PrintLine(logger::LogType::FATAL_ERROR, "Mapper number " + std::to_string(mapper->GetNumber()) + "does not match the header number " + std::to_string(nes_data->header.mapper_num));
 	logger::PrintLine(logger::LogType::INFO, "Mapper name: " + mapper->name);
 
 	return true;
@@ -130,7 +146,7 @@ void Machine::PollInterrupts()
 		cpu.HandleNMI(&bus);
 		bus.nmi_pending = false;
 	}
-	else if ((bus.irq_pending == true || *bus.dmcirq_pending == true) && !cpu.registers[(size_t)RegId::P]->get_flag(flags::Flags::I))
+	else if ((bus.irq_pending == true || *bus.dmcirq_pending == true || (mapper->irq_pending && mapper->irq_enabled)) && !cpu.registers[(size_t)RegId::P]->get_flag(flags::Flags::I))
 	{
 		cpu.HandleIRQ(&bus);
 		//logger::PrintLine(logger::LogType::DEBUG, "IRQ request");
@@ -177,7 +193,7 @@ void Machine::Run()
 				PollInterrupts();
 				cpu.ExecuteInstruction(&bus);
 				uint16_t budget = (uint16_t)(cpu.GetCycles() - old_cycle);
-				ppu.Step(&bus, budget);
+				ppu.Step(&bus, mapper.get(), budget);
 				apu.Step(&bus, budget);
 				cycle_accumulator += budget;
 			}

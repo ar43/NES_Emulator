@@ -16,11 +16,15 @@ public:
 	virtual void ClearRegisters(){}
 	virtual void SaveRAM(std::string name) {}
 	virtual void LoadRAM(std::string name) { if (battery)logger::PrintLine(logger::LogType::WARNING, "ROM requests battery but it is not implemented in the mapper!"); }
-	int getNumber();
+	int GetNumber();
 	bool use_chr_ram = false;
 	int nametable_mirroring; //2 vertical mirroring, 3 horizontal mirroring
 	std::string name;
 	bool battery = false;
+
+	bool irq_enabled = false;
+	bool irq_pending = false;
+	virtual void TickIRQ() {}
 protected:
 	int number;
 

@@ -2,14 +2,13 @@
 #include "../../utility/utility.h"
 #include "../../logger/logger.h"
 #include "../bus/bus.h"
+#include "../mapper/mapper.h"
 
-void Ppu::Step(Bus *bus, uint16_t budget)
+void Ppu::Tick(Bus* bus, Mapper* mapper)
 {
-	budget *= 3;
-	cycle += budget;
-	if (cycle >= 341)
+	if (scanline <= 239)
 	{
-		if (scanline <= 239)
+		if (cycle == 256)
 		{
 			display.CheckRebuild(bus, &registers);
 			if (scanline == 0)
@@ -39,13 +38,14 @@ void Ppu::Step(Bus *bus, uint16_t budget)
 			if(scanline)
 				display.DrawSprites(&registers,oam_data, scanline);
 		}
-
-		cycle -= 341;
-		scanline++;
-
-		
-		
-		if (scanline == 241)
+		else if (cycle == 260 && (registers.ppumask.IsBitSet(MaskBits::SHOW_SPRITES) || registers.ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND)))
+		{
+			mapper->TickIRQ();
+		}
+	}
+	else if (scanline == 241)
+	{
+		if (cycle == 1)
 		{
 			registers.ppustatus.SetBit(StatusBits::VBLANK,true);
 			if (registers.ppuctrl.IsBitSet(ControllerBits::GEN_NMI))
@@ -58,15 +58,33 @@ void Ppu::Step(Bus *bus, uint16_t budget)
 			}
 			registers.ppuaddr.scroll_offset = 0;
 		}
-		else if (scanline >= 262)
-		{
-			scanline = 0;
-			bus->nmi_pending = false;
-			registers.ppustatus.SetBit(StatusBits::SPRITE0_HIT,false);
-			registers.ppustatus.SetBit(StatusBits::SPRITE_OVERFLOW,false);
-			registers.ppustatus.SetBit(StatusBits::VBLANK,false);
-		}
+		
+	}
+	else if (scanline == 261)
+	{
+		bus->nmi_pending = false;
+		registers.ppustatus.SetBit(StatusBits::SPRITE0_HIT,false);
+		registers.ppustatus.SetBit(StatusBits::SPRITE_OVERFLOW,false);
+		registers.ppustatus.SetBit(StatusBits::VBLANK,false);
+	}
 
+	cycle += 1;
+	if (cycle == 341)
+	{
+		scanline++;
+		cycle = 0;
+	}
+	if (scanline == 262)
+		scanline = 0;
+
+}
+
+void Ppu::Step(Bus* bus, Mapper* mapper, uint16_t budget)
+{
+	budget *= 3;
+	for (int i = 0; i < budget; i++)
+	{
+		Tick(bus, mapper);
 	}
 }
 
