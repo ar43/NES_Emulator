@@ -359,13 +359,13 @@ void Display::DrawBackgroundLineHSA(Bus* bus, uint8_t x_shift, uint8_t y_shift, 
     }
 }
 
-void Display::DrawBackgroundLineHSB(Bus* bus, uint8_t x_shift, uint8_t y_shift, int nametable, uint8_t bank, int line, bool toggle, bool show_left)
+void Display::DrawBackgroundLineHSB(Bus* bus, uint8_t x_shift, uint8_t y_shift, int nametable, uint8_t bank, int line, bool toggle, bool show_left, int nametable_mirroring)
 {
     if (!toggle)
         return;
 
     SDL_Color colors[4];
-    nametable = utility::GetOtherNametable(nametable, 0);
+    nametable = utility::GetOtherNametable(nametable, 0, nametable_mirroring);
     int test = (int)ceil(double(x_shift) / double(8));
     for (int x = 0; x < test; x++)
     {
@@ -376,7 +376,7 @@ void Display::DrawBackgroundLineHSB(Bus* bus, uint8_t x_shift, uint8_t y_shift, 
     }
 }
 
-void Display::DrawBackgroundLineVSB(Bus* bus, uint8_t x_shift, uint8_t y_shift, int nametable, uint8_t bank, int line, bool toggle, bool show_left)
+void Display::DrawBackgroundLineVSB(Bus* bus, uint8_t x_shift, uint8_t y_shift, int nametable, uint8_t bank, int line, bool toggle, bool show_left, int nametable_mirroring)
 {
     if (!toggle)
         return;
@@ -384,7 +384,7 @@ void Display::DrawBackgroundLineVSB(Bus* bus, uint8_t x_shift, uint8_t y_shift, 
     int new_line = line - (239-y_shift)-1;
 
     SDL_Color colors[4];
-    nametable = utility::GetOtherNametable(nametable, 1);
+    nametable = utility::GetOtherNametable(nametable, 1, nametable_mirroring);
     int test = x_shift / 8;
     for (int x = test; x < 32; x++)
     {
@@ -395,7 +395,7 @@ void Display::DrawBackgroundLineVSB(Bus* bus, uint8_t x_shift, uint8_t y_shift, 
     }
 }
 
-void Display::DrawBackgroundLineVSA(Bus* bus, uint8_t x_shift, uint8_t y_shift, int nametable, uint8_t bank, int line, bool toggle, bool show_left)
+void Display::DrawBackgroundLineVSA(Bus* bus, uint8_t x_shift, uint8_t y_shift, int nametable, uint8_t bank, int line, bool toggle, bool show_left, int nametable_mirroring)
 {
     if (!toggle)
         return;
@@ -403,7 +403,7 @@ void Display::DrawBackgroundLineVSA(Bus* bus, uint8_t x_shift, uint8_t y_shift, 
     int new_line = line - (239-y_shift)-1;
 
     SDL_Color colors[4];
-    nametable = utility::GetOtherNametable(nametable, 0);
+    nametable = utility::GetOtherNametable(nametable, 0, nametable_mirroring);
     int test = (int)ceil(double(x_shift) / double(8));
     for (int x = 0; x < test; x++)
     {

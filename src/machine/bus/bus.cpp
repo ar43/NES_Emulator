@@ -26,12 +26,12 @@ void Bus::ChangeNametableMirroring(int old)
 {
 	if (old == 3 && mapper->nametable_mirroring == 2)
 	{
-		//logger::PrintLine(logger::LogType::DEBUG, "Nametable mirroring switched from 3 to 2");
+		logger::PrintLine(logger::LogType::DEBUG, "Nametable mirroring switched from 3 to 2");
 		memcpy(ppu->data + 0x2400, ppu->data + 0x2800, 0x400);
 	}
 	else if (old == 2 && mapper->nametable_mirroring == 3)
 	{
-		//logger::PrintLine(logger::LogType::DEBUG, "Nametable mirroring switched from 2 to 3");
+		logger::PrintLine(logger::LogType::DEBUG, "Nametable mirroring switched from 2 to 3");
 		memcpy(ppu->data + 0x2800, ppu->data + 0x2400, 0x400);
 	}
 }

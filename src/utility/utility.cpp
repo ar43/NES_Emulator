@@ -39,18 +39,32 @@ namespace utility
         return (value & (1 << pos)) != 0;
     }
 
-    int GetOtherNametable(int nametable, int scrolling)
+    int GetOtherNametable(int nametable, int scrolling, int mirroring)
     {
         if (scrolling == 0) //horizontal scrolling
         {
-            if (nametable == 0x2400)
+            /*if (mirroring == 3)
             {
-                return nametable - 0x400;
+                if (nametable == 0x2000)
+                {
+                    return nametable + 0x800;
+                }
+                else
+                {
+                    return nametable - 0x800;
+                }
             }
             else
-            {
-                return nametable + 0x400;
-            }
+            {*/
+                if (nametable == 0x2400)
+                {
+                    return nametable - 0x400;
+                }
+                else
+                {
+                    return nametable + 0x400;
+                }
+            //}
         }
         else if (scrolling == 1) //vertical scrolling
         {

@@ -30,9 +30,9 @@ public:
 	void CheckRebuild(Bus *bus, PpuRegisters *ppu_registers);
 
 	void DrawBackgroundLineHSA(Bus *bus, uint8_t x_shift, uint8_t y_shift, int nametable, uint8_t bank, int line, bool toggle, bool show_left);
-	void DrawBackgroundLineVSB(Bus *bus, uint8_t x_shift, uint8_t y_shift, int nametable, uint8_t bank, int line, bool toggle, bool show_left);
-	void DrawBackgroundLineVSA(Bus* bus, uint8_t x_shift, uint8_t y_shift, int nametable, uint8_t bank, int line, bool toggle, bool show_left);
-	void DrawBackgroundLineHSB(Bus *bus, uint8_t x_shift, uint8_t y_shift, int nametable, uint8_t bank, int line, bool toggle, bool show_left);
+	void DrawBackgroundLineVSB(Bus *bus, uint8_t x_shift, uint8_t y_shift, int nametable, uint8_t bank, int line, bool toggle, bool show_left, int nametable_mirroring);
+	void DrawBackgroundLineVSA(Bus* bus, uint8_t x_shift, uint8_t y_shift, int nametable, uint8_t bank, int line, bool toggle, bool show_left, int nametable_mirroring);
+	void DrawBackgroundLineHSB(Bus *bus, uint8_t x_shift, uint8_t y_shift, int nametable, uint8_t bank, int line, bool toggle, bool show_left, int nametable_mirroring);
 
 	void BuildPixelValues(Bus *bus);
 	void BuildPixelValue(Bus *bus, uint8_t bank, uint8_t index);

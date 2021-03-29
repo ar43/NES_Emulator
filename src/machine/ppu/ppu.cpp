@@ -6,6 +6,10 @@
 
 void Ppu::Tick(Bus* bus, Mapper* mapper)
 {
+	if (scanline <= 240 && cycle == 260 && (registers.ppumask.IsBitSet(MaskBits::SHOW_SPRITES) || registers.ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND)))
+	{
+		mapper->TickIRQ();
+	}
 	if (scanline <= 239)
 	{
 		if (cycle == 256)
@@ -27,20 +31,16 @@ void Ppu::Tick(Bus* bus, Mapper* mapper)
 			{
 				display.DrawBackgroundLineHSA(bus, x_scroll, registers.ppuscroll.addr[2], nametable, bank, scanline,registers.ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND),registers.ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND_LEFT));
 				if(x_scroll)
-					display.DrawBackgroundLineHSB(bus, x_scroll, registers.ppuscroll.addr[2], nametable, bank, scanline,registers.ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND),registers.ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND_LEFT));
+					display.DrawBackgroundLineHSB(bus, x_scroll, registers.ppuscroll.addr[2], nametable, bank, scanline,registers.ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND),registers.ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND_LEFT),mapper->nametable_mirroring);
 			}
 			else
 			{
-				display.DrawBackgroundLineVSB(bus, x_scroll, registers.ppuscroll.addr[2], nametable, bank, scanline,registers.ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND),registers.ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND_LEFT)); //todo: hor + ver scrolling if(x_scroll) DrawBackGroundLineVSA
+				display.DrawBackgroundLineVSB(bus, x_scroll, registers.ppuscroll.addr[2], nametable, bank, scanline,registers.ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND),registers.ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND_LEFT),mapper->nametable_mirroring); //todo: hor + ver scrolling if(x_scroll) DrawBackGroundLineVSA
 				if(x_scroll)
-					display.DrawBackgroundLineVSA(bus, x_scroll, registers.ppuscroll.addr[2], nametable, bank, scanline,registers.ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND),registers.ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND_LEFT));
+					display.DrawBackgroundLineVSA(bus, x_scroll, registers.ppuscroll.addr[2], nametable, bank, scanline,registers.ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND),registers.ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND_LEFT),mapper->nametable_mirroring);
 			}
 			if(scanline)
 				display.DrawSprites(&registers,oam_data, scanline);
-		}
-		else if (cycle == 260 && (registers.ppumask.IsBitSet(MaskBits::SHOW_SPRITES) || registers.ppumask.IsBitSet(MaskBits::SHOW_BACKGROUND)))
-		{
-			mapper->TickIRQ();
 		}
 	}
 	else if (scanline == 241)
