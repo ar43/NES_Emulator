@@ -8,4 +8,5 @@ struct MachineStatus
 	bool* mute = nullptr;
 	int reset = 2;
 	bool force_render = false;
+	float volume = 0.2f;
 };

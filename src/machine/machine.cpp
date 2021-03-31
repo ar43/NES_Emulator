@@ -3,6 +3,7 @@
 #include "../utility/utility.h"
 #include "mapper/nrom.h"
 #include "mapper/uxrom.h"
+#include "mapper/cnrom.h"
 #include "mapper/mmc1.h"
 #include "mapper/mmc3.h"
 #include <fstream>
@@ -22,7 +23,7 @@ void Machine::Init()
 {
 	bus.AttachComponents(&cpu, input.joypad, &apu, &ppu);
 	ppu.display.Init();
-	apu.Init(&bus.irq_pending);
+	apu.Init(&bus.irq_pending, &machine_status.volume);
 	ppu.force_render = &machine_status.force_render;
 }
 
@@ -105,6 +106,18 @@ bool Machine::LoadCartridge(NesData *nes_data)
 		}
 		mapper = std::unique_ptr<Uxrom>(new Uxrom(nametable_mirroring,nes_data->prg_rom,nes_data->header.PRG_ROM_size,(uint8_t*)dat_chr));
 		
+		break;
+	}
+	case 3:
+	{
+		int nametable_mirroring = 3;
+		if (utility::IsBitSet(nes_data->header.flags6, 0))
+			nametable_mirroring = 2;
+		else if (utility::IsBitSet(nes_data->header.flags6, 3))
+			nametable_mirroring = 999;
+
+		mapper = std::unique_ptr<Cnrom>(new Cnrom(nametable_mirroring,nes_data->prg_rom,nes_data->chr_rom,&bus.rebuild_pixels));
+
 		break;
 	}
 	case 4:

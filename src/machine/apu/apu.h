@@ -13,7 +13,7 @@ class Apu
 public:
 	Apu();
 	void Reset();
-	void Init(bool* irq_pointer);
+	void Init(bool* irq_pointer, float* volume);
 	void Step(Bus *bus, uint16_t budget);
 	void Tick(Bus *bus);
 	void Frame0Tick();
@@ -40,6 +40,7 @@ private:
 	
 	float pulse_table[31];
 	float tnd_table[203];
+	float* volume;
 
 	bool* irq_pending = nullptr;
 	std::vector<float> snd_buf;

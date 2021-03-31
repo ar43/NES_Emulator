@@ -282,7 +282,7 @@ uint8_t Apu::ReadStatus()
 	return ret;
 }
 
-void Apu::Init(bool* irq_pointer)
+void Apu::Init(bool* irq_pointer, float* volume)
 {
 	SDL_setenv("SDL_AUDIODRIVER", "directsound", 1);
 	SDL_InitSubSystem(SDL_INIT_AUDIO);
@@ -299,6 +299,7 @@ void Apu::Init(bool* irq_pointer)
 	pulse_channel[0].is_pulse1 = true;
 	InitSoundTables();
 	irq_pending = irq_pointer;
+	this->volume = volume;
 	Reset();
 }
 
@@ -408,7 +409,7 @@ void Apu::GenerateSample()
 		HPB_Prev = HPA_Out;
 
 
-		float output = HPB_Out;
+		float output = HPB_Out * *volume;
 		snd_buf.back() = output;
 	}
 }

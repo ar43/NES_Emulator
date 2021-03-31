@@ -12,7 +12,7 @@ void Ppu::Tick(Bus* bus, Mapper* mapper)
 	}
 	if (scanline <= 239)
 	{
-		if (cycle == 256)
+		if (cycle == 230)
 		{
 			display.CheckRebuild(bus, &registers);
 			if (scanline == 0)

@@ -163,6 +163,7 @@
     <ClCompile Include="src\machine\input\input.cpp" />
     <ClCompile Include="src\machine\input\joypad.cpp" />
     <ClCompile Include="src\machine\machine.cpp" />
+    <ClCompile Include="src\machine\mapper\cnrom.cpp" />
     <ClCompile Include="src\machine\mapper\mapper.cpp" />
     <ClCompile Include="src\machine\mapper\mmc1.cpp" />
     <ClCompile Include="src\machine\mapper\mmc3.cpp" />
@@ -201,6 +202,7 @@
     <ClInclude Include="src\machine\input\input.h" />
     <ClInclude Include="src\machine\input\joypad.h" />
     <ClInclude Include="src\machine\machine.h" />
+    <ClInclude Include="src\machine\mapper\cnrom.h" />
     <ClInclude Include="src\machine\mapper\mapper.h" />
     <ClInclude Include="src\machine\mapper\mmc1.h" />
     <ClInclude Include="src\machine\mapper\mmc3.h" />
