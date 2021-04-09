@@ -91,6 +91,12 @@
     <Filter Include="Source Files\Machine\Mapper">
       <UniqueIdentifier>{fd953f1c-41fa-4b0a-b99a-3bd8b9742ac9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Machine\UserInterface">
+      <UniqueIdentifier>{81d3fbb2-3dc9-4383-8878-939a8914b6bb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Machine\UserInterface">
+      <UniqueIdentifier>{f3d860ff-80bc-4c84-9335-f75462e5001b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -203,6 +209,12 @@
     </ClCompile>
     <ClCompile Include="src\machine\mapper\cnrom.cpp">
       <Filter>Source Files\Machine\Mapper</Filter>
+    </ClCompile>
+    <ClCompile Include="src\machine\user_interface\user_interface.cpp">
+      <Filter>Source Files\Machine\UserInterface</Filter>
+    </ClCompile>
+    <ClCompile Include="src\machine\user_interface\menu_bar.cpp">
+      <Filter>Source Files\Machine\UserInterface</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -322,6 +334,12 @@
     </ClInclude>
     <ClInclude Include="src\machine\mapper\cnrom.h">
       <Filter>Header Files\Machine\Mapper</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machine\user_interface\user_interface.h">
+      <Filter>Header Files\Machine\UserInterface</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machine\user_interface\menu_bar.h">
+      <Filter>Header Files\Machine\UserInterface</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -8,6 +8,7 @@
 #include "input/input.h"
 #include "apu/apu.h"
 #include "mapper/mapper.h"
+#include "user_interface/user_interface.h"
 #include <memory>
 
 class Machine
@@ -22,6 +23,7 @@ public:
 	Input input;
 	std::unique_ptr<NesData> nes_data;
 	MachineStatus machine_status;
+	UserInterface ui;
 
 	Frame frame;
 

@@ -7,23 +7,17 @@
 #include <cmath>
 
 
-bool Display::Init()
+bool Display::Init(SDL_Window* window, uint8_t* scale)
 {
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0) 
-    {
-        logger::PrintLine(logger::LogType::FATAL_ERROR, "Unable to initialize SDL: " + std::string(SDL_GetError()));
-        return false;
-    }
-
-    window = SDL_CreateWindow("Hello World", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH*GetScale(), SCREEN_HEIGHT*GetScale(), 0);
-
-    if (window == nullptr)
+    this->window = window;
+    this->scale = scale;
+    if (this->window == nullptr)
     {
         logger::PrintLine(logger::LogType::FATAL_ERROR, "Unable to create window " + std::string(SDL_GetError()));
         return false;
     }
 
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    renderer = SDL_CreateRenderer(this->window, -1, SDL_RENDERER_ACCELERATED);
     if (renderer == nullptr)
     {
         logger::PrintLine(logger::LogType::FATAL_ERROR, "Unable to create renderer " + std::string(SDL_GetError()));
@@ -56,7 +50,7 @@ void Display::SetScale(uint8_t scale)
         logger::PrintLine(logger::LogType::FATAL_ERROR, "Display::SetScale scale too large: " + std::to_string(scale));
         return;
     }
-    this->scale = scale;
+    *this->scale = scale;
 }
 
 //void Display::DrawBackgroundTile(Memory *mem, uint8_t bank, uint8_t index, SDL_Color* color_pointer, int x, int y)
@@ -486,7 +480,7 @@ void Display::RenderEnd()
 
 uint8_t Display::GetScale()
 {
-    return scale;
+    return *scale;
 }
 
 Display::~Display()

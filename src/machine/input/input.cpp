@@ -2,6 +2,8 @@
 #include "../misc/machine_status.h"
 #include "../../logger/logger.h"
 #include "../ppu/display/display.h"
+#include "../user_interface/menu_bar.h"
+#include <SDL_syswm.h>
 
 void Input::Poll(MachineStatus *machine_status, SDL_Window *window, Display* display)
 {
@@ -157,8 +159,29 @@ void Input::Poll(MachineStatus *machine_status, SDL_Window *window, Display* dis
 				break;
 			}
 		}
+		else if (e.type == SDL_SYSWMEVENT)
+		{
+			if (e.syswm.msg->msg.win.msg == WM_COMMAND)
+			{
+				HandleMenuBar(machine_status, LOWORD(e.syswm.msg->msg.win.wParam));
+			}
+		}
 
     }
+}
+
+void Input::HandleMenuBar(MachineStatus *machine_status, WORD param)
+{
+	switch (param)
+	{
+		case (WORD)MenuBarID::EXIT:
+		{
+			logger::PrintLine(logger::LogType::INFO, "Exiting");
+			machine_status->running = false;
+			break;
+		}
+		default: break;
+	}
 }
 
 void Input::PollPause(MachineStatus *machine_status)

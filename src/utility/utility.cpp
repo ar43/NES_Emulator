@@ -119,4 +119,16 @@ namespace utility
             *value &= ~(1 << pos);
         }
     }
+
+    std::wstring CharToWString(const char* text) //used for windows related stuff
+    {
+        const size_t size = std::strlen(text);
+        std::wstring wstr;
+        if (size > 0) 
+        {
+            wstr.resize(size);
+            std::mbstowcs(&wstr[0], text, size);
+        }
+        return wstr;
+    }
 }

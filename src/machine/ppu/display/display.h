@@ -18,7 +18,7 @@ public:
 		texture = nullptr;
 	}
 	~Display();
-	bool Init();
+	bool Init(SDL_Window* window, uint8_t* scale);
 
 	Palette palette;
 	
@@ -47,7 +47,7 @@ public:
 	SDL_Event e;
 	uint8_t pixel_values[2][256 * 64];
 private:
-	uint8_t scale = 4;
+	uint8_t* scale = nullptr;
 	SDL_Window* window;
 	SDL_Texture* texture;
 	

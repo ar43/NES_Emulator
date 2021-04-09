@@ -9,4 +9,5 @@ namespace utility
     void SetBit(uint8_t *value, int pos, bool which);
     void SetBit(uint32_t *value, int pos, bool which);
     int GetOtherNametable(int nametable, int scrolling, int nametable_mirroring);
+    std::wstring CharToWString(const char* text);
 }
