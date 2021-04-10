@@ -99,7 +99,7 @@ void Frame::end(SDL_Window *window)
 		std::stringstream stream;
 		stream << std::fixed << std::setprecision(2) << displayResult;
 		std::string s = stream.str();
-		std::string FPS = "FPS: " + s;
+		std::string FPS = "NES Emulator (fps: " + s + ")";
 		SDL_SetWindowTitle(window, FPS.c_str());
 		//res.loadText("fps", util::va("FPS: %.0f", displayResult), 32, 0, 1080 - 32);
 		counter = 1;

@@ -2,6 +2,7 @@
 #include "../../logger/logger.h"
 #include "../../utility/utility.h"
 #include "../bus/bus.h"
+#include "../misc/machine_status.h"
 #include <iostream>
 #include <sstream>
 #include <iomanip>
@@ -231,7 +232,7 @@ int Cpu::ResolveAddressing(Bus* bus, Instruction* ins)
 	}
 }
 
-void Cpu::HandleReset(Bus *bus, int reset)
+void Cpu::HandleReset(Bus *bus, ResetType reset)
 {
 	
 	logger::PrintLine(logger::LogType::INFO, "CPU RESET detected");
@@ -239,7 +240,7 @@ void Cpu::HandleReset(Bus *bus, int reset)
 	int initial_pc = bus->ReadCPU(0xFFFD)*256 + bus->ReadCPU(0xFFFC); //normally we jump to this
 	registers[(size_t)RegId::PC]->set(initial_pc);
 
-	if (reset == 2)
+	if (reset == ResetType::HARD)
 		registers[(size_t)RegId::SP]->set(0xFD);
 	else
 		registers[(size_t)RegId::SP]->set(registers[(size_t)RegId::SP]->get() - 3);

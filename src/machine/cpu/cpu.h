@@ -6,6 +6,8 @@
 
 constexpr size_t STACK_OFFSET = 0x100;
 
+enum class ResetType;
+
 class Bus;
 
 class Cpu
@@ -24,7 +26,7 @@ public:
 	
 
 	void ExecuteInstruction(Bus* bus);
-	void HandleReset(Bus* bus, int reset);
+	void HandleReset(Bus* bus, ResetType reset);
 	void HandleNMI(Bus* bus);
 	void HandleIRQ(Bus* bus);
 

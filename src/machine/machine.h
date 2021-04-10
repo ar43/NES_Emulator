@@ -22,17 +22,21 @@ public:
 	std::unique_ptr<Mapper> mapper;
 	Input input;
 	std::unique_ptr<NesData> nes_data;
-	MachineStatus machine_status;
+	MachineStatus status;
 	UserInterface ui;
 
 	Frame frame;
-
+	void Run();
 	void Init();
+
+private:
+	
+	void LoadROM(std::string path);
+	void UnloadROM();
+
 	bool ParseINES(std::string path);
 	void PollInterrupts();
-	void RunROM(std::string path);
+
 	bool LoadCartridge(NesData* nes_data);
 	void InitStatus();
-private:
-	void Run();
 };

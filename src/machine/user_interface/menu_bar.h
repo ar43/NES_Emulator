@@ -4,13 +4,14 @@
 
 enum class MenuBarID
 {
-	LOADROM,
+	LOAD_ROM,
 	ABOUT,
 	EXIT,
 	CONTROLS,
 	DEBUG,
 	RESET,
 	PAUSE,
+	POWER_OFF,
 };
 
 class MenuBar
@@ -23,7 +24,6 @@ public:
 	HMENU hFile;
 	HMENU hMenuBar;
 
-	HWND GetSDLWinHandle(SDL_Window* win);
 	void Activate(HWND windowRef);
 	void Init(SDL_Window* win);
 	void AdjustWindowSize(SDL_Window* win);

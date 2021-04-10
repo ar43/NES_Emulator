@@ -19,6 +19,7 @@ public:
 	}
 	~Display();
 	bool Init(SDL_Window* window, uint8_t* scale);
+	void Clear();
 
 	Palette palette;
 	

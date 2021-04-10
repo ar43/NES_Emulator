@@ -24,20 +24,22 @@ void Machine::Init()
 	ui.Init();
 	bus.AttachComponents(&cpu, input.joypad, &apu, &ppu);
 	ppu.display.Init(ui.GetWindow(), &ui.scale);
-	apu.Init(&bus.irq_pending, &machine_status.volume);
-	ppu.force_render = &machine_status.force_render;
+	apu.Init(&bus.irq_pending, &status.volume);
+	ppu.force_render = &status.force_render;
 }
 
-void Machine::RunROM(std::string path)
+void Machine::LoadROM(std::string path)
 {
 	if (ParseINES(path))
 	{
 		if (LoadCartridge(nes_data.get()))
 		{
 			ppu.display.BuildPixelValues(&bus);
-			Run();
+			status.running = RunningStatus::RUNNING_ROM;
+			//Run();
 		}
 	}
+	status.pending_rom.clear();
 }
 
 bool Machine::LoadCartridge(NesData *nes_data)
@@ -165,21 +167,29 @@ void Machine::PollInterrupts()
 		cpu.HandleIRQ(&bus);
 		//logger::PrintLine(logger::LogType::DEBUG, "IRQ request");
 	}
-	else if (machine_status.reset)
+	else if ((int)status.reset)
 	{
 		bus.WriteCPU(0x4015, 00); //silence the apu
 		ppu.HandleReset();
-		cpu.HandleReset(&bus, machine_status.reset);
+		cpu.HandleReset(&bus, status.reset);
 		apu.Reset();
 		bus.Reset();
-		machine_status.reset = 0;
+		status.reset = ResetType::NOT;
 	}
 }
 
 void Machine::InitStatus()
 {
-	machine_status.speedup = &frame.capTimer.bypass;
-	machine_status.mute = &apu.mute;
+	status.speedup = &frame.capTimer.bypass;
+	status.mute = &apu.mute;
+}
+
+void Machine::UnloadROM()
+{
+	mapper->SaveRAM(nes_data->file_name);
+	status.reset = ResetType::HARD;
+	ppu.display.Clear();
+	SDL_SetWindowTitle(ui.GetWindow(), "NES Emulator (unloaded)");
 }
 
 void Machine::Run()
@@ -187,37 +197,48 @@ void Machine::Run()
 	frame.init();
 	InitStatus();
 	SDL_Delay(20);
-	while (machine_status.running)
+	while ((int)status.running)
 	{
-		static uint64_t cycle_accumulator = 0;
-		frame.start();
-
-		while (machine_status.paused)
+		if (status.running == RunningStatus::RUNNING_ROM)
 		{
-			input.PollPause(&machine_status);
-		}
+			static uint64_t cycle_accumulator = 0;
+			frame.start();
 
-		if (frame.capTimer.tick(&frame))
-		{
-			input.Poll(&machine_status, ppu.display.GetWindow(), &ppu.display);
-			cycle_accumulator = 0;
-			while (cycle_accumulator < 29780)
+			while (status.paused)
 			{
-				uint64_t old_cycle = cpu.GetCycles();
-				PollInterrupts();
-				cpu.ExecuteInstruction(&bus);
-				uint16_t budget = (uint16_t)(cpu.GetCycles() - old_cycle);
-				ppu.Step(&bus, mapper.get(), budget);
-				apu.Step(&bus, budget);
-				cycle_accumulator += budget;
+				input.PollPause(&status, ui.GetWindow());
 			}
-			apu.Play();
-			frame.end(ppu.display.GetWindow());
-			
+
+			if (frame.capTimer.tick(&frame))
+			{
+				input.Poll(&status, ui.GetWindow(), &ppu.display);
+				cycle_accumulator = 0;
+				while (cycle_accumulator < 29780)
+				{
+					uint64_t old_cycle = cpu.GetCycles();
+					PollInterrupts();
+					cpu.ExecuteInstruction(&bus);
+					uint16_t budget = (uint16_t)(cpu.GetCycles() - old_cycle);
+					ppu.Step(&bus, mapper.get(), budget);
+					apu.Step(&bus, budget);
+					cycle_accumulator += budget;
+				}
+				apu.Play();
+				frame.end(ui.GetWindow());
+
+			}
+
+			if (status.running != RunningStatus::RUNNING_ROM)
+				UnloadROM();
 		}
-		
+		else
+		{
+			input.Poll(&status, ui.GetWindow(), &ppu.display);
+			if (!status.pending_rom.empty())
+				LoadROM(status.pending_rom);
+			SDL_Delay(10);
+		}
 	}
-	mapper->SaveRAM(nes_data->file_name);
 }
 
 bool Machine::ParseINES(std::string path)

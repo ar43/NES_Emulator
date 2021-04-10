@@ -53,6 +53,13 @@ void Display::SetScale(uint8_t scale)
     *this->scale = scale;
 }
 
+void Display::Clear()
+{
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xFF);
+    SDL_RenderClear(renderer);
+    SDL_RenderPresent(renderer);
+}
+
 //void Display::DrawBackgroundTile(Memory *mem, uint8_t bank, uint8_t index, SDL_Color* color_pointer, int x, int y)
 //{
 //    assert(index <= 255 && index >= 0 && bank >= 0 && bank <= 1);

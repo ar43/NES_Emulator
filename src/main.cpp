@@ -10,11 +10,13 @@ int main(int argc, char *args[])
 	if (argc >= 3)
 	{
 		if (std::string(args[2]).compare(std::string("-force_render")) == 0)
-			machine->machine_status.force_render = true;
+			machine->status.force_render = true;
 	}
 
 	if(argc >= 2)
-		machine->RunROM(std::string(args[1]));
+		machine->status.pending_rom = std::string(args[1]);
+
+	machine->Run();
 	
 	delete machine;
 	return 0;
