@@ -7,26 +7,20 @@
 #include <cmath>
 
 
-bool Display::Init(SDL_Window* window, uint8_t* scale)
+bool Display::Init(SDL_Window* window, SDL_Renderer* renderer, uint8_t* scale)
 {
     this->window = window;
+    this->renderer = renderer;
     this->scale = scale;
     if (this->window == nullptr)
     {
-        logger::PrintLine(logger::LogType::FATAL_ERROR, "Unable to create window " + std::string(SDL_GetError()));
+        logger::PrintLine(logger::LogType::FATAL_ERROR, "Did not get correct window pointer in display");
         return false;
     }
 
-    renderer = SDL_CreateRenderer(this->window, -1, SDL_RENDERER_ACCELERATED);
-    if (renderer == nullptr)
+    if (this->renderer == nullptr)
     {
-        logger::PrintLine(logger::LogType::FATAL_ERROR, "Unable to create renderer " + std::string(SDL_GetError()));
-        return false;
-    }
-
-    if (SDL_RenderSetLogicalSize(renderer, SCREEN_WIDTH, SCREEN_HEIGHT) < 0)
-    {
-        logger::PrintLine(logger::LogType::FATAL_ERROR, "Unable to set render logical size " + std::string(SDL_GetError()));
+        logger::PrintLine(logger::LogType::FATAL_ERROR, "Did not get correct renderer pointer in display");
         return false;
     }
 
@@ -36,7 +30,6 @@ bool Display::Init(SDL_Window* window, uint8_t* scale)
         return false;
     }
 
-    SDL_SetRenderDrawColor(renderer, 0, 0xFF, 0, 0xFF);
     //texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, SCREEN_WIDTH, SCREEN_HEIGHT);
     texture = nullptr;
     surface = SDL_CreateRGBSurfaceWithFormat(0, SCREEN_WIDTH, SCREEN_HEIGHT, 32, SDL_PIXELFORMAT_RGBA8888);
@@ -467,17 +460,12 @@ void Display::BuildPixelValue(Bus *bus, uint8_t bank, uint8_t index)
     }
 }
 
-void Display::Render(PpuRegisters *ppu_registers, uint8_t * oam_data)
-{
-    RenderEnd();
-}
-
 SDL_Window* Display::GetWindow()
 {
     return window;
 }
 
-void Display::RenderEnd()
+void Display::Render()
 {
     texture = SDL_CreateTextureFromSurface(renderer, surface);
 

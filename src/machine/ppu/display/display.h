@@ -18,12 +18,11 @@ public:
 		texture = nullptr;
 	}
 	~Display();
-	bool Init(SDL_Window* window, uint8_t* scale);
+	bool Init(SDL_Window* window, SDL_Renderer* renderer, uint8_t* scale);
 	void Clear();
 
+	void Render();
 	Palette palette;
-	
-	void Render(PpuRegisters *ppu_registers, uint8_t * oam_data);
 
 	void SetScale(uint8_t scale);
 	uint8_t GetScale();
@@ -56,7 +55,6 @@ private:
 
 	//void DrawSpriteLine(Memory* mem, uint8_t bank, uint8_t index, uint8_t palette_id, bool flip_h, bool flip_v, int x, int line);
 
-	void RenderEnd();
 	void DrawChrRom(Bus *bus);
 
 	void DrawBackgroundTileLine(uint8_t bank, uint8_t index, SDL_Color *color_pointer, uint8_t read_line, int x, int line, bool show_background_left);

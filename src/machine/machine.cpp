@@ -23,7 +23,7 @@ void Machine::Init()
 {
 	ui.Init();
 	bus.AttachComponents(&cpu, input.joypad, &apu, &ppu);
-	ppu.display.Init(ui.GetWindow(), &ui.scale);
+	ppu.display.Init(ui.window.GetWindow(), ui.window.GetRenderer(), &ui.scale);
 	apu.Init(&bus.irq_pending, &status.volume);
 	ppu.force_render = &status.force_render;
 }
@@ -158,7 +158,7 @@ void Machine::PollInterrupts()
 {
 	if (bus.nmi_pending)
 	{
-		ppu.display.Render(&ppu.registers,ppu.oam_data);
+		ppu.display.Render();
 		cpu.HandleNMI(&bus);
 		bus.nmi_pending = false;
 	}
@@ -189,7 +189,7 @@ void Machine::UnloadROM()
 	mapper->SaveRAM(nes_data->file_name);
 	status.reset = ResetType::HARD;
 	ppu.display.Clear();
-	SDL_SetWindowTitle(ui.GetWindow(), "NES Emulator (unloaded)");
+	SDL_SetWindowTitle(ui.window.GetWindow(), "NES Emulator (unloaded)");
 }
 
 void Machine::Run()
@@ -206,12 +206,13 @@ void Machine::Run()
 
 			while (status.paused)
 			{
-				input.PollPause(&status, ui.GetWindow());
+				input.Poll(&status, &ui);
+				SDL_Delay(10);
 			}
 
 			if (frame.capTimer.tick(&frame))
 			{
-				input.Poll(&status, ui.GetWindow(), &ppu.display);
+				input.Poll(&status, &ui);
 				cycle_accumulator = 0;
 				while (cycle_accumulator < 29780)
 				{
@@ -224,7 +225,7 @@ void Machine::Run()
 					cycle_accumulator += budget;
 				}
 				apu.Play();
-				frame.end(ui.GetWindow());
+				frame.end(ui.window.GetWindow());
 
 			}
 
@@ -233,7 +234,7 @@ void Machine::Run()
 		}
 		else
 		{
-			input.Poll(&status, ui.GetWindow(), &ppu.display);
+			input.Poll(&status, &ui);
 			if (!status.pending_rom.empty())
 				LoadROM(status.pending_rom);
 			SDL_Delay(10);

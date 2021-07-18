@@ -54,7 +54,7 @@ void Ppu::Tick(Bus* bus, Mapper* mapper)
 			}
 			else if (*force_render)
 			{
-				display.Render(&registers,oam_data);
+				display.Render();
 			}
 			registers.ppuaddr.scroll_offset = 0;
 		}

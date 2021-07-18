@@ -6,13 +6,15 @@
 struct MachineStatus;
 class Display;
 class Bus;
+class UserInterface;
 
 class Input
 {
 public:
-	void Poll(MachineStatus *machine_status, SDL_Window *window, Display* display);
-	void HandleMenuBar(MachineStatus* machine_status, SDL_Window *window, WORD param);
-	void PollPause(MachineStatus *machine_status, SDL_Window *window);
+	void Poll(MachineStatus *machine_status, UserInterface* ui);
+	void PollMain(MachineStatus *machine_status, UserInterface* ui);
+	void PollDebugger(MachineStatus *machine_status, UserInterface* ui);
+	void HandleMenuBar(MachineStatus* machine_status, SDL_Window * main_window, WORD param);
 	Joypad joypad[2];
 private:
 	SDL_Event e;

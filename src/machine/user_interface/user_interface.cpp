@@ -2,12 +2,8 @@
 #include "../../logger/logger.h"
 #include "../misc/constants.h"
 #include "../../utility/utility.h"
+#include "window.h"
 #include <SDL_syswm.h>
-
-SDL_Window* UserInterface::GetWindow()
-{
-    return main_window;
-}
 
 void UserInterface::Init()
 {
@@ -16,8 +12,10 @@ void UserInterface::Init()
         logger::PrintLine(logger::LogType::FATAL_ERROR, "Unable to initialize SDL: " + std::string(SDL_GetError()));
     }
 
-    main_window = SDL_CreateWindow("NES Emulator (unloaded)", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH*GetScale(), SCREEN_HEIGHT*GetScale(), 0);
-    menu_bar.Init(main_window);
+    window.Init("NES Emulator", SCREEN_WIDTH * GetScale(), SCREEN_HEIGHT * GetScale(), SCREEN_WIDTH, SCREEN_HEIGHT);
+
+    menu_bar.Init(window.GetWindow());
+    debugger.Init();
 }
 
 void UserInterface::SetScale(uint8_t scale)

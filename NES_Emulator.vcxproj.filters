@@ -97,6 +97,12 @@
     <Filter Include="Header Files\Machine\UserInterface">
       <UniqueIdentifier>{f3d860ff-80bc-4c84-9335-f75462e5001b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Machine\UserInterface\Units">
+      <UniqueIdentifier>{9ef93a3a-5804-45e7-8fb2-0426cf1420d1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Machine\UserInterface\Units">
+      <UniqueIdentifier>{e1e9a69a-ab49-4f51-8473-8edfddc22a01}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -215,6 +221,12 @@
     </ClCompile>
     <ClCompile Include="src\machine\user_interface\menu_bar.cpp">
       <Filter>Source Files\Machine\UserInterface</Filter>
+    </ClCompile>
+    <ClCompile Include="src\machine\user_interface\debugger.cpp">
+      <Filter>Source Files\Machine\UserInterface</Filter>
+    </ClCompile>
+    <ClCompile Include="src\machine\user_interface\window.cpp">
+      <Filter>Source Files\Machine\UserInterface\Units</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -340,6 +352,12 @@
     </ClInclude>
     <ClInclude Include="src\machine\user_interface\menu_bar.h">
       <Filter>Header Files\Machine\UserInterface</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machine\user_interface\debugger.h">
+      <Filter>Header Files\Machine\UserInterface</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machine\user_interface\window.h">
+      <Filter>Header Files\Machine\UserInterface\Units</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -7,11 +7,16 @@
 #include "../user_interface/user_interface.h"
 #include <SDL_syswm.h>
 
-void Input::Poll(MachineStatus *machine_status, SDL_Window *window, Display* display)
+void Input::Poll(MachineStatus *machine_status, UserInterface *ui)
 {
     while (SDL_PollEvent(&e) != 0)
     {
-        if (e.type == SDL_QUIT)
+		bool request_exit = false;
+
+		ui->window.HandleEvent(&e, &request_exit);
+		ui->debugger.window.HandleEvent(&e, nullptr);
+
+        if (e.type == SDL_QUIT || request_exit)
         {
             logger::PrintLine(logger::LogType::INFO, "Exiting");
 			machine_status->running = RunningStatus::NOT_RUNNING;
@@ -70,8 +75,17 @@ void Input::Poll(MachineStatus *machine_status, SDL_Window *window, Display* dis
 
 			case SDLK_F1:
 			{
-				machine_status->paused = true;
-				SDL_SetWindowTitle(window, "NES Emulator (paused)");
+				if (machine_status->paused == false)
+				{
+					machine_status->paused = true;
+					SDL_SetWindowTitle(ui->window.GetWindow(), "NES Emulator (paused)");
+				}
+				else
+				{
+					machine_status->paused = false;
+					joypad[0].Clear();
+					joypad[1].Clear();
+				}
 				break;
 			}
 
@@ -165,14 +179,14 @@ void Input::Poll(MachineStatus *machine_status, SDL_Window *window, Display* dis
 		{
 			if (e.syswm.msg->msg.win.msg == WM_COMMAND)
 			{
-				HandleMenuBar(machine_status, window, LOWORD(e.syswm.msg->msg.win.wParam));
+				HandleMenuBar(machine_status, ui->window.GetWindow(), LOWORD(e.syswm.msg->msg.win.wParam));
 			}
 		}
 
     }
 }
 
-void Input::HandleMenuBar(MachineStatus *machine_status, SDL_Window *window, WORD param)
+void Input::HandleMenuBar(MachineStatus *machine_status, SDL_Window * main_window, WORD param)
 {
 	switch (param)
 	{
@@ -184,7 +198,7 @@ void Input::HandleMenuBar(MachineStatus *machine_status, SDL_Window *window, WOR
 		}
 		case (WORD)MenuBarID::LOAD_ROM:
 		{
-			machine_status->pending_rom = UserInterface::GetROMPath(window);
+			machine_status->pending_rom = UserInterface::GetROMPath(main_window);
 
 			if (!machine_status->pending_rom.empty())
 			{
@@ -197,7 +211,7 @@ void Input::HandleMenuBar(MachineStatus *machine_status, SDL_Window *window, WOR
 		{
 			machine_status->paused = !machine_status->paused;
 			if(machine_status->paused)
-				SDL_SetWindowTitle(window, "NES Emulator (paused)");
+				SDL_SetWindowTitle(main_window, "NES Emulator (paused)");
 			break;
 		}
 		case (WORD)MenuBarID::RESET:
@@ -212,56 +226,4 @@ void Input::HandleMenuBar(MachineStatus *machine_status, SDL_Window *window, WOR
 		}
 		default: break;
 	}
-}
-
-void Input::PollPause(MachineStatus *machine_status, SDL_Window *window)
-{
-	while (SDL_PollEvent(&e) != 0)
-	{
-		if (e.type == SDL_QUIT)
-		{
-			logger::PrintLine(logger::LogType::INFO, "Exiting");
-			machine_status->running = RunningStatus::NOT_RUNNING;
-			machine_status->paused = false;
-		}
-		else if (e.type == SDL_KEYDOWN) 
-		{
-			switch (e.key.keysym.sym)
-			{
-			case SDLK_ESCAPE:
-			{
-				logger::PrintLine(logger::LogType::INFO, "Exiting");
-				machine_status->running = RunningStatus::NOT_RUNNING;
-				machine_status->paused = false;
-				break;
-			}
-
-			case SDLK_F1:
-			{
-				machine_status->paused = false;
-				joypad[0].Clear();
-				joypad[1].Clear();
-				break;
-			}
-
-			case SDLK_F3:
-			{
-				machine_status->reset = ResetType::NORMAL;
-				break;
-			}
-
-			default:
-				break;
-			}
-		}
-		else if (e.type == SDL_SYSWMEVENT)
-		{
-			if (e.syswm.msg->msg.win.msg == WM_COMMAND)
-			{
-				HandleMenuBar(machine_status, window, LOWORD(e.syswm.msg->msg.win.wParam));
-			}
-		}
-
-	}
-	SDL_Delay(10);
 }

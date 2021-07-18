@@ -18,6 +18,7 @@ int main(int argc, char *args[])
 
 	machine->Run();
 	
-	delete machine;
+	//todo: close SDL and all other stuff, deleting machine causes exceptions
+	//delete machine;
 	return 0;
 }
