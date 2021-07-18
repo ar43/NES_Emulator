@@ -179,14 +179,14 @@ void Input::Poll(MachineStatus *machine_status, UserInterface *ui)
 		{
 			if (e.syswm.msg->msg.win.msg == WM_COMMAND)
 			{
-				HandleMenuBar(machine_status, ui->window.GetWindow(), LOWORD(e.syswm.msg->msg.win.wParam));
+				HandleMenuBar(machine_status, ui, LOWORD(e.syswm.msg->msg.win.wParam));
 			}
 		}
 
     }
 }
 
-void Input::HandleMenuBar(MachineStatus *machine_status, SDL_Window * main_window, WORD param)
+void Input::HandleMenuBar(MachineStatus *machine_status, UserInterface* ui, WORD param)
 {
 	switch (param)
 	{
@@ -198,7 +198,7 @@ void Input::HandleMenuBar(MachineStatus *machine_status, SDL_Window * main_windo
 		}
 		case (WORD)MenuBarID::LOAD_ROM:
 		{
-			machine_status->pending_rom = UserInterface::GetROMPath(main_window);
+			machine_status->pending_rom = UserInterface::GetROMPath(ui->window.GetWindow());
 
 			if (!machine_status->pending_rom.empty())
 			{
@@ -211,7 +211,7 @@ void Input::HandleMenuBar(MachineStatus *machine_status, SDL_Window * main_windo
 		{
 			machine_status->paused = !machine_status->paused;
 			if(machine_status->paused)
-				SDL_SetWindowTitle(main_window, "NES Emulator (paused)");
+				SDL_SetWindowTitle(ui->window.GetWindow(), "NES Emulator (paused)");
 			break;
 		}
 		case (WORD)MenuBarID::RESET:
@@ -222,6 +222,11 @@ void Input::HandleMenuBar(MachineStatus *machine_status, SDL_Window * main_windo
 		case (WORD)MenuBarID::POWER_OFF:
 		{
 			machine_status->running = RunningStatus::RUNNING;
+			break;
+		}
+		case (WORD)MenuBarID::DEBUG:
+		{
+			ui->debugger.window.Toggle();
 			break;
 		}
 		default: break;

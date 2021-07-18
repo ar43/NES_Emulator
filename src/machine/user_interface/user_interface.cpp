@@ -12,7 +12,9 @@ void UserInterface::Init()
         logger::PrintLine(logger::LogType::FATAL_ERROR, "Unable to initialize SDL: " + std::string(SDL_GetError()));
     }
 
+    window.no_update = true;
     window.Init("NES Emulator", SCREEN_WIDTH * GetScale(), SCREEN_HEIGHT * GetScale(), SCREEN_WIDTH, SCREEN_HEIGHT);
+    
 
     menu_bar.Init(window.GetWindow());
     debugger.Init();
