@@ -4,19 +4,30 @@
 #include "../../utility/utility.h"
 #include "window.h"
 #include <SDL_syswm.h>
+#include <SDL_ttf.h>
 
-void UserInterface::Init()
+void UserInterface::InitSDL()
 {
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMECONTROLLER) != 0) 
     {
         logger::PrintLine(logger::LogType::FATAL_ERROR, "Unable to initialize SDL: " + std::string(SDL_GetError()));
     }
 
+    if (TTF_Init() == -1)
+    {
+        logger::PrintLine(logger::LogType::FATAL_ERROR, "Unable to initialize SDL_TTF: " + std::string(SDL_GetError()));
+    }
+}
+
+void UserInterface::Init()
+{
+    InitSDL();
+
     window.no_update = true;
     window.Init("NES Emulator", SCREEN_WIDTH * GetScale(), SCREEN_HEIGHT * GetScale(), SCREEN_WIDTH, SCREEN_HEIGHT);
     
-
     menu_bar.Init(window.GetWindow());
+
     debugger.Init();
 }
 

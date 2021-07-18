@@ -18,6 +18,7 @@ public:
 
 	void SetScale(uint8_t scale);
 	uint8_t GetScale();
+	void InitSDL();
 	void Init();
 	Window window;
 
