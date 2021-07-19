@@ -228,6 +228,15 @@
     <ClCompile Include="src\machine\user_interface\window.cpp">
       <Filter>Source Files\Machine\UserInterface\Units</Filter>
     </ClCompile>
+    <ClCompile Include="src\machine\user_interface\element.cpp">
+      <Filter>Source Files\Machine\UserInterface\Units</Filter>
+    </ClCompile>
+    <ClCompile Include="src\machine\user_interface\text.cpp">
+      <Filter>Source Files\Machine\UserInterface\Units</Filter>
+    </ClCompile>
+    <ClCompile Include="src\machine\user_interface\button.cpp">
+      <Filter>Source Files\Machine\UserInterface\Units</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\logger\logger.h">
@@ -357,6 +366,15 @@
       <Filter>Header Files\Machine\UserInterface</Filter>
     </ClInclude>
     <ClInclude Include="src\machine\user_interface\window.h">
+      <Filter>Header Files\Machine\UserInterface\Units</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machine\user_interface\button.h">
+      <Filter>Header Files\Machine\UserInterface\Units</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machine\user_interface\text.h">
+      <Filter>Header Files\Machine\UserInterface\Units</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machine\user_interface\element.h">
       <Filter>Header Files\Machine\UserInterface\Units</Filter>
     </ClInclude>
   </ItemGroup>

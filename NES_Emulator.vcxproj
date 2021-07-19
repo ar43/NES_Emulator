@@ -180,8 +180,11 @@
     <ClCompile Include="src\machine\ppu\ppuregisters.cpp" />
     <ClCompile Include="src\machine\ppu\ppuscroll.cpp" />
     <ClCompile Include="src\machine\ppu\ppustatus.cpp" />
+    <ClCompile Include="src\machine\user_interface\button.cpp" />
     <ClCompile Include="src\machine\user_interface\debugger.cpp" />
+    <ClCompile Include="src\machine\user_interface\element.cpp" />
     <ClCompile Include="src\machine\user_interface\menu_bar.cpp" />
+    <ClCompile Include="src\machine\user_interface\text.cpp" />
     <ClCompile Include="src\machine\user_interface\user_interface.cpp" />
     <ClCompile Include="src\machine\user_interface\window.cpp" />
     <ClCompile Include="src\main.cpp" />
@@ -226,8 +229,11 @@
     <ClInclude Include="src\machine\ppu\ppuregisters.h" />
     <ClInclude Include="src\machine\ppu\ppuscroll.h" />
     <ClInclude Include="src\machine\ppu\ppustatus.h" />
+    <ClInclude Include="src\machine\user_interface\button.h" />
     <ClInclude Include="src\machine\user_interface\debugger.h" />
+    <ClInclude Include="src\machine\user_interface\element.h" />
     <ClInclude Include="src\machine\user_interface\menu_bar.h" />
+    <ClInclude Include="src\machine\user_interface\text.h" />
     <ClInclude Include="src\machine\user_interface\user_interface.h" />
     <ClInclude Include="src\machine\user_interface\window.h" />
     <ClInclude Include="src\timing\frame.h" />

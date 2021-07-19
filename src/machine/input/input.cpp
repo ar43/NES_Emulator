@@ -13,8 +13,15 @@ void Input::Poll(MachineStatus *machine_status, UserInterface *ui)
     {
 		bool request_exit = false;
 
-		ui->window.HandleEvent(&e, &request_exit);
-		ui->debugger.window.HandleEvent(&e, nullptr);
+		if (e.type == SDL_WINDOWEVENT)
+		{
+			ui->window.HandleWindowEvent(&e, &request_exit);
+			ui->debugger.window.HandleWindowEvent(&e, nullptr);
+		}
+		else
+		{
+			ui->debugger.window.HandleEvent(&e);
+		}
 
         if (e.type == SDL_QUIT || request_exit)
         {

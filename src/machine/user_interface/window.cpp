@@ -2,6 +2,8 @@
 #include <SDL.h>
 #include <string>
 #include "../../logger/logger.h"
+#include "button.h"
+#include "element.h"
 
 void Window::Toggle()
 {
@@ -11,10 +13,15 @@ void Window::Toggle()
         Show();
 }
 
-void Window::HandleEvent(SDL_Event* e, bool *request_exit)
+void Window::AddButton(std::shared_ptr<Button> button)
+{
+    elements.push_back(button);
+}
+
+void Window::HandleWindowEvent(SDL_Event* e, bool *request_exit)
 {
     //If an event was detected for this window
-    if( e->type == SDL_WINDOWEVENT && e->window.windowID == window_id )
+    if(e->window.windowID == window_id )
     {
         //Caption update flag
         bool updateCaption = false;
@@ -103,6 +110,16 @@ void Window::Init(std::string window_name, int width, int height, int rend_width
     //open = true;
 }
 
+void Window::HandleEvent(SDL_Event* e)
+{
+    if (!focus)
+        return;
+    for (auto ele : elements)
+    {
+        ele->HandleEvent(e);
+    }
+}
+
 void Window::Update()
 {
     if (no_update || !shown)
@@ -111,10 +128,13 @@ void Window::Update()
     logger::PrintLine(logger::LogType::DEBUG, "Updating window #" + std::to_string(window_id));
 
     SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, 0xFF);
-
-
-
     SDL_RenderClear(renderer);
+
+    for (auto ele : elements)
+    {
+        ele->Render(renderer);
+    }
+
     SDL_RenderPresent(renderer);
 }
 
