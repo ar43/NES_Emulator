@@ -354,7 +354,8 @@ void Apu::Tick(Bus *bus)
 	if (sample_timer == 0)
 	{
 		sample_timer = 20;
-		GenerateSample();
+		if(!*speedup)
+			GenerateSample();
 	}
 	else
 	{

@@ -125,7 +125,7 @@ void Window::Update()
     if (no_update || !shown)
         return;
 
-    logger::PrintLine(logger::LogType::DEBUG, "Updating window #" + std::to_string(window_id));
+    //logger::PrintLine(logger::LogType::DEBUG, "Updating window #" + std::to_string(window_id));
 
     SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, 0xFF);
     SDL_RenderClear(renderer);

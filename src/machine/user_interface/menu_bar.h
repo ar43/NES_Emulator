@@ -16,14 +16,14 @@ enum class MenuBarID
 
 class MenuBar
 {
-public:
+private:
 	HMENU hHelp;
 	HMENU hGame;
 	HMENU hTools;
 	HMENU hOptions;
 	HMENU hFile;
 	HMENU hMenuBar;
-
+public:
 	void Activate(HWND windowRef);
 	void Init(SDL_Window* win);
 	void AdjustWindowSize(SDL_Window* win);

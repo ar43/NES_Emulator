@@ -181,6 +181,7 @@ void Machine::PollInterrupts()
 void Machine::InitStatus()
 {
 	status.speedup = &frame.capTimer.bypass;
+	apu.speedup = status.speedup;
 	status.mute = &apu.mute;
 }
 
@@ -207,6 +208,7 @@ void Machine::Run()
 			while (status.paused)
 			{
 				input.Poll(&status, &ui);
+				ui.UpdateAll();
 				SDL_Delay(10);
 			}
 
@@ -225,6 +227,7 @@ void Machine::Run()
 					cycle_accumulator += budget;
 				}
 				apu.Play();
+				ui.UpdateAll();
 				frame.end(ui.window.GetWindow());
 
 			}
@@ -235,6 +238,7 @@ void Machine::Run()
 		else
 		{
 			input.Poll(&status, &ui);
+			ui.UpdateAll();
 			if (!status.pending_rom.empty())
 				LoadROM(status.pending_rom);
 			SDL_Delay(10);

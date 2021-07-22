@@ -20,10 +20,13 @@ public:
 	uint8_t GetScale();
 	void InitSDL();
 	void Init();
+	void UpdateAll();
 	Window window;
 
 	uint8_t scale = 4;
 
 	MenuBar menu_bar;
 	Debugger debugger;
+
+	std::vector<Window*> other_windows;
 };

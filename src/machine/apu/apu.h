@@ -25,6 +25,7 @@ public:
 	uint8_t ReadStatus();
 
 	bool mute = false;
+	bool* speedup = nullptr;
 
 	FrameCounter frame_counter;
 	PulseChannel pulse_channel[2];
