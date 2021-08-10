@@ -10,7 +10,7 @@ class Window;
 class UserInterface
 {
 private:
-	
+	TTF_Font *font;
 public:
 
 	static HWND GetSDLWinHandle(SDL_Window* win);

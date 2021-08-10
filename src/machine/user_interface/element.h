@@ -12,6 +12,8 @@ private:
 	SDL_Rect rect;
 	SDL_Color color;
 
+	bool active = true;
+
 public:
 	Element()
 	{
@@ -22,6 +24,8 @@ public:
 	void SetPosition(int x, int y);
 	void SetRect(int x, int y, int w, int h);
 	void SetColor(Uint8 r, Uint8 g, Uint8 b);
+	void SetActive(bool active);
+	bool IsActive();
 	SDL_Color* GetColor();
 	virtual void HandleEvent(SDL_Event* e) = 0;
 	virtual void Render(SDL_Renderer *renderer) = 0;

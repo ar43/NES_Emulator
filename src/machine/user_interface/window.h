@@ -1,5 +1,6 @@
 #pragma once
 #include <SDL.h>
+#include <SDL_ttf.h>
 #include <string>
 #include <vector>
 #include <memory>
@@ -17,7 +18,7 @@ private:
 	bool shown = false;
 	bool focus = false;
 	bool minimized = false;
-	SDL_Color color = { 0xff,0xff,0xff };
+	SDL_Color color = { 0xf0,0xf0,0xf0 };
 
 	std::vector<std::shared_ptr<Element>> elements;
 public:
@@ -32,7 +33,8 @@ public:
 	void Hide() { SDL_HideWindow(window); }
 	void Toggle();
 
-	void AddButton(std::shared_ptr<Button> button);
+	void AddButton(int x, int y, int w, int h, std::string text, TTF_Font *font);
+	void AddText(int x, int y, std::string text, TTF_Font* font);
 
 	void Open();
 	void Init(std::string window_name, int width, int height, int rend_width, int rend_height, Uint32 flags = 0);

@@ -33,6 +33,16 @@ void Element::SetColor(Uint8 r, Uint8 g, Uint8 b)
 	color.a = 0xff;
 }
 
+void Element::SetActive(bool active)
+{
+	this->active = active;
+}
+
+bool Element::IsActive()
+{
+	return this->active;
+}
+
 SDL_Color* Element::GetColor()
 {
 	return &color;

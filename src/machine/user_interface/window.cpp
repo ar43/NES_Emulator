@@ -4,6 +4,7 @@
 #include "../../logger/logger.h"
 #include "button.h"
 #include "element.h"
+#include "text.h"
 
 void Window::Toggle()
 {
@@ -13,9 +14,16 @@ void Window::Toggle()
         Show();
 }
 
-void Window::AddButton(std::shared_ptr<Button> button)
+void Window::AddButton(int x, int y, int w, int h, std::string text, TTF_Font *font)
 {
+    auto button = std::shared_ptr<Button>(new Button(GetRenderer(),x,y,w,h,text, font));
     elements.push_back(button);
+}
+
+void Window::AddText(int x, int y, std::string text, TTF_Font *font)
+{
+    auto txt = std::shared_ptr<Text>(new Text(GetRenderer(),x,y,text, font));
+    elements.push_back(txt);
 }
 
 void Window::HandleWindowEvent(SDL_Event* e, bool *request_exit)

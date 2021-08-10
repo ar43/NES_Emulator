@@ -1,5 +1,6 @@
 #pragma once
 #include <SDL.h>
+#include <SDL_ttf.h>
 #include "window.h"
 
 class Debugger
@@ -11,5 +12,5 @@ private:
 public:
 	Window window;
 	void Open();
-	void Init();
+	void Init(TTF_Font *font);
 };

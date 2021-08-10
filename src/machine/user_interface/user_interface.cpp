@@ -15,7 +15,12 @@ void UserInterface::InitSDL()
 
     if (TTF_Init() == -1)
     {
-        logger::PrintLine(logger::LogType::FATAL_ERROR, "Unable to initialize SDL_TTF: " + std::string(SDL_GetError()));
+        logger::PrintLine(logger::LogType::FATAL_ERROR, "Unable to initialize SDL_TTF: " + std::string(TTF_GetError()));
+    }
+    font = TTF_OpenFont( "data/Consolas.ttf", 16 );
+    if( font == NULL )
+    {
+        logger::PrintLine(logger::LogType::FATAL_ERROR, "Unable to load font: " + std::string(TTF_GetError()));
     }
 }
 
@@ -27,7 +32,7 @@ void UserInterface::Init()
     window.Init("NES Emulator", SCREEN_WIDTH * GetScale(), SCREEN_HEIGHT * GetScale(), SCREEN_WIDTH, SCREEN_HEIGHT);
     
     menu_bar.Init(window.GetWindow());
-    debugger.Init();
+    debugger.Init(font);
 
     other_windows.push_back(&debugger.window);
 }

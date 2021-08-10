@@ -1,18 +1,19 @@
 #pragma once
 #include <SDL.h>
+#include <SDL_ttf.h>
+#include <string>
 #include "element.h"
+
+class Text;
+
 class Button : public Element
 {
 private:
-	
-
+	Text *text_obj = nullptr;
+	std::string text = "Empty";
 	bool pressed = false;
 public:
-	Button(int x, int y, int w, int h)
-	{
-		SetRect(x, y, w, h);
-		SetColor(0, 0, 0);
-	}
+	Button(SDL_Renderer *renderer, int x, int y, int w, int h, std::string text, TTF_Font *font);
 	void HandleEvent(SDL_Event* e);
 	void Render(SDL_Renderer* renderer);
 	void (*OnClick)() = 0;
