@@ -20,6 +20,8 @@ private:
 	bool minimized = false;
 	SDL_Color color = { 0xf0,0xf0,0xf0 };
 
+	int w, h;
+
 	std::vector<std::shared_ptr<Element>> elements;
 public:
 
@@ -33,7 +35,7 @@ public:
 	void Hide() { SDL_HideWindow(window); }
 	void Toggle();
 
-	void AddButton(int x, int y, int w, int h, std::string text, TTF_Font *font);
+	void AddButton(int x, int y, int w, int h, std::string text, TTF_Font *font, void (*OnClick)());
 	void AddText(int x, int y, std::string text, TTF_Font* font);
 
 	void Open();
@@ -43,4 +45,5 @@ public:
 	SDL_Window* GetWindow();
 	SDL_Renderer* GetRenderer();
 	void HandleWindowEvent(SDL_Event* e, bool *request_exit);
+	void (*DrawHook)(SDL_Renderer* renderer) = nullptr;
 };

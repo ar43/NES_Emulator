@@ -13,4 +13,6 @@ public:
 	Window window;
 	void Open();
 	void Init(TTF_Font *font);
+	static void DrawBackground(SDL_Renderer* renderer);
+	static void Button1Click();
 };

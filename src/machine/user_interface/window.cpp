@@ -14,9 +14,9 @@ void Window::Toggle()
         Show();
 }
 
-void Window::AddButton(int x, int y, int w, int h, std::string text, TTF_Font *font)
+void Window::AddButton(int x, int y, int w, int h, std::string text, TTF_Font *font, void (*OnClick)())
 {
-    auto button = std::shared_ptr<Button>(new Button(GetRenderer(),x,y,w,h,text, font));
+    auto button = std::shared_ptr<Button>(new Button(GetRenderer(),x,y,w,h,text, font, OnClick));
     elements.push_back(button);
 }
 
@@ -115,6 +115,8 @@ void Window::Init(std::string window_name, int width, int height, int rend_width
     }
 
     SDL_SetRenderDrawColor(renderer, 0, 0xFF, 0, 0xFF);
+    this->w = width;
+    this->h = height;
     //open = true;
 }
 
@@ -137,6 +139,9 @@ void Window::Update()
 
     SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, 0xFF);
     SDL_RenderClear(renderer);
+
+    if(DrawHook != nullptr)
+        DrawHook(renderer);
 
     for (auto ele : elements)
     {

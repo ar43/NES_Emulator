@@ -2,12 +2,13 @@
 #include "../../logger/logger.h"
 #include "text.h"
 
-Button::Button(SDL_Renderer *renderer, int x, int y, int w, int h, std::string text, TTF_Font *font)
+Button::Button(SDL_Renderer *renderer, int x, int y, int w, int h, std::string text, TTF_Font *font, void (*OnClick)())
 {
 	this->text = text;
 	SetRect(x, y, w, h);
 	SetColor(0xb1, 0xb1, 0xb1);
 	text_obj = new Text(renderer, x, y, text, font,true,w,h);
+	this->OnClick = OnClick;
 }
 
 void Button::HandleEvent(SDL_Event* e)
@@ -26,9 +27,12 @@ void Button::HandleEvent(SDL_Event* e)
 			pressed = false;
 			if (IsActive())
 			{
-				//onClick();
+				if(OnClick != nullptr)
+					OnClick();
+				else
+					logger::PrintLine(logger::LogType::DEBUG, "Button #" + std::to_string(GetId()) + " clicked but has no function bound");
 			}
-			logger::PrintLine(logger::LogType::DEBUG, "Button #" + std::to_string(GetId()) + " clicked");
+			//logger::PrintLine(logger::LogType::DEBUG, "Button #" + std::to_string(GetId()) + " clicked");
 		}
 	}
 	else if (e->type == SDL_MOUSEBUTTONDOWN && e->button.button == SDL_BUTTON_LEFT)
