@@ -17,7 +17,7 @@ void UserInterface::InitSDL()
     {
         logger::PrintLine(logger::LogType::FATAL_ERROR, "Unable to initialize SDL_TTF: " + std::string(TTF_GetError()));
     }
-    font = TTF_OpenFont( "data/Consolas.ttf", 16 );
+    font = TTF_OpenFont( FONT_PATH, 16 );
     if( font == NULL )
     {
         logger::PrintLine(logger::LogType::FATAL_ERROR, "Unable to load font: " + std::string(TTF_GetError()));

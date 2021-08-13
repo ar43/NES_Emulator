@@ -16,13 +16,13 @@ void Window::Toggle()
 
 void Window::AddButton(int x, int y, int w, int h, std::string text, TTF_Font *font, void (*OnClick)())
 {
-    auto button = std::shared_ptr<Button>(new Button(GetRenderer(),x,y,w,h,text, font, OnClick));
+    auto button = std::shared_ptr<Button>(new Button(GetRenderer(), x, y, w, h, text, font, OnClick));
     elements.push_back(button);
 }
 
-void Window::AddText(int x, int y, std::string text, TTF_Font *font)
+void Window::AddText(int x, int y, std::string text, TTF_Font *font, int size)
 {
-    auto txt = std::shared_ptr<Text>(new Text(GetRenderer(),x,y,text, font));
+    auto txt = std::shared_ptr<Text>(new Text(GetRenderer(), x, y, text, font, size));
     elements.push_back(txt);
 }
 

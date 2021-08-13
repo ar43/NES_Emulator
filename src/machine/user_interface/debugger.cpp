@@ -6,7 +6,7 @@ void Debugger::Init(TTF_Font *font)
 {
     window.Init("Debugger", win_width, win_height, win_width, win_height, SDL_WINDOW_HIDDEN);
     window.DrawHook = &Debugger::DrawBackground;
-    window.AddText(50, 10, "Debugger", font);
+    window.AddText(50, 10, "Debugger", font, 18);
     window.AddButton(10,50,73,21,"Okay", font, &Debugger::Button1Click);
 }
 
