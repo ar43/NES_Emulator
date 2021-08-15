@@ -115,7 +115,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_ttf.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_ttf.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -181,6 +181,7 @@
     <ClCompile Include="src\machine\ppu\ppuscroll.cpp" />
     <ClCompile Include="src\machine\ppu\ppustatus.cpp" />
     <ClCompile Include="src\machine\user_interface\button.cpp" />
+    <ClCompile Include="src\machine\user_interface\checkbox.cpp" />
     <ClCompile Include="src\machine\user_interface\debugger.cpp" />
     <ClCompile Include="src\machine\user_interface\element.cpp" />
     <ClCompile Include="src\machine\user_interface\menu_bar.cpp" />
@@ -230,6 +231,7 @@
     <ClInclude Include="src\machine\ppu\ppuscroll.h" />
     <ClInclude Include="src\machine\ppu\ppustatus.h" />
     <ClInclude Include="src\machine\user_interface\button.h" />
+    <ClInclude Include="src\machine\user_interface\checkbox.h" />
     <ClInclude Include="src\machine\user_interface\debugger.h" />
     <ClInclude Include="src\machine\user_interface\element.h" />
     <ClInclude Include="src\machine\user_interface\menu_bar.h" />

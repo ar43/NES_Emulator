@@ -5,6 +5,7 @@
 #include "button.h"
 #include "element.h"
 #include "text.h"
+#include "checkbox.h"
 
 void Window::Toggle()
 {
@@ -24,6 +25,12 @@ void Window::AddText(int x, int y, std::string text, TTF_Font *font, int size)
 {
     auto txt = std::shared_ptr<Text>(new Text(GetRenderer(), x, y, text, font, size));
     elements.push_back(txt);
+}
+
+void Window::AddCheckbox(int x, int y, std::string text, TTF_Font* font, void(*OnClick)(bool* new_state))
+{
+    auto checkbox = std::shared_ptr<Checkbox>(new Checkbox(GetRenderer(), x, y, text, font, OnClick));
+    elements.push_back(checkbox);
 }
 
 void Window::HandleWindowEvent(SDL_Event* e, bool *request_exit)

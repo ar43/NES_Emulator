@@ -16,20 +16,20 @@ private:
 public:
 	Text(SDL_Renderer *renderer, int x, int y, std::string text, TTF_Font *font, int size)
 	{
-		TTF_CloseFont(font);
 		this->size = size;
 		font = TTF_OpenFont( FONT_PATH, size );
 		SetColor(0, 0, 0);
 		SetPosition(x, y);
 		SetText(renderer, text, font);
+		TTF_CloseFont(font);
 	}
 	Text(SDL_Renderer *renderer, int x, int y, std::string text, TTF_Font *font, bool offset, int w, int h)
 	{
-		TTF_CloseFont(font);
 		font = TTF_OpenFont( FONT_PATH, size );
 		SetColor(0, 0, 0);
 		SetPosition(x, y);
 		SetText(renderer, text, font,offset,w,h);
+		TTF_CloseFont(font);
 	}
 	void HandleEvent(SDL_Event* e) {};
 	void Render(SDL_Renderer *renderer);

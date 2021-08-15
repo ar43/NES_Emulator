@@ -37,6 +37,7 @@ public:
 
 	void AddButton(int x, int y, int w, int h, std::string text, TTF_Font *font, void (*OnClick)());
 	void AddText(int x, int y, std::string text, TTF_Font* font, int size);
+	void AddCheckbox(int x, int y, std::string text, TTF_Font* font, void (*OnClick)(bool* new_state));
 
 	void Open();
 	void Init(std::string window_name, int width, int height, int rend_width, int rend_height, Uint32 flags = 0);

@@ -15,4 +15,5 @@ public:
 	void Init(TTF_Font *font);
 	static void DrawBackground(SDL_Renderer* renderer);
 	static void Button1Click();
+	static void Checkbox1Click(bool *new_state);
 };
