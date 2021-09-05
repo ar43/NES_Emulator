@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <functional>
 
 class Element;
 class Button;
@@ -35,16 +36,18 @@ public:
 	void Hide() { SDL_HideWindow(window); }
 	void Toggle();
 
-	void AddButton(int x, int y, int w, int h, std::string text, TTF_Font *font, void (*OnClick)());
+	void AddButton(int x, int y, int w, int h, std::string text, TTF_Font *font, std::function<void()> OnClick);
 	void AddText(int x, int y, std::string text, TTF_Font* font, int size);
-	void AddCheckbox(int x, int y, std::string text, TTF_Font* font, void (*OnClick)(bool* new_state));
+	void AddCheckbox(int x, int y, std::string text, TTF_Font* font, std::function<void(bool*)> OnClick);
 
-	void Open();
 	void Init(std::string window_name, int width, int height, int rend_width, int rend_height, Uint32 flags = 0);
 	void HandleEvent(SDL_Event* e);
 	void Update();
 	SDL_Window* GetWindow();
 	SDL_Renderer* GetRenderer();
 	void HandleWindowEvent(SDL_Event* e, bool *request_exit);
-	void (*DrawHook)(SDL_Renderer* renderer) = nullptr;
+	//void (*DrawHook)(SDL_Renderer* renderer) = nullptr;
+	std::function<void(SDL_Renderer*)> DrawHook;
+	std::function<void()> OnOpen;
+	std::function<void()> OnClose;
 };

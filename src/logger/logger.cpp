@@ -18,7 +18,7 @@ namespace logger
 
 	void WriteTestToFile()
 	{
-		if(CPU_TEST_MODE)
+		/*if(CPU_TEST_MODE)
 		{
 			std::ofstream out("tests/cpu_test.log", std::ofstream::out | std::ofstream::app);
 			for (auto& str : cpu_test_buffer)
@@ -27,7 +27,7 @@ namespace logger
 			}
 			out.close();
 			cpu_test_buffer.clear();
-		}
+		}*/
 	}
 
 	std::string TypeToString(LogType logType)

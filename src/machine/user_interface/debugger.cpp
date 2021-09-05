@@ -5,10 +5,12 @@
 void Debugger::Init(TTF_Font *font)
 {
     window.Init("Debugger", win_width, win_height, win_width, win_height, SDL_WINDOW_HIDDEN);
-    window.DrawHook = &Debugger::DrawBackground;
+    window.OnOpen = std::bind(&Debugger::Open,this);
+    window.OnClose = std::bind(&Debugger::Close,this);
+    window.DrawHook = std::bind(&Debugger::DrawBackground, this, std::placeholders::_1);
     window.AddText(50, 10, "Debugger", font, 18);
-    window.AddButton(10,50,73,21,"Okay", font, &Debugger::Button1Click);
-    window.AddCheckbox(100, 100, "Some stuff here", font, &Debugger::Checkbox1Click);
+    window.AddButton(10,50,73,21,"Okay", font, std::bind(&Debugger::Button1Click, this));
+    window.AddCheckbox(100, 100, "Some stuff here", font, std::bind(&Debugger::Checkbox1Click, this, std::placeholders::_1));
 }
 
 void Debugger::DrawBackground(SDL_Renderer* renderer)
@@ -33,5 +35,15 @@ void Debugger::Checkbox1Click(bool* new_state)
     {
         logger::PrintLine(logger::LogType::INFO, "Unchecked");
     }
+}
+
+void Debugger::Open()
+{
+    *debug_mode = true;
+}
+
+void Debugger::Close()
+{
+    *debug_mode = false;
 }
 

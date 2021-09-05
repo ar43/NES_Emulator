@@ -3,6 +3,7 @@
 #include "../../utility/utility.h"
 #include "../bus/bus.h"
 #include "../misc/machine_status.h"
+#include "../user_interface/debugger.h"
 #include <iostream>
 #include <sstream>
 #include <iomanip>
@@ -36,12 +37,12 @@ uint8_t Cpu::ReadRam(size_t loc)
 	return RAM[loc];
 }
 
-uint8_t Cpu::Fetch(Bus* bus)
+uint8_t Cpu::Fetch(Bus* bus, bool generate_string)
 {
 	uint8_t ret = bus->ReadCPUSafe(registers[(size_t)RegId::PC]->get());
 	registers[(size_t)RegId::PC]->increment();
 
-	if (logger::CPU_TEST_MODE)
+	if (logger::CPU_TEST_MODE || generate_string)
 	{
 		fetch_buffer += utility::int_to_hex(ret) + " ";
 	}
@@ -49,7 +50,7 @@ uint8_t Cpu::Fetch(Bus* bus)
 	return ret;
 }
 
-int Cpu::ResolveAddressing(Bus* bus, Instruction* ins)
+int Cpu::ResolveAddressing(Bus* bus, Instruction* ins, bool generate_string)
 {
 	switch (ins->mode)
 	{
@@ -62,69 +63,69 @@ int Cpu::ResolveAddressing(Bus* bus, Instruction* ins)
 	{
 		//special case, beware!
 		//have to take care of this on opcode level
-		if(logger::CPU_TEST_MODE)
+		if(logger::CPU_TEST_MODE || generate_string)
 			output_string = "A";
 		return 0;
 	}
 	case AddressingMode::IMMEDIATE:
 	{
-		auto fetched = Fetch(bus);
-		if(logger::CPU_TEST_MODE)
+		auto fetched = Fetch(bus, generate_string);
+		if(logger::CPU_TEST_MODE || generate_string)
 			output_string = "#$" + utility::int_to_hex(fetched);
 		return fetched;
 	}
 	case AddressingMode::ZERO_PAGE:
 	{
-		auto fetched = Fetch(bus);
-		if(logger::CPU_TEST_MODE)
+		auto fetched = Fetch(bus, generate_string);
+		if(logger::CPU_TEST_MODE || generate_string)
 			output_string = "$" + utility::int_to_hex(fetched) + " = " + utility::int_to_hex(bus->ReadCPUSafe(fetched));
 		return fetched;
 	}
 	case AddressingMode::ZERO_PAGE_X:
 	{
-		uint8_t fetched = Fetch(bus);
+		uint8_t fetched = Fetch(bus, generate_string);
 		int x = registers[(size_t)RegId::X]->get();
 		int addr = fetched + x;
 		addr = addr % 0x100;
-		if(logger::CPU_TEST_MODE)
+		if(logger::CPU_TEST_MODE || generate_string)
 			output_string = "$" + utility::int_to_hex(fetched) + ",X @ " + utility::int_to_hex(addr) + " = " + utility::int_to_hex(bus->ReadCPUSafe(addr));
 		return addr;
 	}
 	case AddressingMode::ZERO_PAGE_Y:
 	{
-		uint8_t fetched = Fetch(bus);
+		uint8_t fetched = Fetch(bus, generate_string);
 		int y = registers[(size_t)RegId::Y]->get();
 		int addr = fetched + y;
 		addr = addr % 0x100;
-		if(logger::CPU_TEST_MODE)
+		if(logger::CPU_TEST_MODE || generate_string)
 			output_string = "$" + utility::int_to_hex(fetched) + ",Y @ " + utility::int_to_hex(addr) + " = " + utility::int_to_hex(bus->ReadCPUSafe(addr));
 		return addr;
 	}
 	case AddressingMode::RELATIVE:
 	{
-		uint8_t fetched = Fetch(bus);
+		uint8_t fetched = Fetch(bus, generate_string);
 		int ret = (int8_t)fetched;
-		if(logger::CPU_TEST_MODE)
+		if(logger::CPU_TEST_MODE || generate_string)
 			output_string = "$" + utility::int_to_hex(ret + registers[(size_t)RegId::PC]->get());
 		return ret;
 	}
 	case AddressingMode::ABSOLUTE:
 	{
-		uint8_t ls = Fetch(bus);
-		uint8_t ms = Fetch(bus);
+		uint8_t ls = Fetch(bus, generate_string);
+		uint8_t ms = Fetch(bus, generate_string);
 		int ret = (ms << 8) | ls;
 
-		if(logger::CPU_TEST_MODE && ins->name.compare("JMP") != 0 && ins->name.compare("JSR") != 0)
+		if((logger::CPU_TEST_MODE || generate_string) && ins->opcode != 0x20 && ins->opcode != 0x4C)
 			output_string = "$" + utility::int_to_hex(ret) + " = " + utility::int_to_hex(bus->ReadCPUSafe(ret));
-		else if(logger::CPU_TEST_MODE)
+		else if(logger::CPU_TEST_MODE || generate_string)
 			output_string = "$" + utility::int_to_hex(ret);
 
 		return ret;
 	}
 	case AddressingMode::ABSOLUTE_X: //extra cycle support
 	{
-		uint8_t ls = Fetch(bus);
-		uint8_t ms = Fetch(bus);
+		uint8_t ls = Fetch(bus, generate_string);
+		uint8_t ms = Fetch(bus, generate_string);
 		int first = (ms << 8) | ls;
 
 		int x = registers[(size_t)RegId::X]->get();
@@ -136,14 +137,14 @@ int Cpu::ResolveAddressing(Bus* bus, Instruction* ins)
 		if (ins->extra_cycle && first_page != second_page)
 			add_extra_cycle = true;
 
-		if(logger::CPU_TEST_MODE)
+		if(logger::CPU_TEST_MODE || generate_string)
 			output_string = "$" + utility::int_to_hex(first) + ",X @ " + utility::int_to_hex(second) + " = " + utility::int_to_hex(bus->ReadCPUSafe(second));
 		return second;
 	}
 	case AddressingMode::ABSOLUTE_Y: //extra cycle support
 	{
-		uint8_t ls = Fetch(bus);
-		uint8_t ms = Fetch(bus);
+		uint8_t ls = Fetch(bus, generate_string);
+		uint8_t ms = Fetch(bus, generate_string);
 		int first = (ms << 8) | ls;
 
 		int y = registers[(size_t)RegId::Y]->get();
@@ -155,14 +156,14 @@ int Cpu::ResolveAddressing(Bus* bus, Instruction* ins)
 		if (ins->extra_cycle && first_page != second_page)
 			add_extra_cycle = true;
 
-		if(logger::CPU_TEST_MODE)
+		if(logger::CPU_TEST_MODE || generate_string)
 			output_string = "$" + utility::int_to_hex(first) + ",Y @ " + utility::int_to_hex(second) + " = " + utility::int_to_hex(bus->ReadCPUSafe(second));
 		return second;
 	}
 	case AddressingMode::INDIRECT:
 	{
-		uint8_t ls = Fetch(bus);
-		uint8_t ms = Fetch(bus);
+		uint8_t ls = Fetch(bus, generate_string);
+		uint8_t ms = Fetch(bus, generate_string);
 		size_t addr = (ms << 8) | ls;
 
 		assert(addr < 0xFFFF);
@@ -175,14 +176,14 @@ int Cpu::ResolveAddressing(Bus* bus, Instruction* ins)
 
 		int ret = (ms_lookup << 8) | ls_lookup;
 
-		if(logger::CPU_TEST_MODE)
+		if(logger::CPU_TEST_MODE || generate_string)
 			output_string = "($" + utility::int_to_hex(old_addr) + ") = " + utility::int_to_hex(ret);
 
 		return ret;
 	}
 	case AddressingMode::INDEXED_INDIRECT:
 	{
-		uint8_t fetched = Fetch(bus);
+		uint8_t fetched = Fetch(bus, generate_string);
 		int x = registers[(size_t)RegId::X]->get();
 		int addr = fetched + x;
 		if (addr > 0xFF)
@@ -195,14 +196,14 @@ int Cpu::ResolveAddressing(Bus* bus, Instruction* ins)
 
 		int ret = (ms_lookup << 8) | ls_lookup;
 
-		if(logger::CPU_TEST_MODE)
+		if(logger::CPU_TEST_MODE || generate_string)
 			output_string = "($" + utility::int_to_hex(fetched) + ",X) @ " + utility::int_to_hex(old_addr) + " = " + utility::int_to_hex(ret) + " = " + utility::int_to_hex(bus->ReadCPUSafe(ret));
 
 		return ret;
 	}
 	case AddressingMode::INDIRECT_INDEXED: //extra cycle support
 	{
-		uint8_t fetched = Fetch(bus);
+		uint8_t fetched = Fetch(bus, generate_string);
 		int addr = fetched;
 		uint8_t ls_lookup = bus->ReadCPUSafe(addr);
 		addr= (addr + 1) % 0x100;
@@ -218,7 +219,7 @@ int Cpu::ResolveAddressing(Bus* bus, Instruction* ins)
 		if (ins->extra_cycle && first_page != second_page)
 			add_extra_cycle = true;
 
-		if(logger::CPU_TEST_MODE)
+		if(logger::CPU_TEST_MODE || generate_string)
 			output_string = "($" + utility::int_to_hex(fetched) + "),Y = " + utility::int_to_hex(first) + " @ " + utility::int_to_hex(second) + " = " + utility::int_to_hex(bus->ReadCPUSafe(second));
 
 		return second;
@@ -238,6 +239,7 @@ void Cpu::HandleReset(Bus *bus, ResetType reset)
 	logger::PrintLine(logger::LogType::INFO, "CPU RESET detected");
 	AddCycles(7);
 	int initial_pc = bus->ReadCPU(0xFFFD)*256 + bus->ReadCPU(0xFFFC); //normally we jump to this
+	debug_data->all_bytes = 0xffff - initial_pc + 1;
 	registers[(size_t)RegId::PC]->set(initial_pc);
 
 	if (reset == ResetType::HARD)
@@ -316,18 +318,37 @@ void Cpu::HandleIRQ(Bus *bus)
 
 void Cpu::ExecuteInstruction(Bus *bus)
 {
+	bool generate_string = false;
+
 	int old_pc = registers[(size_t)RegId::PC]->get();
 
-	uint8_t opcode = Fetch(bus);
+	if (debug_mode)
+	{
+		if (debug_data->code[old_pc].empty())
+			generate_string = true;
+	}
+
+	uint8_t opcode = Fetch(bus, generate_string);
 	auto instruction = GetInstruction(opcode);
 
-	int value = ResolveAddressing(bus, instruction);
+	int value = ResolveAddressing(bus, instruction, generate_string);
 
-	if (logger::CPU_TEST_MODE)
+	//if (logger::CPU_TEST_MODE)
+	//{
+	//	std::stringstream ss;
+	//	//ss << utility::int_to_hex(old_pc) << "  " << std::setw(10) << std::left << GetFetchBuffer() << instruction->name << " " << std::setw(28) << std::left << output_string << RegistersToString() << PPUCounterToString() << " " << CYCToString() << std::endl;
+	//	ss << utility::int_to_hex(old_pc) << "  " << std::setw(10) << std::left << GetFetchBuffer() << instruction->name << " " << std::setw(28) << std::left << output_string << std::endl;
+	//	logger::cpu_test_buffer.push_back(ss.str());
+	//	output_string = "";
+	//}
+
+	if (generate_string)
 	{
 		std::stringstream ss;
-		ss << utility::int_to_hex(old_pc) << "  " << std::setw(10) << std::left << GetFetchBuffer() << instruction->name << " " << std::setw(28) << std::left << output_string << RegistersToString() << PPUCounterToString() << " " << CYCToString() << std::endl;
-		logger::cpu_test_buffer.push_back(ss.str());
+		ss << utility::int_to_hex(old_pc) << "  " << std::setw(10) << std::left << GetFetchBuffer() << instruction->name << " " << std::setw(28) << std::left << output_string << std::endl;
+		debug_data->code[old_pc] = ss.str();
+		debug_data->known_bytes += registers[(size_t)RegId::PC]->get() - old_pc;
+		//logger::PrintLine(logger::LogType::DEBUG, std::to_string(double(debug_data->known_bytes)/double(debug_data->all_bytes)*100) + "% = " + std::to_string(debug_data->known_bytes) + "/" + std::to_string(debug_data->all_bytes));
 		output_string = "";
 	}
 
@@ -358,6 +379,12 @@ void Cpu::AddCycles(uint32_t num)
 		cycle_counter += 1;
 		add_extra_cycle = false;
 	}
+}
+
+void Cpu::Init(DebugData *debug_data, bool **debug_mode)
+{
+	this->debug_data = debug_data;
+	*debug_mode = &this->debug_mode;
 }
 
 void Cpu::InitRegisters()

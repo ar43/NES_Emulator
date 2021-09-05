@@ -22,6 +22,7 @@ Machine::Machine()
 void Machine::Init()
 {
 	ui.Init();
+	cpu.Init(&ui.debugger.debug_data, &ui.debugger.debug_mode);
 	bus.AttachComponents(&cpu, input.joypad, &apu, &ppu);
 	ppu.display.Init(ui.window.GetWindow(), ui.window.GetRenderer(), &ui.scale);
 	apu.Init(&bus.irq_pending, &status.volume);

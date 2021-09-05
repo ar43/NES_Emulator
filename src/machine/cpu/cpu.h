@@ -9,11 +9,13 @@ constexpr size_t STACK_OFFSET = 0x100;
 enum class ResetType;
 
 class Bus;
+struct DebugData;
 
 class Cpu
 {
 public:
 	Cpu();
+	void Init(DebugData *debug_data, bool** debug_mode);
 
 	std::string RegistersToString();
 	std::string PPUCounterToString();
@@ -57,13 +59,17 @@ private:
 
 	void InitRegisters();
 
-	uint8_t Fetch(Bus *bus);
+	uint8_t Fetch(Bus *bus, bool generate_string);
 	std::string fetch_buffer;
 	
-	int ResolveAddressing(Bus *bus, Instruction* ins);
+	int ResolveAddressing(Bus *bus, Instruction* ins, bool generate_string);
 
 	uint64_t cycle_counter = 0;
 	bool add_extra_cycle = false;
+	
+	bool debug_mode = false;
+	//std::string* debug_array = nullptr;
+	DebugData* debug_data;
 
 	uint8_t RAM[0x800]; //2KB internal ram
 	

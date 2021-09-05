@@ -15,7 +15,7 @@ void Window::Toggle()
         Show();
 }
 
-void Window::AddButton(int x, int y, int w, int h, std::string text, TTF_Font *font, void (*OnClick)())
+void Window::AddButton(int x, int y, int w, int h, std::string text, TTF_Font *font, std::function<void()> OnClick)
 {
     auto button = std::shared_ptr<Button>(new Button(GetRenderer(), x, y, w, h, text, font, OnClick));
     elements.push_back(button);
@@ -27,7 +27,7 @@ void Window::AddText(int x, int y, std::string text, TTF_Font *font, int size)
     elements.push_back(txt);
 }
 
-void Window::AddCheckbox(int x, int y, std::string text, TTF_Font* font, void(*OnClick)(bool* new_state))
+void Window::AddCheckbox(int x, int y, std::string text, TTF_Font* font, std::function<void(bool*)> OnClick)
 {
     auto checkbox = std::shared_ptr<Checkbox>(new Checkbox(GetRenderer(), x, y, text, font, OnClick));
     elements.push_back(checkbox);
@@ -46,11 +46,15 @@ void Window::HandleWindowEvent(SDL_Event* e, bool *request_exit)
         case SDL_WINDOWEVENT_SHOWN:
             shown = true;
             Update();
+            if (OnOpen)
+                OnOpen();
             break;
 
             //Window disappeared
         case SDL_WINDOWEVENT_HIDDEN:
             shown = false;
+            if(OnClose)
+                OnClose();
             break;
 
             //Repaint on expose
@@ -147,7 +151,7 @@ void Window::Update()
     SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, 0xFF);
     SDL_RenderClear(renderer);
 
-    if(DrawHook != nullptr)
+    if(DrawHook)
         DrawHook(renderer);
 
     for (auto ele : elements)

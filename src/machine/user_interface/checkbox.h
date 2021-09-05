@@ -2,6 +2,7 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <string>
+#include <functional>
 #include "element.h"
 
 class Text;
@@ -17,10 +18,11 @@ private:
 	int w = 14;
 	int h = 14;
 public:
-	Checkbox(SDL_Renderer *renderer, int x, int y, std::string text, TTF_Font *font, void (*OnClick)(bool *new_state));
+	Checkbox(SDL_Renderer *renderer, int x, int y, std::string text, TTF_Font *font, std::function<void(bool*)> OnClick);
 	void HandleEvent(SDL_Event* e);
 	void Render(SDL_Renderer* renderer);
-	void (*OnClick)(bool *new_state) = nullptr;
+	//void (*OnClick)(bool *new_state) = nullptr;
+	std::function<void(bool*)> OnClick;
 
 	static void InitTexture(SDL_Renderer *renderer);
 };

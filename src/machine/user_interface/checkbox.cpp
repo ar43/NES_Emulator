@@ -3,7 +3,7 @@
 #include "../../logger/logger.h"
 #include "text.h"
 
-Checkbox::Checkbox(SDL_Renderer *renderer, int x, int y, std::string text, TTF_Font *font, void (*OnClick)(bool *new_state))
+Checkbox::Checkbox(SDL_Renderer *renderer, int x, int y, std::string text, TTF_Font *font, std::function<void(bool*)> OnClick)
 {
 	if (texture == nullptr)
 		InitTexture(renderer);
@@ -50,7 +50,7 @@ void Checkbox::HandleEvent(SDL_Event* e)
 			if (IsActive())
 			{
 				state = !state;
-				if(OnClick != nullptr)
+				if(OnClick)
 					OnClick(&state);
 				else
 					logger::PrintLine(logger::LogType::DEBUG, "Checkbox #" + std::to_string(GetId()) + " clicked but has no function bound");
