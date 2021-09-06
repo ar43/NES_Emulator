@@ -161,7 +161,7 @@ void Window::Update()
 
     for (auto ele : elements)
     {
-        ele->Render(renderer);
+        ele->Render();
     }
 
     SDL_RenderPresent(renderer);

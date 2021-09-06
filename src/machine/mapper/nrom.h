@@ -21,6 +21,7 @@ public:
 		{
 			memset(this->prg_rom+0x4000, 0, 0x4000);
 			this->mirror_prg_rom = true;
+			debugger_mirroring = true;
 		}
 		if (chr_rom != nullptr)
 		{

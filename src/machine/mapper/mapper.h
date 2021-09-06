@@ -21,6 +21,7 @@ public:
 	int nametable_mirroring; //2 vertical mirroring, 3 horizontal mirroring
 	std::string name;
 	bool battery = false;
+	bool debugger_mirroring = false;
 
 	bool irq_enabled = false;
 	bool irq_pending = false;

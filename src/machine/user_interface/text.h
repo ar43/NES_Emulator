@@ -17,23 +17,25 @@ private:
 public:
 	Text(SDL_Renderer *renderer, int x, int y, std::string text, int size)
 	{
+		this->renderer = renderer;
 		this->size = size;
 		TTF_Font *font = TTF_OpenFont( FONT_PATH, size );
 		this->font = font;
 		SetColor(0, 0, 0);
 		SetPosition(x, y);
-		SetText(renderer, text);
+		SetText(text);
 	}
 	Text(SDL_Renderer *renderer, int x, int y, std::string text, bool offset, int w, int h)
 	{
+		this->renderer = renderer;
 		TTF_Font *font = TTF_OpenFont( FONT_PATH, size );
 		this->font = font;
 		SetColor(0, 0, 0);
 		SetPosition(x, y);
-		SetText(renderer, text, offset,w,h);
+		SetText(text, offset,w,h);
 	}
 	void HandleEvent(SDL_Event* e) {};
-	void Render(SDL_Renderer *renderer);
-	void SetText(SDL_Renderer *renderer, std::string text, bool offset = false, int w = 0, int h = 0);
+	void Render();
+	void SetText(std::string text, bool offset = false, int w = 0, int h = 0);
 	std::string GetText();
 };

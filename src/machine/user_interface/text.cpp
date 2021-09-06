@@ -2,12 +2,12 @@
 #include "../../logger/logger.h"
 #include <SDL_ttf.h>
 
-void Text::Render(SDL_Renderer* renderer)
+void Text::Render()
 {
     SDL_RenderCopy( renderer, texture, NULL, GetRect() );
 }
 
-void Text::SetText(SDL_Renderer *renderer, std::string text, bool offset, int w, int h)
+void Text::SetText(std::string text, bool offset, int w, int h)
 {
     this->text = text;
     if (texture != NULL)

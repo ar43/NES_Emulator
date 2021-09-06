@@ -68,8 +68,10 @@ private:
 	bool add_extra_cycle = false;
 	
 	bool debug_mode = false;
-	//std::string* debug_array = nullptr;
 	DebugData* debug_data;
+	void GenerateDebugString(int old_pc, Instruction *instruction);
+
+	void AddDMACycles(Bus *bus);
 
 	uint8_t RAM[0x800]; //2KB internal ram
 	

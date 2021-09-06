@@ -154,6 +154,7 @@ bool Machine::LoadCartridge(NesData *nes_data)
 	logger::PrintLine(logger::LogType::INFO, "Mapper name: " + mapper->name);
 
 	ui.debugger.mapper = mapper->GetNumber();
+	ui.debugger.debug_data.mirror = mapper->debugger_mirroring;
 
 	return true;
 }

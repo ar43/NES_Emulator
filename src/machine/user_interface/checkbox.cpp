@@ -5,8 +5,8 @@
 
 Checkbox::Checkbox(SDL_Renderer *renderer, int x, int y, std::string text, std::function<void(bool*)> OnClick)
 {
-	if (texture == nullptr)
-		InitTexture(renderer);
+	this->renderer = renderer;
+	InitTexture();
 	this->text = text;
 	SetRect(x, y, w, h);
 	SetColor(0xff, 0xff, 0xff);
@@ -14,7 +14,7 @@ Checkbox::Checkbox(SDL_Renderer *renderer, int x, int y, std::string text, std::
 	this->OnClick = OnClick;
 }
 
-void Checkbox::InitTexture(SDL_Renderer *renderer)
+void Checkbox::InitTexture()
 {
 	SDL_Surface* loadedSurface = IMG_Load( CHECKMARK_PATH );
 	if( loadedSurface == NULL )
@@ -67,7 +67,7 @@ void Checkbox::HandleEvent(SDL_Event* e)
 	}
 }
 
-void Checkbox::Render(SDL_Renderer* renderer)
+void Checkbox::Render()
 {
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xff);
 	SDL_Rect rect = { GetRect()->x - 1,GetRect()->y - 1, 16, 16 };
@@ -86,5 +86,5 @@ void Checkbox::Render(SDL_Renderer* renderer)
 		SDL_RenderCopy(renderer, texture, NULL, &rect);
 	}
 	if (text_obj != nullptr)
-		text_obj->Render(renderer);
+		text_obj->Render();
 }

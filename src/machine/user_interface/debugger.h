@@ -8,7 +8,8 @@ struct DebugData
 {
 	std::array<std::string, 0x10000> code;
 	int known_bytes = 0;
-	int all_bytes = -1;
+	int all_bytes = 0x8000;
+	bool mirror = false;
 
 	void Clear()
 	{

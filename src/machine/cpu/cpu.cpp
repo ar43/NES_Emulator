@@ -233,13 +233,43 @@ int Cpu::ResolveAddressing(Bus* bus, Instruction* ins, bool generate_string)
 	}
 }
 
+void Cpu::GenerateDebugString(int old_pc, Instruction *instruction)
+{
+	std::stringstream ss;
+	ss << utility::int_to_hex(old_pc) << "  " << std::setw(10) << std::left << GetFetchBuffer() << instruction->name << " " << std::setw(28) << std::left << output_string << std::endl;
+	debug_data->code[old_pc] = ss.str();
+	debug_data->known_bytes += registers[(size_t)RegId::PC]->get() - old_pc;
+	if (debug_data->mirror)
+	{
+		if (old_pc + 0x4000 > 0xffff)
+		{
+			debug_data->code[old_pc-0x4000] = ss.str();
+		}
+		else
+		{
+			debug_data->code[old_pc+0x4000] = ss.str();
+		}
+		debug_data->known_bytes += registers[(size_t)RegId::PC]->get() - old_pc;
+	}
+	//logger::PrintLine(logger::LogType::DEBUG, std::to_string(double(debug_data->known_bytes)/double(debug_data->all_bytes)*100) + "% = " + std::to_string(debug_data->known_bytes) + "/" + std::to_string(debug_data->all_bytes));
+	output_string = "";
+}
+
+void Cpu::AddDMACycles(Bus *bus)
+{
+	bus->add_dma_cycles = false;
+	if (cycle_counter % 2 == 1)
+		AddCycles(514);
+	else
+		AddCycles(513);
+}
+
 void Cpu::HandleReset(Bus *bus, ResetType reset)
 {
 	
 	logger::PrintLine(logger::LogType::INFO, "CPU RESET detected");
 	AddCycles(7);
 	int initial_pc = bus->ReadCPU(0xFFFD)*256 + bus->ReadCPU(0xFFFC); //normally we jump to this
-	debug_data->all_bytes = 0xffff - initial_pc + 1;
 	registers[(size_t)RegId::PC]->set(initial_pc);
 
 	if (reset == ResetType::HARD)
@@ -322,10 +352,9 @@ void Cpu::ExecuteInstruction(Bus *bus)
 
 	int old_pc = registers[(size_t)RegId::PC]->get();
 
-	if (debug_mode)
+	if (debug_mode && debug_data->code[old_pc].empty())
 	{
-		if (debug_data->code[old_pc].empty())
-			generate_string = true;
+		generate_string = true;
 	}
 
 	uint8_t opcode = Fetch(bus, generate_string);
@@ -344,12 +373,7 @@ void Cpu::ExecuteInstruction(Bus *bus)
 
 	if (generate_string)
 	{
-		std::stringstream ss;
-		ss << utility::int_to_hex(old_pc) << "  " << std::setw(10) << std::left << GetFetchBuffer() << instruction->name << " " << std::setw(28) << std::left << output_string << std::endl;
-		debug_data->code[old_pc] = ss.str();
-		debug_data->known_bytes += registers[(size_t)RegId::PC]->get() - old_pc;
-		//logger::PrintLine(logger::LogType::DEBUG, std::to_string(double(debug_data->known_bytes)/double(debug_data->all_bytes)*100) + "% = " + std::to_string(debug_data->known_bytes) + "/" + std::to_string(debug_data->all_bytes));
-		output_string = "";
+		GenerateDebugString(old_pc, instruction);
 	}
 
 	instruction->func(this, bus, value, instruction->mode);
@@ -358,11 +382,7 @@ void Cpu::ExecuteInstruction(Bus *bus)
 
 	if (bus->add_dma_cycles)
 	{
-		bus->add_dma_cycles = false;
-		if (cycle_counter % 2 == 1)
-			AddCycles(514);
-		else
-			AddCycles(513);
+		AddDMACycles(bus);
 	}
 }
 

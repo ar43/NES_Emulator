@@ -31,6 +31,7 @@ public:
 		{
 			memcpy(this->prg_rom[0], (uint8_t*)prg_rom.at(0).get(), 0x4000);
 			memcpy(this->prg_rom[1], (uint8_t*)prg_rom.at(0).get(), 0x4000);
+			debugger_mirroring = true;
 		}
 		else if (num_banks_prg == 2)
 		{

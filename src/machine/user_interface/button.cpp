@@ -4,6 +4,7 @@
 
 Button::Button(SDL_Renderer *renderer, int x, int y, int w, int h, std::string text, std::function<void()> OnClick)
 {
+	this->renderer = renderer;
 	this->text = text;
 	SetRect(x, y, w, h);
 	SetColor(0xb1, 0xb1, 0xb1);
@@ -44,7 +45,7 @@ void Button::HandleEvent(SDL_Event* e)
 	}
 }
 
-void Button::Render(SDL_Renderer* renderer)
+void Button::Render()
 {
 	SDL_Color final_color = {GetColor()->r,GetColor()->g,GetColor()->b,GetColor()->a};
 	if (pressed && IsActive())
@@ -56,5 +57,22 @@ void Button::Render(SDL_Renderer* renderer)
 	SDL_SetRenderDrawColor(renderer, final_color.r, final_color.g, final_color.b, final_color.a);
 	SDL_RenderFillRect(renderer, GetRect());
 	if (text_obj != nullptr)
-		text_obj->Render(renderer);
+		text_obj->Render();
+}
+
+void Button::SetActive(bool active)
+{
+	Element::SetActive(active);
+	if (active == false)
+	{
+		SetColor(201, 201, 201);
+		text_obj->SetColor(161, 161, 161);
+		text_obj->SetText(text);
+	}
+	else
+	{
+		SetColor(0xb1, 0xb1, 0xb1);
+		text_obj->SetColor(0, 0, 0);
+		text_obj->SetText(text);
+	}
 }

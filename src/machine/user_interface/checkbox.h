@@ -10,7 +10,7 @@ class Text;
 class Checkbox : public Element
 {
 private:
-	inline static SDL_Texture* texture = nullptr;
+	SDL_Texture* texture = nullptr;
 	Text *text_obj = nullptr;
 	std::string text = "Empty";
 	bool pressed = false;
@@ -20,9 +20,9 @@ private:
 public:
 	Checkbox(SDL_Renderer *renderer, int x, int y, std::string text, std::function<void(bool*)> OnClick);
 	void HandleEvent(SDL_Event* e);
-	void Render(SDL_Renderer* renderer);
+	void Render();
 	//void (*OnClick)(bool *new_state) = nullptr;
 	std::function<void(bool*)> OnClick;
 
-	static void InitTexture(SDL_Renderer *renderer);
+	void InitTexture();
 };

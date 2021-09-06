@@ -14,6 +14,9 @@ private:
 
 	bool active = true;
 
+protected:
+	SDL_Renderer* renderer;
+
 public:
 	Element()
 	{
@@ -28,5 +31,5 @@ public:
 	bool IsActive();
 	SDL_Color* GetColor();
 	virtual void HandleEvent(SDL_Event* e) = 0;
-	virtual void Render(SDL_Renderer *renderer) = 0;
+	virtual void Render() = 0;
 };

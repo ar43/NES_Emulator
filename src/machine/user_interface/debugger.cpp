@@ -29,7 +29,7 @@ void Debugger::DrawBackground(SDL_Renderer* renderer)
 void Debugger::Button1Click()
 {
     logger::PrintLine(logger::LogType::INFO, "placeholder button click");
-    text_status->SetText(window.GetRenderer(), "Changed");
+    text_status->SetText("Changed");
 }
 
 void Debugger::Checkbox1Click(bool* new_state)
@@ -49,19 +49,19 @@ void Debugger::Attach()
     if (machine_status->running == RunningStatus::RUNNING)
     {
         *debug_mode = false;
-        text_status->SetText(window.GetRenderer(), "Status: Game is not running");
+        text_status->SetText("Status: Game is not running");
         button_attach->SetActive(true);
     }
     else if (!(mapper == 0 || mapper == 3))
     {
         *debug_mode = false;
-        text_status->SetText(window.GetRenderer(), "Status: Unsupported mapper");
+        text_status->SetText("Status: Unsupported mapper");
         button_attach->SetActive(true);
     }
     else if(machine_status->running == RunningStatus::RUNNING_ROM)
     {
         *debug_mode = true;
-        text_status->SetText(window.GetRenderer(), "Status: Attached");
+        text_status->SetText("Status: Attached");
         button_attach->SetActive(false);
     }
         
@@ -73,7 +73,7 @@ void Debugger::Detach()
     if (*debug_mode == true)
     {
         *debug_mode = false;
-        text_status->SetText(window.GetRenderer(), "Status: Detached");
+        text_status->SetText("Status: Detached");
         button_attach->SetActive(true);
         debug_data.Clear();
     }
@@ -99,8 +99,8 @@ void Debugger::Update()
         {
             std::stringstream stream;
             stream << std::fixed << std::setprecision(2) << double(debug_data.known_bytes) / double(debug_data.all_bytes) * 100;
-            std::string str = "Status: Attached - " + stream.str() + "% of PRG code discovered";
-            text_status->SetText(window.GetRenderer(), str);
+            std::string str = "Status: Attached - " + stream.str() + "% of PRG bytes discovered";
+            text_status->SetText(str);
             last_update = SDL_GetTicks();
         }
     }

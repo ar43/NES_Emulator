@@ -16,7 +16,9 @@ private:
 public:
 	Button(SDL_Renderer *renderer, int x, int y, int w, int h, std::string text, std::function<void()> OnClick);
 	void HandleEvent(SDL_Event* e);
-	void Render(SDL_Renderer* renderer);
+	void Render();
 	//void (*OnClick)() = nullptr;
 	std::function<void()> OnClick;
+
+	void SetActive(bool active);
 };
