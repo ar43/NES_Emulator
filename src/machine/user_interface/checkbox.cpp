@@ -3,14 +3,14 @@
 #include "../../logger/logger.h"
 #include "text.h"
 
-Checkbox::Checkbox(SDL_Renderer *renderer, int x, int y, std::string text, TTF_Font *font, std::function<void(bool*)> OnClick)
+Checkbox::Checkbox(SDL_Renderer *renderer, int x, int y, std::string text, std::function<void(bool*)> OnClick)
 {
 	if (texture == nullptr)
 		InitTexture(renderer);
 	this->text = text;
 	SetRect(x, y, w, h);
 	SetColor(0xff, 0xff, 0xff);
-	text_obj = new Text(renderer, x+19, y, text, font, 16);
+	text_obj = new Text(renderer, x+19, y, text, 16);
 	this->OnClick = OnClick;
 }
 

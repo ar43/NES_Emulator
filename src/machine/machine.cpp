@@ -27,6 +27,7 @@ void Machine::Init()
 	ppu.display.Init(ui.window.GetWindow(), ui.window.GetRenderer(), &ui.scale);
 	apu.Init(&bus.irq_pending, &status.volume);
 	ppu.force_render = &status.force_render;
+	ui.debugger.machine_status = &this->status;
 }
 
 void Machine::LoadROM(std::string path)
@@ -151,6 +152,8 @@ bool Machine::LoadCartridge(NesData *nes_data)
 	if(mapper->GetNumber() != nes_data->header.mapper_num)
 		logger::PrintLine(logger::LogType::FATAL_ERROR, "Mapper number " + std::to_string(mapper->GetNumber()) + "does not match the header number " + std::to_string(nes_data->header.mapper_num));
 	logger::PrintLine(logger::LogType::INFO, "Mapper name: " + mapper->name);
+
+	ui.debugger.mapper = mapper->GetNumber();
 
 	return true;
 }

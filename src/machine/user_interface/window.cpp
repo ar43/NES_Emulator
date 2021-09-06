@@ -15,21 +15,23 @@ void Window::Toggle()
         Show();
 }
 
-void Window::AddButton(int x, int y, int w, int h, std::string text, TTF_Font *font, std::function<void()> OnClick)
+Button* Window::AddButton(int x, int y, int w, int h, std::string text, std::function<void()> OnClick)
 {
-    auto button = std::shared_ptr<Button>(new Button(GetRenderer(), x, y, w, h, text, font, OnClick));
+    auto button = std::shared_ptr<Button>(new Button(GetRenderer(), x, y, w, h, text, OnClick));
     elements.push_back(button);
+    return button.get();
 }
 
-void Window::AddText(int x, int y, std::string text, TTF_Font *font, int size)
+Text *Window::AddText(int x, int y, std::string text, int size)
 {
-    auto txt = std::shared_ptr<Text>(new Text(GetRenderer(), x, y, text, font, size));
+    auto txt = std::shared_ptr<Text>(new Text(GetRenderer(), x, y, text, size));
     elements.push_back(txt);
+    return txt.get();
 }
 
-void Window::AddCheckbox(int x, int y, std::string text, TTF_Font* font, std::function<void(bool*)> OnClick)
+void Window::AddCheckbox(int x, int y, std::string text, std::function<void(bool*)> OnClick)
 {
-    auto checkbox = std::shared_ptr<Checkbox>(new Checkbox(GetRenderer(), x, y, text, font, OnClick));
+    auto checkbox = std::shared_ptr<Checkbox>(new Checkbox(GetRenderer(), x, y, text, OnClick));
     elements.push_back(checkbox);
 }
 
@@ -147,6 +149,9 @@ void Window::Update()
         return;
 
     //logger::PrintLine(logger::LogType::DEBUG, "Updating window #" + std::to_string(window_id));
+
+    if (OnUpdate)
+        OnUpdate();
 
     SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, 0xFF);
     SDL_RenderClear(renderer);

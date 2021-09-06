@@ -2,12 +2,12 @@
 #include "../../logger/logger.h"
 #include "text.h"
 
-Button::Button(SDL_Renderer *renderer, int x, int y, int w, int h, std::string text, TTF_Font *font, std::function<void()> OnClick)
+Button::Button(SDL_Renderer *renderer, int x, int y, int w, int h, std::string text, std::function<void()> OnClick)
 {
 	this->text = text;
 	SetRect(x, y, w, h);
 	SetColor(0xb1, 0xb1, 0xb1);
-	text_obj = new Text(renderer, x, y, text, font,true,w,h);
+	text_obj = new Text(renderer, x, y, text,true,w,h);
 	this->OnClick = OnClick;
 }
 

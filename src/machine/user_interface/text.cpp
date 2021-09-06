@@ -7,13 +7,13 @@ void Text::Render(SDL_Renderer* renderer)
     SDL_RenderCopy( renderer, texture, NULL, GetRect() );
 }
 
-void Text::SetText(SDL_Renderer *renderer, std::string text, TTF_Font *font, bool offset, int w, int h)
+void Text::SetText(SDL_Renderer *renderer, std::string text, bool offset, int w, int h)
 {
     this->text = text;
     if (texture != NULL)
         SDL_DestroyTexture(texture);
 
-    SDL_Surface* textSurface = TTF_RenderText_Blended(font, GetText().c_str(), {GetColor()->r,GetColor()->g,GetColor()->b,GetColor()->a});
+    SDL_Surface* textSurface = TTF_RenderText_Blended(this->font, GetText().c_str(), {GetColor()->r,GetColor()->g,GetColor()->b,GetColor()->a});
     if( textSurface == NULL )
     {
         logger::PrintLine(logger::LogType::FATAL_ERROR, "Unable to create text surface: " + std::string(TTF_GetError()));

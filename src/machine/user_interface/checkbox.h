@@ -18,7 +18,7 @@ private:
 	int w = 14;
 	int h = 14;
 public:
-	Checkbox(SDL_Renderer *renderer, int x, int y, std::string text, TTF_Font *font, std::function<void(bool*)> OnClick);
+	Checkbox(SDL_Renderer *renderer, int x, int y, std::string text, std::function<void(bool*)> OnClick);
 	void HandleEvent(SDL_Event* e);
 	void Render(SDL_Renderer* renderer);
 	//void (*OnClick)(bool *new_state) = nullptr;

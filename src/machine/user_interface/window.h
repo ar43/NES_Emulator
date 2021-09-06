@@ -8,6 +8,7 @@
 
 class Element;
 class Button;
+class Text;
 
 class Window
 {
@@ -36,9 +37,9 @@ public:
 	void Hide() { SDL_HideWindow(window); }
 	void Toggle();
 
-	void AddButton(int x, int y, int w, int h, std::string text, TTF_Font *font, std::function<void()> OnClick);
-	void AddText(int x, int y, std::string text, TTF_Font* font, int size);
-	void AddCheckbox(int x, int y, std::string text, TTF_Font* font, std::function<void(bool*)> OnClick);
+	Button* AddButton(int x, int y, int w, int h, std::string text, std::function<void()> OnClick);
+	Text* AddText(int x, int y, std::string text, int size);
+	void AddCheckbox(int x, int y, std::string text, std::function<void(bool*)> OnClick);
 
 	void Init(std::string window_name, int width, int height, int rend_width, int rend_height, Uint32 flags = 0);
 	void HandleEvent(SDL_Event* e);
@@ -50,4 +51,5 @@ public:
 	std::function<void(SDL_Renderer*)> DrawHook;
 	std::function<void()> OnOpen;
 	std::function<void()> OnClose;
+	std::function<void()> OnUpdate;
 };
