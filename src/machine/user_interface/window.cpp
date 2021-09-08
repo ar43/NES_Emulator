@@ -6,6 +6,9 @@
 #include "element.h"
 #include "text.h"
 #include "checkbox.h"
+#include "list.h"
+#include "asm_list.h"
+#include "debugger.h"
 
 void Window::Toggle()
 {
@@ -33,6 +36,20 @@ void Window::AddCheckbox(int x, int y, std::string text, std::function<void(bool
 {
     auto checkbox = std::shared_ptr<Checkbox>(new Checkbox(GetRenderer(), x, y, text, OnClick));
     elements.push_back(checkbox);
+}
+
+List* Window::AddList(int x, int y, int w, int h)
+{
+    auto list = std::shared_ptr<List>(new List(GetRenderer(), x, y, w, h));
+    elements.push_back(list);
+    return list.get();
+}
+
+AsmList* Window::AddAsmList(int x, int y, int w, int h, int cursor, DebugData* debug_data)
+{
+    auto list = std::shared_ptr<AsmList>(new AsmList(GetRenderer(), x, y, w, h, cursor, debug_data, &current_active_list));
+    elements.push_back(list);
+    return list.get();
 }
 
 void Window::HandleWindowEvent(SDL_Event* e, bool *request_exit)

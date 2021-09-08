@@ -44,7 +44,7 @@ uint8_t Cpu::Fetch(Bus* bus, bool generate_string)
 
 	if (logger::CPU_TEST_MODE || generate_string)
 	{
-		fetch_buffer += utility::int_to_hex(ret) + " ";
+		fetch_buffer += "$" + utility::int_to_hex(ret) + " ";
 	}
 
 	return ret;
@@ -236,7 +236,7 @@ int Cpu::ResolveAddressing(Bus* bus, Instruction* ins, bool generate_string)
 void Cpu::GenerateDebugString(int old_pc, Instruction *instruction)
 {
 	std::stringstream ss;
-	ss << utility::int_to_hex(old_pc) << "  " << std::setw(10) << std::left << GetFetchBuffer() << instruction->name << " " << std::setw(28) << std::left << output_string << std::endl;
+	ss << utility::int_to_hex(old_pc) << "  " << std::setw(13) << std::left << GetFetchBuffer() << instruction->name << " " << std::setw(28) << std::left << output_string;
 	debug_data->code[old_pc] = ss.str();
 	debug_data->known_bytes += registers[(size_t)RegId::PC]->get() - old_pc;
 	if (debug_data->mirror)

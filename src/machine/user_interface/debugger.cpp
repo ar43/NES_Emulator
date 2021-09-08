@@ -6,6 +6,7 @@
 #include <string>
 #include <iomanip>
 #include <sstream>
+#include "asm_list.h"
 
 void Debugger::Init()
 {
@@ -16,7 +17,8 @@ void Debugger::Init()
     window.DrawHook = std::bind(&Debugger::DrawBackground, this, std::placeholders::_1);
     text_status = window.AddText(3, win_height-12, "Status: Game is not running", 12);
     button_attach = window.AddButton(10,50,73,21,"Attach", std::bind(&Debugger::Attach, this));
-    window.AddCheckbox(100, 100, "Some stuff here", std::bind(&Debugger::Checkbox1Click, this, std::placeholders::_1));
+    window.AddCheckbox(100, 50, "Some stuff here", std::bind(&Debugger::Checkbox1Click, this, std::placeholders::_1));
+    asm_list = window.AddAsmList(10, 100, 300, 22,-1,&debug_data);
 }
 
 void Debugger::DrawBackground(SDL_Renderer* renderer)
@@ -76,6 +78,7 @@ void Debugger::Detach()
         text_status->SetText("Status: Detached");
         button_attach->SetActive(true);
         debug_data.Clear();
+        asm_list->SetActive(false);
     }
 }
 
@@ -102,6 +105,11 @@ void Debugger::Update()
             std::string str = "Status: Attached - " + stream.str() + "% of PRG bytes discovered";
             text_status->SetText(str);
             last_update = SDL_GetTicks();
+            if (debug_data.known_bytes > 100)
+            {
+                asm_list->SetActive(true);
+                asm_list->Update();
+            }
         }
     }
     if (last_running_status == RunningStatus::RUNNING_ROM && machine_status->running == RunningStatus::RUNNING)

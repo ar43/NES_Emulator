@@ -9,6 +9,9 @@
 class Element;
 class Button;
 class Text;
+class AsmList;
+class List;
+struct DebugData;
 
 class Window
 {
@@ -28,6 +31,7 @@ private:
 public:
 
 	bool no_update = false;
+	Uint32 current_active_list = -1;
 
 	bool IsFocused() { return focus; }
 	bool IsShown() { return shown; }
@@ -40,6 +44,8 @@ public:
 	Button* AddButton(int x, int y, int w, int h, std::string text, std::function<void()> OnClick);
 	Text* AddText(int x, int y, std::string text, int size);
 	void AddCheckbox(int x, int y, std::string text, std::function<void(bool*)> OnClick);
+	List* AddList(int x, int y, int w, int h);
+	AsmList* AddAsmList(int x, int y, int w, int h, int cursor, DebugData* debug_data);
 
 	void Init(std::string window_name, int width, int height, int rend_width, int rend_height, Uint32 flags = 0);
 	void HandleEvent(SDL_Event* e);

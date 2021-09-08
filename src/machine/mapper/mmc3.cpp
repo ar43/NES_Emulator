@@ -134,7 +134,7 @@ uint8_t Mmc3::ReadPRG(size_t loc)
 	}
 
 	
-	logger::PrintLine(logger::LogType::FATAL_ERROR, "Mapper: Illegal mem");
+	logger::PrintLine(logger::LogType::FATAL_ERROR, "Mapper: Illegal mem - " + utility::int_to_hex(loc));
 	return 0;
 }
 

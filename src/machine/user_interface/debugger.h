@@ -24,6 +24,7 @@ struct DebugData
 class Text;
 class Button;
 struct MachineStatus;
+class AsmList;
 
 class Debugger
 {
@@ -34,6 +35,7 @@ private:
 
 	Text *text_status;
 	Button* button_attach;
+	AsmList* asm_list;
 public:
 	Window window;
 	void Init();
