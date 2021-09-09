@@ -3,6 +3,7 @@
 #include "debugger.h"
 #include "../../logger/logger.h"
 #include "../../utility/utility.h"
+#include <string>
 
 bool AsmList::CanScrollDown()
 {
@@ -33,10 +34,32 @@ AsmList::AsmList(SDL_Renderer* renderer, int x, int y, int w, int h, int cursor,
 	}
 }
 
+void AsmList::RenderSlider(SDL_Rect *rect_slider)
+{
+	int all = end - start;
+	int y = (int)(GetRect()->y+20 + ((cursor-start) / (float)(all))*(GetRect()->h-50));
+	if (elements[this->num_elements-1]->GetText().c_str()[0] == '-') //hack but its fast
+		y = GetRect()->y + GetRect()->h - 30;
+	SDL_SetRenderDrawColor(renderer, 38, 38, 38, 0xff);
+	rect_slider->y = y;
+	SDL_RenderFillRect(renderer, rect_slider);
+}
+
 void AsmList::Render()
 {
 	SDL_SetRenderDrawColor(renderer, 0xff, 0xff, 0xff, 0xff);
 	SDL_RenderFillRect(renderer, GetRect());
+
+	static SDL_Rect rect_slider_body = { GetRect()->x + GetRect()->w,GetRect()->y,20,GetRect()->h };
+	static SDL_Rect rect_up = { GetRect()->x + GetRect()->w,GetRect()->y,20,20 };
+	static SDL_Rect rect_down = { GetRect()->x + GetRect()->w,GetRect()->y+GetRect()->h-20,20,20 };
+	static SDL_Rect rect_slider = { GetRect()->x + GetRect()->w,GetRect()->y+20,20,10 };
+
+	SDL_SetRenderDrawColor(renderer, 230, 230, 230, 0xff);
+	SDL_RenderFillRect(renderer, &rect_slider_body);
+	SDL_SetRenderDrawColor(renderer, 64, 64, 64, 0xff);
+	SDL_RenderFillRect(renderer, &rect_up);
+	SDL_RenderFillRect(renderer, &rect_down);
 
 	if (IsActive())
 	{
@@ -44,6 +67,7 @@ void AsmList::Render()
 		{
 			elements[i]->Render();
 		}
+		RenderSlider(&rect_slider);
 	}
 }
 
@@ -64,18 +88,42 @@ void AsmList::ScrollDown(int speed)
 	logger::PrintLine(logger::LogType::DEBUG, "Cursor: " + utility::int_to_hex(this->cursor));
 }
 
+void AsmList::FindStartAndEnd()
+{
+	for (int i = 0x8000; i < 0xffff; i++)
+	{
+		if (!debug_data->code[i].empty())
+		{
+			start = i;
+			break;
+		}
+	}
+	for (int i = 0xffff; i >= 0x8000; i--)
+	{
+		if (!debug_data->code[i].empty())
+		{
+			end = i;
+			break;
+		}
+	}
+}
+
 void AsmList::HandleEvent(SDL_Event* e)
 {
+	static SDL_Rect rect_up = { GetRect()->x + GetRect()->w,GetRect()->y,20,20 };
+	static SDL_Rect rect_down = { GetRect()->x + GetRect()->w,GetRect()->y+GetRect()->h-20,20,20 };
+	static SDL_Rect rect_slider_body = { GetRect()->x + GetRect()->w,GetRect()->y,20,GetRect()->h };
+
 	if (pressed && e->type == SDL_MOUSEMOTION)
 	{
 		SDL_Point point = { e->motion.x,e->motion.y };
-		if (!SDL_PointInRect(&point, GetRect()))
+		if (!(SDL_PointInRect(&point, GetRect()) || SDL_PointInRect(&point,&rect_slider_body)))
 			pressed = false;
 	}
 	else if (e->type == SDL_MOUSEBUTTONUP && e->button.button == SDL_BUTTON_LEFT)
 	{
 		SDL_Point point = { e->motion.x,e->motion.y };
-		if (pressed && SDL_PointInRect(&point, GetRect()))
+		if (pressed && (SDL_PointInRect(&point, GetRect()) || SDL_PointInRect(&point,&rect_slider_body)))
 		{
 			pressed = false;
 			if (IsActive())
@@ -89,8 +137,26 @@ void AsmList::HandleEvent(SDL_Event* e)
 	{
 		//logger::PrintLine(logger::LogType::DEBUG, "zzz");
 		SDL_Point point = { e->motion.x,e->motion.y };
-		if(SDL_PointInRect(&point, GetRect()))
+		if((SDL_PointInRect(&point, GetRect()) || SDL_PointInRect(&point,&rect_slider_body)))
 			pressed = true;
+
+		if (IsActive())
+		{
+			if (SDL_PointInRect(&point, &rect_up))
+				ScrollUp(5);
+			else if (SDL_PointInRect(&point, &rect_down))
+				ScrollDown(5);
+			else if (SDL_PointInRect(&point, &rect_slider_body))
+			{
+				
+				float c = (point.y - GetRect()->y - 20) / float(rect_slider_body.h - 40);
+				int num = int(c * (end - start) + start);
+				InitCursor(num, false, true);
+				logger::PrintLine(logger::LogType::DEBUG, utility::int_to_hex(num));
+				Update();
+			}
+				
+		}
 	}
 	else if(e->type == SDL_MOUSEWHEEL && *current_active_list == GetId() && IsActive())
 	{
@@ -131,6 +197,7 @@ void AsmList::Update()
 	}
 	int counter = cursor;
 	bool prot = false;
+	FindStartAndEnd();
 	for (int i = 0; i < num_elements; i++)
 	{
 		for (int j = counter; j <= 0xffff; j++)

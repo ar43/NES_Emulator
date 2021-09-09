@@ -78,7 +78,7 @@ int Cpu::ResolveAddressing(Bus* bus, Instruction* ins, bool generate_string)
 	{
 		auto fetched = Fetch(bus, generate_string);
 		if(logger::CPU_TEST_MODE || generate_string)
-			output_string = "$" + utility::int_to_hex(fetched) + " = " + utility::int_to_hex(bus->ReadCPUSafe(fetched));
+			output_string = "$" + utility::int_to_hex(fetched);
 		return fetched;
 	}
 	case AddressingMode::ZERO_PAGE_X:
@@ -88,7 +88,7 @@ int Cpu::ResolveAddressing(Bus* bus, Instruction* ins, bool generate_string)
 		int addr = fetched + x;
 		addr = addr % 0x100;
 		if(logger::CPU_TEST_MODE || generate_string)
-			output_string = "$" + utility::int_to_hex(fetched) + ",X @ " + utility::int_to_hex(addr) + " = " + utility::int_to_hex(bus->ReadCPUSafe(addr));
+			output_string = "$" + utility::int_to_hex(fetched) + ",X";
 		return addr;
 	}
 	case AddressingMode::ZERO_PAGE_Y:
@@ -98,7 +98,7 @@ int Cpu::ResolveAddressing(Bus* bus, Instruction* ins, bool generate_string)
 		int addr = fetched + y;
 		addr = addr % 0x100;
 		if(logger::CPU_TEST_MODE || generate_string)
-			output_string = "$" + utility::int_to_hex(fetched) + ",Y @ " + utility::int_to_hex(addr) + " = " + utility::int_to_hex(bus->ReadCPUSafe(addr));
+			output_string = "$" + utility::int_to_hex(fetched) + ",Y";
 		return addr;
 	}
 	case AddressingMode::RELATIVE:
@@ -115,9 +115,7 @@ int Cpu::ResolveAddressing(Bus* bus, Instruction* ins, bool generate_string)
 		uint8_t ms = Fetch(bus, generate_string);
 		int ret = (ms << 8) | ls;
 
-		if((logger::CPU_TEST_MODE || generate_string) && ins->opcode != 0x20 && ins->opcode != 0x4C)
-			output_string = "$" + utility::int_to_hex(ret) + " = " + utility::int_to_hex(bus->ReadCPUSafe(ret));
-		else if(logger::CPU_TEST_MODE || generate_string)
+		if(logger::CPU_TEST_MODE || generate_string)
 			output_string = "$" + utility::int_to_hex(ret);
 
 		return ret;
@@ -138,7 +136,7 @@ int Cpu::ResolveAddressing(Bus* bus, Instruction* ins, bool generate_string)
 			add_extra_cycle = true;
 
 		if(logger::CPU_TEST_MODE || generate_string)
-			output_string = "$" + utility::int_to_hex(first) + ",X @ " + utility::int_to_hex(second) + " = " + utility::int_to_hex(bus->ReadCPUSafe(second));
+			output_string = "$" + utility::int_to_hex(first) + ",X";
 		return second;
 	}
 	case AddressingMode::ABSOLUTE_Y: //extra cycle support
@@ -157,7 +155,7 @@ int Cpu::ResolveAddressing(Bus* bus, Instruction* ins, bool generate_string)
 			add_extra_cycle = true;
 
 		if(logger::CPU_TEST_MODE || generate_string)
-			output_string = "$" + utility::int_to_hex(first) + ",Y @ " + utility::int_to_hex(second) + " = " + utility::int_to_hex(bus->ReadCPUSafe(second));
+			output_string = "$" + utility::int_to_hex(first) + ",Y";
 		return second;
 	}
 	case AddressingMode::INDIRECT:
@@ -177,7 +175,7 @@ int Cpu::ResolveAddressing(Bus* bus, Instruction* ins, bool generate_string)
 		int ret = (ms_lookup << 8) | ls_lookup;
 
 		if(logger::CPU_TEST_MODE || generate_string)
-			output_string = "($" + utility::int_to_hex(old_addr) + ") = " + utility::int_to_hex(ret);
+			output_string = "($" + utility::int_to_hex(old_addr) + ")";
 
 		return ret;
 	}
@@ -197,7 +195,7 @@ int Cpu::ResolveAddressing(Bus* bus, Instruction* ins, bool generate_string)
 		int ret = (ms_lookup << 8) | ls_lookup;
 
 		if(logger::CPU_TEST_MODE || generate_string)
-			output_string = "($" + utility::int_to_hex(fetched) + ",X) @ " + utility::int_to_hex(old_addr) + " = " + utility::int_to_hex(ret) + " = " + utility::int_to_hex(bus->ReadCPUSafe(ret));
+			output_string = "($" + utility::int_to_hex(fetched) + ",X)";
 
 		return ret;
 	}
@@ -220,7 +218,7 @@ int Cpu::ResolveAddressing(Bus* bus, Instruction* ins, bool generate_string)
 			add_extra_cycle = true;
 
 		if(logger::CPU_TEST_MODE || generate_string)
-			output_string = "($" + utility::int_to_hex(fetched) + "),Y = " + utility::int_to_hex(first) + " @ " + utility::int_to_hex(second) + " = " + utility::int_to_hex(bus->ReadCPUSafe(second));
+			output_string = "($" + utility::int_to_hex(fetched) + "),Y";
 
 		return second;
 	}
@@ -486,3 +484,188 @@ std::string Cpu::GetFetchBuffer()
 	fetch_buffer = "";
 	return fb;
 }
+
+//backup
+
+//int Cpu::ResolveAddressing(Bus* bus, Instruction* ins, bool generate_string)
+//{
+//	switch (ins->mode)
+//	{
+//
+//	case AddressingMode::IMPLICIT:
+//	{
+//		return 0;
+//	}
+//	case AddressingMode::ACCUMULATOR:
+//	{
+//		//special case, beware!
+//		//have to take care of this on opcode level
+//		if(logger::CPU_TEST_MODE || generate_string)
+//			output_string = "A";
+//		return 0;
+//	}
+//	case AddressingMode::IMMEDIATE:
+//	{
+//		auto fetched = Fetch(bus, generate_string);
+//		if(logger::CPU_TEST_MODE || generate_string)
+//			output_string = "#$" + utility::int_to_hex(fetched);
+//		return fetched;
+//	}
+//	case AddressingMode::ZERO_PAGE:
+//	{
+//		auto fetched = Fetch(bus, generate_string);
+//		if(logger::CPU_TEST_MODE || generate_string)
+//			output_string = "$" + utility::int_to_hex(fetched) + " = " + utility::int_to_hex(bus->ReadCPUSafe(fetched));
+//		return fetched;
+//	}
+//	case AddressingMode::ZERO_PAGE_X:
+//	{
+//		uint8_t fetched = Fetch(bus, generate_string);
+//		int x = registers[(size_t)RegId::X]->get();
+//		int addr = fetched + x;
+//		addr = addr % 0x100;
+//		if(logger::CPU_TEST_MODE || generate_string)
+//			output_string = "$" + utility::int_to_hex(fetched) + ",X @ " + utility::int_to_hex(addr) + " = " + utility::int_to_hex(bus->ReadCPUSafe(addr));
+//		return addr;
+//	}
+//	case AddressingMode::ZERO_PAGE_Y:
+//	{
+//		uint8_t fetched = Fetch(bus, generate_string);
+//		int y = registers[(size_t)RegId::Y]->get();
+//		int addr = fetched + y;
+//		addr = addr % 0x100;
+//		if(logger::CPU_TEST_MODE || generate_string)
+//			output_string = "$" + utility::int_to_hex(fetched) + ",Y @ " + utility::int_to_hex(addr) + " = " + utility::int_to_hex(bus->ReadCPUSafe(addr));
+//		return addr;
+//	}
+//	case AddressingMode::RELATIVE:
+//	{
+//		uint8_t fetched = Fetch(bus, generate_string);
+//		int ret = (int8_t)fetched;
+//		if(logger::CPU_TEST_MODE || generate_string)
+//			output_string = "$" + utility::int_to_hex(ret + registers[(size_t)RegId::PC]->get());
+//		return ret;
+//	}
+//	case AddressingMode::ABSOLUTE:
+//	{
+//		uint8_t ls = Fetch(bus, generate_string);
+//		uint8_t ms = Fetch(bus, generate_string);
+//		int ret = (ms << 8) | ls;
+//
+//		if((logger::CPU_TEST_MODE || generate_string) && ins->opcode != 0x20 && ins->opcode != 0x4C)
+//			output_string = "$" + utility::int_to_hex(ret) + " = " + utility::int_to_hex(bus->ReadCPUSafe(ret));
+//		else if(logger::CPU_TEST_MODE || generate_string)
+//			output_string = "$" + utility::int_to_hex(ret);
+//
+//		return ret;
+//	}
+//	case AddressingMode::ABSOLUTE_X: //extra cycle support
+//	{
+//		uint8_t ls = Fetch(bus, generate_string);
+//		uint8_t ms = Fetch(bus, generate_string);
+//		int first = (ms << 8) | ls;
+//
+//		int x = registers[(size_t)RegId::X]->get();
+//		int second = (first + x) % CPU_MEM_SIZE;
+//
+//		int first_page = first / 256;
+//		int second_page = second / 256;
+//
+//		if (ins->extra_cycle && first_page != second_page)
+//			add_extra_cycle = true;
+//
+//		if(logger::CPU_TEST_MODE || generate_string)
+//			output_string = "$" + utility::int_to_hex(first) + ",X @ " + utility::int_to_hex(second) + " = " + utility::int_to_hex(bus->ReadCPUSafe(second));
+//		return second;
+//	}
+//	case AddressingMode::ABSOLUTE_Y: //extra cycle support
+//	{
+//		uint8_t ls = Fetch(bus, generate_string);
+//		uint8_t ms = Fetch(bus, generate_string);
+//		int first = (ms << 8) | ls;
+//
+//		int y = registers[(size_t)RegId::Y]->get();
+//		int second = (first + y) % CPU_MEM_SIZE;
+//
+//		int first_page = first / 256;
+//		int second_page = second / 256;
+//
+//		if (ins->extra_cycle && first_page != second_page)
+//			add_extra_cycle = true;
+//
+//		if(logger::CPU_TEST_MODE || generate_string)
+//			output_string = "$" + utility::int_to_hex(first) + ",Y @ " + utility::int_to_hex(second) + " = " + utility::int_to_hex(bus->ReadCPUSafe(second));
+//		return second;
+//	}
+//	case AddressingMode::INDIRECT:
+//	{
+//		uint8_t ls = Fetch(bus, generate_string);
+//		uint8_t ms = Fetch(bus, generate_string);
+//		size_t addr = (ms << 8) | ls;
+//
+//		assert(addr < 0xFFFF);
+//		uint8_t ls_lookup = bus->ReadCPUSafe(addr);
+//		int old_addr = addr;
+//		addr = addr + 1;
+//		if (addr % 0x100 == 0)
+//			addr -= 0x100;
+//		uint8_t ms_lookup = bus->ReadCPUSafe(addr);
+//
+//		int ret = (ms_lookup << 8) | ls_lookup;
+//
+//		if(logger::CPU_TEST_MODE || generate_string)
+//			output_string = "($" + utility::int_to_hex(old_addr) + ") = " + utility::int_to_hex(ret);
+//
+//		return ret;
+//	}
+//	case AddressingMode::INDEXED_INDIRECT:
+//	{
+//		uint8_t fetched = Fetch(bus, generate_string);
+//		int x = registers[(size_t)RegId::X]->get();
+//		int addr = fetched + x;
+//		if (addr > 0xFF)
+//			addr = addr % 0x100;
+//
+//		uint8_t ls_lookup = bus->ReadCPUSafe(addr);
+//		int old_addr = addr;
+//		addr = (addr + 1) % 0x100;
+//		uint8_t ms_lookup = bus->ReadCPUSafe(addr);
+//
+//		int ret = (ms_lookup << 8) | ls_lookup;
+//
+//		if(logger::CPU_TEST_MODE || generate_string)
+//			output_string = "($" + utility::int_to_hex(fetched) + ",X) @ " + utility::int_to_hex(old_addr) + " = " + utility::int_to_hex(ret) + " = " + utility::int_to_hex(bus->ReadCPUSafe(ret));
+//
+//		return ret;
+//	}
+//	case AddressingMode::INDIRECT_INDEXED: //extra cycle support
+//	{
+//		uint8_t fetched = Fetch(bus, generate_string);
+//		int addr = fetched;
+//		uint8_t ls_lookup = bus->ReadCPUSafe(addr);
+//		addr= (addr + 1) % 0x100;
+//		uint8_t ms_lookup = bus->ReadCPUSafe(addr);
+//
+//		int first = (ms_lookup << 8) | ls_lookup;
+//		int y = registers[(size_t)RegId::Y]->get();
+//		int second = (first + y) % CPU_MEM_SIZE;
+//
+//		int first_page = first / 256;
+//		int second_page = second / 256;
+//
+//		if (ins->extra_cycle && first_page != second_page)
+//			add_extra_cycle = true;
+//
+//		if(logger::CPU_TEST_MODE || generate_string)
+//			output_string = "($" + utility::int_to_hex(fetched) + "),Y = " + utility::int_to_hex(first) + " @ " + utility::int_to_hex(second) + " = " + utility::int_to_hex(bus->ReadCPUSafe(second));
+//
+//		return second;
+//	}
+//	default:
+//	{
+//		logger::PrintLine(logger::LogType::FATAL_ERROR, "Unknown addressing " + std::to_string((size_t)ins->mode));
+//		return 0;
+//	}
+//
+//	}
+//}

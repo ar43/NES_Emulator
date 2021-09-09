@@ -17,7 +17,7 @@ void Debugger::Init()
     window.DrawHook = std::bind(&Debugger::DrawBackground, this, std::placeholders::_1);
     text_status = window.AddText(3, win_height-12, "Status: Game is not running", 12);
     button_attach = window.AddButton(10,50,73,21,"Attach", std::bind(&Debugger::Attach, this));
-    window.AddCheckbox(100, 50, "Some stuff here", std::bind(&Debugger::Checkbox1Click, this, std::placeholders::_1));
+    window.AddCheckbox(100, 51, "Some stuff here", std::bind(&Debugger::Checkbox1Click, this, std::placeholders::_1));
     asm_list = window.AddAsmList(10, 100, 300, 22,-1,&debug_data);
 }
 

@@ -18,14 +18,17 @@ private:
 	bool* can_scroll_down;
 	bool CanScrollDown();
 	bool pressed;
+	int start, end;
 public:
 	int cursor;
 	Uint32* current_active_list;
 	AsmList(SDL_Renderer* renderer, int x, int y, int w, int h, int cursor, DebugData* debug_data, Uint32* current_active_list);
+	void RenderSlider(SDL_Rect *rect_slider);
 	void HandleEvent(SDL_Event* e);
 	void Update();
 	void InitCursor(int start_loc, bool down = false, bool force = false);
 	void Render();
 	void ScrollUp(int speed);
 	void ScrollDown(int speed);
+	void FindStartAndEnd();
 };
