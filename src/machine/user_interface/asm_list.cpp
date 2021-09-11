@@ -4,6 +4,8 @@
 #include "../../logger/logger.h"
 #include "../../utility/utility.h"
 #include <string>
+#include <sstream>
+#include <iostream>
 
 bool AsmList::CanScrollDown()
 {
@@ -17,10 +19,11 @@ bool AsmList::CanScrollDown()
 
 AsmList::AsmList(SDL_Renderer* renderer, int x, int y, int w, int h, int cursor, DebugData* debug_data, Uint32* current_active_list)
 {
+	static int asm_offset = 12;
 	this->SetActive(false);
 	this->renderer = renderer;
-	SetRect(x, y, w, h * 14);
-	elements = new Text * [h];
+	SetRect(x, y, w, h * AsmList::font_size);
+	elements = new AsmListElement[h];
 	this->cursor = cursor;
 	this->num_elements = h;
 	this->debug_data = debug_data;
@@ -30,16 +33,16 @@ AsmList::AsmList(SDL_Renderer* renderer, int x, int y, int w, int h, int cursor,
 	for (int i = 0; i < num_elements; i++)
 	{
 		can_scroll_down[h] = true;
-		elements[i] = new Text(renderer, x, y + i * 14,"placeholder", 14);
+		elements[i].text = new Text(renderer, x+asm_offset , y + i * AsmList::font_size,"placeholder", AsmList::font_size);
 	}
 }
 
 void AsmList::RenderSlider(SDL_Rect *rect_slider)
 {
 	int all = end - start;
-	int y = (int)(GetRect()->y+20 + ((cursor-start) / (float)(all))*(GetRect()->h-50));
-	if (elements[this->num_elements-1]->GetText().c_str()[0] == '-') //hack but its fast
-		y = GetRect()->y + GetRect()->h - 30;
+	int y = (int)(GetRect()->y+AsmList::slider_w + ((cursor-start) / (float)(all))*(GetRect()->h-AsmList::slider_w*2-AsmList::slider_h));
+	if (elements[this->num_elements-1].text->GetText().c_str()[0] == '-') //hack but its fast
+		y = GetRect()->y + GetRect()->h - AsmList::slider_w-AsmList::slider_h;
 	SDL_SetRenderDrawColor(renderer, 38, 38, 38, 0xff);
 	rect_slider->y = y;
 	SDL_RenderFillRect(renderer, rect_slider);
@@ -50,10 +53,11 @@ void AsmList::Render()
 	SDL_SetRenderDrawColor(renderer, 0xff, 0xff, 0xff, 0xff);
 	SDL_RenderFillRect(renderer, GetRect());
 
-	static SDL_Rect rect_slider_body = { GetRect()->x + GetRect()->w,GetRect()->y,20,GetRect()->h };
-	static SDL_Rect rect_up = { GetRect()->x + GetRect()->w,GetRect()->y,20,20 };
-	static SDL_Rect rect_down = { GetRect()->x + GetRect()->w,GetRect()->y+GetRect()->h-20,20,20 };
-	static SDL_Rect rect_slider = { GetRect()->x + GetRect()->w,GetRect()->y+20,20,10 };
+	static SDL_Rect rect_slider_body = { GetRect()->x + GetRect()->w,GetRect()->y,AsmList::slider_w,GetRect()->h };
+	static SDL_Rect rect_up = { GetRect()->x + GetRect()->w,GetRect()->y,AsmList::slider_w,AsmList::slider_w };
+	static SDL_Rect rect_down = { GetRect()->x + GetRect()->w,GetRect()->y+GetRect()->h-AsmList::slider_w,AsmList::slider_w,AsmList::slider_w };
+	static SDL_Rect rect_slider = { GetRect()->x + GetRect()->w,GetRect()->y+AsmList::slider_w,AsmList::slider_w,AsmList::slider_h };
+	static SDL_Rect rect_selected = { GetRect()->x, GetRect()->y + 0 * AsmList::font_size,GetRect()->w,AsmList::font_size };
 
 	SDL_SetRenderDrawColor(renderer, 230, 230, 230, 0xff);
 	SDL_RenderFillRect(renderer, &rect_slider_body);
@@ -65,7 +69,13 @@ void AsmList::Render()
 	{
 		for (int i = 0; i < num_elements; i++)
 		{
-			elements[i]->Render();
+			if (elements[i].number == selected)
+			{
+				rect_selected.y = GetRect()->y + i * AsmList::font_size;
+				SDL_SetRenderDrawColor(renderer, 102, 226, 242, 0xff);
+				SDL_RenderFillRect(renderer, &rect_selected);
+			}
+			elements[i].text->Render();
 		}
 		RenderSlider(&rect_slider);
 	}
@@ -110,9 +120,9 @@ void AsmList::FindStartAndEnd()
 
 void AsmList::HandleEvent(SDL_Event* e)
 {
-	static SDL_Rect rect_up = { GetRect()->x + GetRect()->w,GetRect()->y,20,20 };
-	static SDL_Rect rect_down = { GetRect()->x + GetRect()->w,GetRect()->y+GetRect()->h-20,20,20 };
-	static SDL_Rect rect_slider_body = { GetRect()->x + GetRect()->w,GetRect()->y,20,GetRect()->h };
+	static SDL_Rect rect_up = { GetRect()->x + GetRect()->w,GetRect()->y,AsmList::slider_w,AsmList::slider_w };
+	static SDL_Rect rect_down = { GetRect()->x + GetRect()->w,GetRect()->y+GetRect()->h-AsmList::slider_w,AsmList::slider_w,AsmList::slider_w };
+	static SDL_Rect rect_slider_body = { GetRect()->x + GetRect()->w,GetRect()->y,AsmList::slider_w,GetRect()->h };
 
 	if (pressed && e->type == SDL_MOUSEMOTION)
 	{
@@ -149,11 +159,20 @@ void AsmList::HandleEvent(SDL_Event* e)
 			else if (SDL_PointInRect(&point, &rect_slider_body))
 			{
 				
-				float c = (point.y - GetRect()->y - 20) / float(rect_slider_body.h - 40);
+				float c = (point.y - GetRect()->y - AsmList::slider_w) / float(rect_slider_body.h - AsmList::slider_w*2);
 				int num = int(c * (end - start) + start);
 				InitCursor(num, false, true);
 				logger::PrintLine(logger::LogType::DEBUG, utility::int_to_hex(num));
 				Update();
+			}
+			else if (SDL_PointInRect(&point,GetRect()))
+			{
+				int y = point.y - GetRect()->y;
+				int element = y / AsmList::font_size;
+				selected = elements[element].number;
+				if (selected < 0)
+					selected = 0;
+				logger::PrintLine(logger::LogType::DEBUG, "Selected: " + utility::int_to_hex(selected));
 			}
 				
 		}
@@ -206,13 +225,18 @@ void AsmList::Update()
 			{
 				if (i > 0 && debug_data->code[j - 1].empty() && debug_data->code[j - 2].empty() && debug_data->code[j - 3].empty() && !prot)
 				{
-					elements[i]->SetText("...");
+					elements[i].text->SetText("...");
+					elements[i].number = -1;
 					counter = j;
 					prot = true;
 					can_scroll_down[i] = true;
 					break;
 				}
-				elements[i]->SetText(debug_data->code[j]);
+				elements[i].text->SetText(debug_data->code[j]);
+				std::string hex_num = debug_data->code[j].substr(0, 4);
+				std::stringstream ss;
+				ss << std::hex << hex_num;
+				ss >> elements[i].number;
 				counter = j + 1;
 				prot = false;
 				can_scroll_down[i] = true;
@@ -220,7 +244,8 @@ void AsmList::Update()
 			}
 			else if (j == 0xffff && debug_data->code[j].empty())
 			{
-				elements[i]->SetText("---------------------------------");
+				elements[i].text->SetText("---------------------------------");
+				elements[i].number = -1;
 				can_scroll_down[i] = false;
 				break;
 			}
