@@ -221,7 +221,7 @@ void Machine::Run()
 			{
 				input.Poll(&status, &ui);
 				
-				while (cycle_accumulator < 29781)
+				while (cycle_accumulator < 29780)
 				{
 					uint64_t old_cycle = cpu.GetCycles();
 					PollInterrupts();
@@ -233,9 +233,9 @@ void Machine::Run()
 					apu.Step(&bus, budget);
 					cycle_accumulator += budget;
 				}
-				if (cycle_accumulator >= 29781)
+				if (cycle_accumulator >= 29780)
 				{
-					cycle_accumulator -= 29781;
+					cycle_accumulator = 0;
 					apu.Play();
 					ui.UpdateAll();
 					frame.end(ui.window.GetWindow());
