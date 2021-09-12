@@ -17,21 +17,42 @@ void Debugger::Init()
     window.DrawHook = std::bind(&Debugger::DrawBackground, this, std::placeholders::_1);
     text_status = window.AddText(3, win_height-12, "Status: Game is not running", 12);
     button_attach = window.AddButton(10,50,73,21,"Attach", std::bind(&Debugger::Attach, this));
+    button_breakpoint_toggle = window.AddButton(460,50,173,21,"Toggle breakpoint", std::bind(&Debugger::ToggleBreakpoint, this));
     window.AddCheckbox(100, 51, "Some stuff here", std::bind(&Debugger::Checkbox1Click, this, std::placeholders::_1));
     asm_list = window.AddAsmList(10, 100, 300, 22,-1,&debug_data);
 }
 
 void Debugger::DrawBackground(SDL_Renderer* renderer)
 {
-    SDL_Rect rect = { win_width-50,0,50,50 };
+    /*SDL_Rect rect = { win_width-50,0,50,50 };
     SDL_SetRenderDrawColor(renderer, 0xff, 0, 0, 255);
-    SDL_RenderFillRect(renderer, &rect);
+    SDL_RenderFillRect(renderer, &rect);*/
 }
 
 void Debugger::Button1Click()
 {
     logger::PrintLine(logger::LogType::INFO, "placeholder button click");
     text_status->SetText("Changed");
+}
+
+void Debugger::ToggleBreakpoint()
+{
+    int selected = asm_list->GetSelected();
+    if (selected >= 0x8000 && selected <= 0xffff)
+    {
+        Breakpoint* breakpoint = &debug_data.breakpoint[asm_list->GetSelected()];
+        if (*breakpoint == Breakpoint::INACTIVE)
+        {
+            *breakpoint = Breakpoint::ACTIVE;
+            debug_data.breakpoints.insert(selected);
+        }
+        else
+        {
+            *breakpoint = Breakpoint::INACTIVE;
+            auto iter = debug_data.breakpoints.find(selected);
+            debug_data.breakpoints.erase(iter);
+        }
+    }
 }
 
 void Debugger::Checkbox1Click(bool* new_state)
@@ -62,6 +83,7 @@ void Debugger::Attach()
     }
     else if(machine_status->running == RunningStatus::RUNNING_ROM)
     {
+        asm_list->SetSelected(0);
         *debug_mode = true;
         text_status->SetText("Status: Attached");
         button_attach->SetActive(false);
@@ -78,6 +100,7 @@ void Debugger::Detach()
         text_status->SetText("Status: Detached");
         button_attach->SetActive(true);
         debug_data.Clear();
+        asm_list->cursor = -1;
         asm_list->SetActive(false);
     }
 }
@@ -114,6 +137,7 @@ void Debugger::Update()
     }
     if (last_running_status == RunningStatus::RUNNING_ROM && machine_status->running == RunningStatus::RUNNING)
     {
+        logger::PrintLine(logger::LogType::DEBUG, "Auto detached");
         Detach();
     }
     last_running_status = machine_status->running;

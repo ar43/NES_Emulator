@@ -350,9 +350,21 @@ void Cpu::ExecuteInstruction(Bus *bus)
 
 	int old_pc = registers[(size_t)RegId::PC]->get();
 
-	if (debug_mode && debug_data->code[old_pc].empty())
+	if (debug_mode)
 	{
-		generate_string = true;
+		if (debug_data->code[old_pc].empty())
+		{
+			generate_string = true;
+		}
+		else if (debug_data->breakpoint[old_pc] == Breakpoint::ACTIVE)
+		{
+			debug_data->breakpoint_hit = old_pc;
+			return;
+		}
+		else
+		{
+			debug_data->breakpoint_hit = 0;
+		}
 	}
 
 	uint8_t opcode = Fetch(bus, generate_string);

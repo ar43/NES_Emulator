@@ -28,16 +28,11 @@ void UserInterface::Init()
     
     menu_bar.Init(window.GetWindow());
     debugger.Init();
-
-    other_windows.push_back(&debugger.window);
 }
 
 void UserInterface::UpdateAll()
 {
-    for (auto window : other_windows)
-    {
-        window->Update();
-    }
+    debugger.window.Update();
 }
 
 void UserInterface::SetScale(uint8_t scale)

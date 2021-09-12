@@ -26,6 +26,4 @@ public:
 
 	MenuBar menu_bar;
 	Debugger debugger;
-
-	std::vector<Window*> other_windows;
 };

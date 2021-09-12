@@ -58,6 +58,8 @@ void AsmList::Render()
 	static SDL_Rect rect_down = { GetRect()->x + GetRect()->w,GetRect()->y+GetRect()->h-AsmList::slider_w,AsmList::slider_w,AsmList::slider_w };
 	static SDL_Rect rect_slider = { GetRect()->x + GetRect()->w,GetRect()->y+AsmList::slider_w,AsmList::slider_w,AsmList::slider_h };
 	static SDL_Rect rect_selected = { GetRect()->x, GetRect()->y + 0 * AsmList::font_size,GetRect()->w,AsmList::font_size };
+	static SDL_Rect rect_breakpoint_outer = { GetRect()->x + 2,GetRect()->y + 0 * AsmList::font_size + 2,8,8 };
+	static SDL_Rect rect_breakpoint_inner = { GetRect()->x + 3,GetRect()->y + 0 * AsmList::font_size + 3,6,6 };
 
 	SDL_SetRenderDrawColor(renderer, 230, 230, 230, 0xff);
 	SDL_RenderFillRect(renderer, &rect_slider_body);
@@ -74,6 +76,24 @@ void AsmList::Render()
 				rect_selected.y = GetRect()->y + i * AsmList::font_size;
 				SDL_SetRenderDrawColor(renderer, 102, 226, 242, 0xff);
 				SDL_RenderFillRect(renderer, &rect_selected);
+			}
+			if (elements[i].number == debug_data->breakpoint_hit)
+			{
+				rect_selected.y = GetRect()->y + i * AsmList::font_size;
+				SDL_SetRenderDrawColor(renderer, 255, 67, 54, 0xff);
+				SDL_RenderFillRect(renderer, &rect_selected);
+			}
+			if (elements[i].number >= 0x8000 && debug_data->breakpoint[elements[i].number] != Breakpoint::INACTIVE)
+			{
+				rect_breakpoint_outer.y = GetRect()->y + i * AsmList::font_size + 2;
+				rect_breakpoint_inner.y = GetRect()->y + i * AsmList::font_size + 3;
+				SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xff);
+				SDL_RenderFillRect(renderer, &rect_breakpoint_outer);
+				if(debug_data->breakpoint[elements[i].number] == Breakpoint::ACTIVE)
+					SDL_SetRenderDrawColor(renderer, 148, 17, 7, 0xff);
+				else
+					SDL_SetRenderDrawColor(renderer, 94, 86, 86, 0xff);
+				SDL_RenderFillRect(renderer, &rect_breakpoint_inner);
 			}
 			elements[i].text->Render();
 		}
@@ -116,6 +136,16 @@ void AsmList::FindStartAndEnd()
 			break;
 		}
 	}
+}
+
+int AsmList::GetSelected()
+{
+	return selected;
+}
+
+void AsmList::SetSelected(int selected)
+{
+	this->selected = selected;
 }
 
 void AsmList::HandleEvent(SDL_Event* e)

@@ -220,25 +220,40 @@ void Machine::Run()
 			if (frame.capTimer.tick(&frame))
 			{
 				input.Poll(&status, &ui);
-				cycle_accumulator = 0;
-				while (cycle_accumulator < 29780)
+				
+				while (cycle_accumulator < 29781)
 				{
 					uint64_t old_cycle = cpu.GetCycles();
 					PollInterrupts();
 					cpu.ExecuteInstruction(&bus);
 					uint16_t budget = (uint16_t)(cpu.GetCycles() - old_cycle);
+					if (budget == 0) //for debugger
+						break;
 					ppu.Step(&bus, mapper.get(), budget);
 					apu.Step(&bus, budget);
 					cycle_accumulator += budget;
 				}
-				apu.Play();
-				ui.UpdateAll();
-				frame.end(ui.window.GetWindow());
-
+				if (cycle_accumulator >= 29781)
+				{
+					cycle_accumulator -= 29781;
+					apu.Play();
+					ui.UpdateAll();
+					frame.end(ui.window.GetWindow());
+				}
+				else
+				{
+					if (!ui.debugger.debug_mode)
+						logger::PrintLine(logger::LogType::FATAL_ERROR, "Illegal emulator state");
+					ui.UpdateAll();
+				}
 			}
 
 			if (status.running != RunningStatus::RUNNING_ROM)
+			{
 				UnloadROM();
+				cycle_accumulator = 0;
+			}
+				
 		}
 		else
 		{

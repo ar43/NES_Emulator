@@ -43,4 +43,6 @@ public:
 	void ScrollUp(int speed);
 	void ScrollDown(int speed);
 	void FindStartAndEnd();
+	int GetSelected();
+	void SetSelected(int selected);
 };
