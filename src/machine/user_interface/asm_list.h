@@ -45,4 +45,7 @@ public:
 	void FindStartAndEnd();
 	int GetSelected();
 	void SetSelected(int selected);
+
+	/*std::string status_string;
+	std::string selected_string;*/
 };

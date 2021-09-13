@@ -29,6 +29,8 @@ AsmList::AsmList(SDL_Renderer* renderer, int x, int y, int w, int h, int cursor,
 	this->debug_data = debug_data;
 	this->current_active_list = current_active_list;
 	this->can_scroll_down = new bool[h];
+	/*status_string = "";
+	selected_string = "";*/
 	//Init();
 	for (int i = 0; i < num_elements; i++)
 	{
@@ -58,8 +60,8 @@ void AsmList::Render()
 	static SDL_Rect rect_down = { GetRect()->x + GetRect()->w,GetRect()->y+GetRect()->h-AsmList::slider_w,AsmList::slider_w,AsmList::slider_w };
 	static SDL_Rect rect_slider = { GetRect()->x + GetRect()->w,GetRect()->y+AsmList::slider_w,AsmList::slider_w,AsmList::slider_h };
 	static SDL_Rect rect_selected = { GetRect()->x, GetRect()->y + 0 * AsmList::font_size,GetRect()->w,AsmList::font_size };
-	static SDL_Rect rect_breakpoint_outer = { GetRect()->x + 2,GetRect()->y + 0 * AsmList::font_size + 2,8,8 };
-	static SDL_Rect rect_breakpoint_inner = { GetRect()->x + 3,GetRect()->y + 0 * AsmList::font_size + 3,6,6 };
+	static SDL_Rect rect_breakpoint_outer = { GetRect()->x + 2,GetRect()->y + 0 * AsmList::font_size + 3,8,8 };
+	static SDL_Rect rect_breakpoint_inner = { GetRect()->x + 3,GetRect()->y + 0 * AsmList::font_size + 4,6,6 };
 
 	SDL_SetRenderDrawColor(renderer, 230, 230, 230, 0xff);
 	SDL_RenderFillRect(renderer, &rect_slider_body);
@@ -67,26 +69,49 @@ void AsmList::Render()
 	SDL_RenderFillRect(renderer, &rect_up);
 	SDL_RenderFillRect(renderer, &rect_down);
 
+	bool force_cursor = true;
+
 	if (IsActive())
 	{
 		for (int i = 0; i < num_elements; i++)
 		{
-			if (elements[i].number == selected)
-			{
-				rect_selected.y = GetRect()->y + i * AsmList::font_size;
-				SDL_SetRenderDrawColor(renderer, 102, 226, 242, 0xff);
-				SDL_RenderFillRect(renderer, &rect_selected);
-			}
+			
 			if (elements[i].number == debug_data->breakpoint_hit)
 			{
 				rect_selected.y = GetRect()->y + i * AsmList::font_size;
 				SDL_SetRenderDrawColor(renderer, 255, 67, 54, 0xff);
 				SDL_RenderFillRect(renderer, &rect_selected);
+				force_cursor = false;
 			}
+			else if (elements[i].number == debug_data->hit)
+			{
+				rect_selected.y = GetRect()->y + i * AsmList::font_size;
+				SDL_SetRenderDrawColor(renderer, 117, 255, 122, 0xff);
+				SDL_RenderFillRect(renderer, &rect_selected);
+				force_cursor = false;
+			}
+			else if (elements[i].number == selected)
+			{
+				rect_selected.y = GetRect()->y + i * AsmList::font_size;
+				SDL_SetRenderDrawColor(renderer, 217, 255, 255, 0xff);
+				SDL_RenderFillRect(renderer, &rect_selected);
+			}
+
+			if (elements[i].number == selected)
+			{
+				SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xff);
+				SDL_RenderDrawLine(renderer, GetRect()->x , rect_selected.y, GetRect()->x+GetRect()->w, rect_selected.y);
+				SDL_RenderDrawLine(renderer, GetRect()->x , rect_selected.y+AsmList::font_size, GetRect()->x+GetRect()->w, rect_selected.y+AsmList::font_size);
+				SDL_RenderDrawLine(renderer, GetRect()->x , rect_selected.y, GetRect()->x, rect_selected.y+AsmList::font_size);
+				SDL_RenderDrawLine(renderer, GetRect()->x+GetRect()->w , rect_selected.y, GetRect()->x+GetRect()->w, rect_selected.y+AsmList::font_size);
+
+				//selected_string = " Selected " + utility::int_to_hex(selected) + ".";
+			}
+
 			if (elements[i].number >= 0x8000 && debug_data->breakpoint[elements[i].number] != Breakpoint::INACTIVE)
 			{
-				rect_breakpoint_outer.y = GetRect()->y + i * AsmList::font_size + 2;
-				rect_breakpoint_inner.y = GetRect()->y + i * AsmList::font_size + 3;
+				rect_breakpoint_outer.y = GetRect()->y + i * AsmList::font_size + 3;
+				rect_breakpoint_inner.y = GetRect()->y + i * AsmList::font_size + 4;
 				SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xff);
 				SDL_RenderFillRect(renderer, &rect_breakpoint_outer);
 				if(debug_data->breakpoint[elements[i].number] == Breakpoint::ACTIVE)
@@ -98,6 +123,18 @@ void AsmList::Render()
 			elements[i].text->Render();
 		}
 		RenderSlider(&rect_slider);
+
+		if (debug_data->signal == DebuggerSignal::PAUSE)
+		{
+			if (force_cursor && debug_data->force_cursor != 0)
+			{
+				InitCursor(debug_data->force_cursor, false, true);
+				debug_data->force_cursor = 0;
+				Update();
+			}
+		}
+
+		
 	}
 }
 

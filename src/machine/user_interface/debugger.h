@@ -12,6 +12,13 @@ enum class Breakpoint
 	ACTIVE
 };
 
+enum class DebuggerSignal
+{
+	CLEAR,
+	PAUSE,
+	CONTINUE
+};
+
 struct DebugData
 {
 	DebugData()
@@ -25,7 +32,12 @@ struct DebugData
 	std::set<int> breakpoints;
 	Breakpoint breakpoint[0x10000];
 
+	DebuggerSignal signal = DebuggerSignal::CLEAR;
+	int step = 0;
+	int force_cursor = 0;
+
 	int breakpoint_hit = 0;
+	int hit = 0;
 
 	void Clear()
 	{
@@ -36,6 +48,12 @@ struct DebugData
 			breakpoint[i] = Breakpoint::INACTIVE;
 		}
 		breakpoints.clear();
+		signal = DebuggerSignal::CLEAR;
+		step = 0;
+		force_cursor = 0;
+		breakpoint_hit = 0;
+		hit = 0;
+		mirror = false;
 	}
 };
 
@@ -54,11 +72,15 @@ private:
 	Text *text_status;
 	Button* button_attach;
 	Button* button_breakpoint_toggle;
+	Button* button_continue;
+	Button* button_step;
 	AsmList* asm_list;
 public:
 	Window window;
 	void Init();
 	void DrawBackground(SDL_Renderer* renderer);
+	void Continue();
+	void Step();
 	void Button1Click();
 	void ToggleBreakpoint();
 	void Checkbox1Click(bool *new_state);

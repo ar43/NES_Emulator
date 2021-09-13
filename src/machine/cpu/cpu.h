@@ -32,6 +32,8 @@ public:
 	void HandleNMI(Bus* bus);
 	void HandleIRQ(Bus* bus);
 
+	bool HandleDebugMode(bool* generate_string, int old_pc);
+
 	void WriteRam(size_t loc, uint8_t byte);
 	uint8_t ReadRam(size_t loc);
 

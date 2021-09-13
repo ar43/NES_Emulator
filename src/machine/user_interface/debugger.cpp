@@ -18,6 +18,8 @@ void Debugger::Init()
     text_status = window.AddText(3, win_height-12, "Status: Game is not running", 12);
     button_attach = window.AddButton(10,50,73,21,"Attach", std::bind(&Debugger::Attach, this));
     button_breakpoint_toggle = window.AddButton(460,50,173,21,"Toggle breakpoint", std::bind(&Debugger::ToggleBreakpoint, this));
+    button_continue = window.AddButton(460,100,173,21, "Continue", std::bind(&Debugger::Continue, this));
+    button_step = window.AddButton(460,150,173,21, "Step", std::bind(&Debugger::Step, this));
     window.AddCheckbox(100, 51, "Some stuff here", std::bind(&Debugger::Checkbox1Click, this, std::placeholders::_1));
     asm_list = window.AddAsmList(10, 100, 300, 22,-1,&debug_data);
 }
@@ -27,6 +29,19 @@ void Debugger::DrawBackground(SDL_Renderer* renderer)
     /*SDL_Rect rect = { win_width-50,0,50,50 };
     SDL_SetRenderDrawColor(renderer, 0xff, 0, 0, 255);
     SDL_RenderFillRect(renderer, &rect);*/
+}
+
+void Debugger::Continue()
+{
+    debug_data.signal = DebuggerSignal::CONTINUE;
+}
+
+void Debugger::Step()
+{
+    if (debug_data.signal == DebuggerSignal::PAUSE)
+    {
+        debug_data.step = 1;
+    }
 }
 
 void Debugger::Button1Click()
@@ -121,11 +136,17 @@ void Debugger::Update()
     static RunningStatus last_running_status = RunningStatus::NOT_RUNNING;
     if (*debug_mode == true)
     {
+        /*if (debug_data.force_cursor != 0)
+        {
+            asm_list->InitCursor(debug_data.force_cursor, false, true);
+            asm_list->Update();
+            debug_data.force_cursor = 0;
+        }*/
         if (SDL_GetTicks() - last_update > 3000)
         {
             std::stringstream stream;
             stream << std::fixed << std::setprecision(2) << double(debug_data.known_bytes) / double(debug_data.all_bytes) * 100;
-            std::string str = "Status: Attached - " + stream.str() + "% of PRG bytes discovered";
+            std::string str = "Status: Attached - " + stream.str() + "% of PRG bytes discovered. Signal: " + std::to_string((int)debug_data.signal) + ".";
             text_status->SetText(str);
             last_update = SDL_GetTicks();
             if (debug_data.known_bytes > 100)

@@ -344,6 +344,71 @@ void Cpu::HandleIRQ(Bus *bus)
 	p->set_flag(flags::Flags::I);
 }
 
+bool Cpu::HandleDebugMode(bool *generate_string, int old_pc)
+{
+	static bool force_cursor = false;
+	if (debug_data->code[old_pc].empty())
+	{
+		*generate_string = true;
+	}
+	else if (debug_data->breakpoint[old_pc] == Breakpoint::ACTIVE)
+	{
+		if (debug_data->signal == DebuggerSignal::CLEAR || debug_data->signal == DebuggerSignal::PAUSE)
+		{
+			debug_data->force_cursor = old_pc;
+			debug_data->signal = DebuggerSignal::PAUSE;
+			debug_data->breakpoint_hit = old_pc;
+			debug_data->hit = debug_data->breakpoint_hit;
+		}
+		if (debug_data->signal == DebuggerSignal::CONTINUE)
+		{
+			debug_data->signal = DebuggerSignal::CLEAR;
+			debug_data->breakpoint_hit = 0;
+			debug_data->hit = 0;
+		}
+		else if (debug_data->signal == DebuggerSignal::PAUSE && debug_data->step)
+		{
+			debug_data->step--;
+			debug_data->breakpoint_hit = 0;
+		}
+		else
+		{
+			return false;
+		}
+
+	}
+	else if (debug_data->signal == DebuggerSignal::PAUSE)
+	{
+		debug_data->breakpoint_hit = 0;
+		if (debug_data->step)
+		{
+			debug_data->step--;
+			force_cursor = true;
+		}
+		else
+		{
+			if (force_cursor)
+			{
+				debug_data->force_cursor = old_pc;
+				force_cursor = false;
+			}
+
+			debug_data->hit = old_pc;
+			return false;
+		}
+	}
+	else if (debug_data->signal == DebuggerSignal::CONTINUE)
+	{
+		debug_data->signal = DebuggerSignal::CLEAR;
+	}
+	else
+	{
+		debug_data->breakpoint_hit = 0;
+		debug_data->hit = 0;
+	}
+	return true;
+}
+
 void Cpu::ExecuteInstruction(Bus *bus)
 {
 	bool generate_string = false;
@@ -352,19 +417,8 @@ void Cpu::ExecuteInstruction(Bus *bus)
 
 	if (debug_mode)
 	{
-		if (debug_data->code[old_pc].empty())
-		{
-			generate_string = true;
-		}
-		else if (debug_data->breakpoint[old_pc] == Breakpoint::ACTIVE)
-		{
-			debug_data->breakpoint_hit = old_pc;
+		if (!HandleDebugMode(&generate_string, old_pc))
 			return;
-		}
-		else
-		{
-			debug_data->breakpoint_hit = 0;
-		}
 	}
 
 	uint8_t opcode = Fetch(bus, generate_string);
