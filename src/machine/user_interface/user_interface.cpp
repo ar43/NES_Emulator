@@ -27,7 +27,7 @@ void UserInterface::Init()
     window.Init("NES Emulator", SCREEN_WIDTH * GetScale(), SCREEN_HEIGHT * GetScale(), SCREEN_WIDTH, SCREEN_HEIGHT);
     
     menu_bar.Init(window.GetWindow());
-    debugger.Init();
+    debugger.Init(window.GetWindow());
 }
 
 void UserInterface::UpdateAll()

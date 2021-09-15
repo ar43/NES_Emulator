@@ -129,8 +129,14 @@ void AsmList::Render()
 			if (force_cursor && debug_data->force_cursor != 0)
 			{
 				InitCursor(debug_data->force_cursor, false, true);
+				selected = debug_data->force_cursor;
 				debug_data->force_cursor = 0;
 				Update();
+			}
+			else if(debug_data->force_cursor != 0)
+			{
+				selected = debug_data->force_cursor;
+				debug_data->force_cursor = 0;
 			}
 		}
 

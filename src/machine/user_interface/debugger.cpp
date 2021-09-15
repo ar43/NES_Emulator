@@ -8,7 +8,7 @@
 #include <sstream>
 #include "asm_list.h"
 
-void Debugger::Init()
+void Debugger::Init(SDL_Window* window_main)
 {
     window.Init("Debugger", win_width, win_height, win_width, win_height, SDL_WINDOW_HIDDEN);
     window.OnOpen = std::bind(&Debugger::Open,this);
@@ -22,6 +22,7 @@ void Debugger::Init()
     button_step = window.AddButton(460,150,173,21, "Step", std::bind(&Debugger::Step, this));
     window.AddCheckbox(100, 51, "Some stuff here", std::bind(&Debugger::Checkbox1Click, this, std::placeholders::_1));
     asm_list = window.AddAsmList(10, 100, 300, 22,-1,&debug_data);
+    this->window_main = window_main;
 }
 
 void Debugger::DrawBackground(SDL_Renderer* renderer)
@@ -34,6 +35,7 @@ void Debugger::DrawBackground(SDL_Renderer* renderer)
 void Debugger::Continue()
 {
     debug_data.signal = DebuggerSignal::CONTINUE;
+    machine_status->paused = false;
 }
 
 void Debugger::Step()
@@ -153,6 +155,11 @@ void Debugger::Update()
             {
                 asm_list->SetActive(true);
                 asm_list->Update();
+            }
+            if (debug_data.signal != DebuggerSignal::CLEAR)
+            {
+                std::string title = "NES Emulator (debugging)";
+                SDL_SetWindowTitle(window_main, title.c_str());
             }
         }
     }

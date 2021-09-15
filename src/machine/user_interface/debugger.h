@@ -75,9 +75,11 @@ private:
 	Button* button_continue;
 	Button* button_step;
 	AsmList* asm_list;
+	SDL_Window* window_main;
+
 public:
 	Window window;
-	void Init();
+	void Init(SDL_Window* window_main);
 	void DrawBackground(SDL_Renderer* renderer);
 	void Continue();
 	void Step();

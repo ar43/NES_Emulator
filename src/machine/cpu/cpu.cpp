@@ -346,7 +346,8 @@ void Cpu::HandleIRQ(Bus *bus)
 
 bool Cpu::HandleDebugMode(bool *generate_string, int old_pc)
 {
-	static bool force_cursor = false;
+	static bool force_cursor = true;
+	static bool force_cursor_red = true;
 	if (debug_data->code[old_pc].empty())
 	{
 		*generate_string = true;
@@ -355,7 +356,12 @@ bool Cpu::HandleDebugMode(bool *generate_string, int old_pc)
 	{
 		if (debug_data->signal == DebuggerSignal::CLEAR || debug_data->signal == DebuggerSignal::PAUSE)
 		{
-			debug_data->force_cursor = old_pc;
+			if (force_cursor_red)
+			{
+				debug_data->force_cursor = old_pc;
+				force_cursor_red = false;
+			}
+				
 			debug_data->signal = DebuggerSignal::PAUSE;
 			debug_data->breakpoint_hit = old_pc;
 			debug_data->hit = debug_data->breakpoint_hit;
@@ -365,11 +371,13 @@ bool Cpu::HandleDebugMode(bool *generate_string, int old_pc)
 			debug_data->signal = DebuggerSignal::CLEAR;
 			debug_data->breakpoint_hit = 0;
 			debug_data->hit = 0;
+			force_cursor_red = true;
 		}
 		else if (debug_data->signal == DebuggerSignal::PAUSE && debug_data->step)
 		{
 			debug_data->step--;
 			debug_data->breakpoint_hit = 0;
+			force_cursor_red = true;
 		}
 		else
 		{
@@ -392,7 +400,6 @@ bool Cpu::HandleDebugMode(bool *generate_string, int old_pc)
 				debug_data->force_cursor = old_pc;
 				force_cursor = false;
 			}
-
 			debug_data->hit = old_pc;
 			return false;
 		}
@@ -400,6 +407,7 @@ bool Cpu::HandleDebugMode(bool *generate_string, int old_pc)
 	else if (debug_data->signal == DebuggerSignal::CONTINUE)
 	{
 		debug_data->signal = DebuggerSignal::CLEAR;
+		force_cursor = true;
 	}
 	else
 	{
