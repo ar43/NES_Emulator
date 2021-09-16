@@ -74,6 +74,7 @@ private:
 	Button* button_breakpoint_toggle;
 	Button* button_continue;
 	Button* button_step;
+	Button* button_step_over;
 	AsmList* asm_list;
 	SDL_Window* window_main;
 
@@ -82,7 +83,8 @@ public:
 	void Init(SDL_Window* window_main);
 	void DrawBackground(SDL_Renderer* renderer);
 	void Continue();
-	void Step();
+	void StepIn();
+	void StepOver();
 	void Button1Click();
 	void ToggleBreakpoint();
 	void Checkbox1Click(bool *new_state);

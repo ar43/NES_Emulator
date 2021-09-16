@@ -19,7 +19,8 @@ void Debugger::Init(SDL_Window* window_main)
     button_attach = window.AddButton(10,50,73,21,"Attach", std::bind(&Debugger::Attach, this));
     button_breakpoint_toggle = window.AddButton(460,50,173,21,"Toggle breakpoint", std::bind(&Debugger::ToggleBreakpoint, this));
     button_continue = window.AddButton(460,100,173,21, "Continue", std::bind(&Debugger::Continue, this));
-    button_step = window.AddButton(460,150,173,21, "Step", std::bind(&Debugger::Step, this));
+    button_step = window.AddButton(460,150,173,21, "Step In", std::bind(&Debugger::StepIn, this));
+    button_step_over = window.AddButton(460,200,173,21, "Step Over", std::bind(&Debugger::StepOver, this));
     window.AddCheckbox(100, 51, "Some stuff here", std::bind(&Debugger::Checkbox1Click, this, std::placeholders::_1));
     asm_list = window.AddAsmList(10, 100, 300, 22,-1,&debug_data);
     this->window_main = window_main;
@@ -38,11 +39,19 @@ void Debugger::Continue()
     machine_status->paused = false;
 }
 
-void Debugger::Step()
+void Debugger::StepIn()
 {
     if (debug_data.signal == DebuggerSignal::PAUSE)
     {
         debug_data.step = 1;
+    }
+}
+
+void Debugger::StepOver()
+{
+    if (debug_data.signal == DebuggerSignal::PAUSE)
+    {
+        debug_data.step = 2;
     }
 }
 
@@ -138,12 +147,6 @@ void Debugger::Update()
     static RunningStatus last_running_status = RunningStatus::NOT_RUNNING;
     if (*debug_mode == true)
     {
-        /*if (debug_data.force_cursor != 0)
-        {
-            asm_list->InitCursor(debug_data.force_cursor, false, true);
-            asm_list->Update();
-            debug_data.force_cursor = 0;
-        }*/
         if (SDL_GetTicks() - last_update > 3000)
         {
             std::stringstream stream;

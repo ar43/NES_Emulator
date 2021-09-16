@@ -352,8 +352,15 @@ bool Cpu::HandleDebugMode(bool *generate_string, int old_pc)
 	{
 		*generate_string = true;
 	}
+	else if (old_pc == debug_data->step)
+	{
+		debug_data->step = 0;
+		return false;
+	}
 	else if (debug_data->breakpoint[old_pc] == Breakpoint::ACTIVE)
 	{
+		if (debug_data->step >= 0x8000)
+			debug_data->step = 0;
 		if (debug_data->signal == DebuggerSignal::CLEAR || debug_data->signal == DebuggerSignal::PAUSE)
 		{
 			if (force_cursor_red)
@@ -373,9 +380,10 @@ bool Cpu::HandleDebugMode(bool *generate_string, int old_pc)
 			debug_data->hit = 0;
 			force_cursor_red = true;
 		}
-		else if (debug_data->signal == DebuggerSignal::PAUSE && debug_data->step)
+		else if (debug_data->signal == DebuggerSignal::PAUSE && (debug_data->step == 1 || debug_data->step == 2))
 		{
-			debug_data->step--;
+			if(debug_data->step == 1)
+				debug_data->step = 0;
 			debug_data->breakpoint_hit = 0;
 			force_cursor_red = true;
 		}
@@ -390,7 +398,11 @@ bool Cpu::HandleDebugMode(bool *generate_string, int old_pc)
 		debug_data->breakpoint_hit = 0;
 		if (debug_data->step)
 		{
-			debug_data->step--;
+			if (debug_data->step == 1)
+			{
+				debug_data->step = 0;
+			}
+			
 			force_cursor = true;
 		}
 		else
@@ -420,6 +432,7 @@ bool Cpu::HandleDebugMode(bool *generate_string, int old_pc)
 void Cpu::ExecuteInstruction(Bus *bus)
 {
 	bool generate_string = false;
+	static int jsr_counter = 0;
 
 	int old_pc = registers[(size_t)RegId::PC]->get();
 
@@ -430,9 +443,27 @@ void Cpu::ExecuteInstruction(Bus *bus)
 	}
 
 	uint8_t opcode = Fetch(bus, generate_string);
+
 	auto instruction = GetInstruction(opcode);
 
 	int value = ResolveAddressing(bus, instruction, generate_string);
+
+	if (debug_mode) //2 - check if instruction is jsr
+	{
+		if (debug_data->step == 2)
+		{
+			if (opcode != 0x20) //this is a normal step
+			{
+				debug_data->step = 0; 
+			}
+			else
+			{
+				auto pc = registers[(size_t)RegId::PC];
+				debug_data->step = pc->get(); //wait for RTS
+			}
+				
+		}
+	}
 
 	//if (logger::CPU_TEST_MODE)
 	//{
