@@ -26,6 +26,7 @@ public:
 	void AddCycles(uint32_t num);
 	uint64_t GetCycles();
 	
+	void SendCpuDataToDebugger();
 
 	void ExecuteInstruction(Bus* bus);
 	void HandleReset(Bus* bus, ResetType reset);

@@ -7,6 +7,8 @@
 #include <iomanip>
 #include <sstream>
 #include "asm_list.h"
+#include "../cpu/register.h"
+#include "../../utility/utility.h"
 
 void Debugger::Init(SDL_Window* window_main)
 {
@@ -17,13 +19,21 @@ void Debugger::Init(SDL_Window* window_main)
     window.DrawHook = std::bind(&Debugger::DrawBackground, this, std::placeholders::_1);
     text_status = window.AddText(3, win_height-12, "Status: Game is not running", 12);
     button_attach = window.AddButton(10,50,73,21,"Attach", std::bind(&Debugger::Attach, this));
-    button_breakpoint_toggle = window.AddButton(460,50,173,21,"Toggle breakpoint", std::bind(&Debugger::ToggleBreakpoint, this));
-    button_continue = window.AddButton(460,100,173,21, "Continue", std::bind(&Debugger::Continue, this));
-    button_step = window.AddButton(460,150,173,21, "Step In", std::bind(&Debugger::StepIn, this));
-    button_step_over = window.AddButton(460,200,173,21, "Step Over", std::bind(&Debugger::StepOver, this));
+    button_breakpoint_toggle = window.AddButton(100,450,173,21,"Toggle breakpoint", std::bind(&Debugger::ToggleBreakpoint, this));
+    button_continue = window.AddButton(100,500,173,21, "Continue", std::bind(&Debugger::Continue, this));
+    button_step = window.AddButton(100,550,173,21, "Step In", std::bind(&Debugger::StepIn, this));
+    button_step_over = window.AddButton(100,600,173,21, "Step Over", std::bind(&Debugger::StepOver, this));
     window.AddCheckbox(100, 51, "Some stuff here", std::bind(&Debugger::Checkbox1Click, this, std::placeholders::_1));
     asm_list = window.AddAsmList(10, 100, 300, 22,-1,&debug_data);
     this->window_main = window_main;
+
+    std::stringstream stream;
+    window.AddText(win_width - 400, 100, "CPU Data", 14);
+    window.AddText(win_width - 400, 100+14+6, "Registers", 14);
+    stream << "A: " << std::left << std::setw(3) << "?" << " X: " << std::left << std::setw(3) << "?" << " Y: " << std::left << std::setw(3) << "?" << " P: " << std::left << std::setw(3) << "?" << " SP: " << std::left << std::setw(3) << "?" << " PC: " << std::left << std::setw(4) << "?";
+    text_registers = window.AddText(win_width - 400, 100+14*2+6, stream.str(), 14);
+    window.AddText(win_width - 400, 100+14*3+6*2, "Flags", 14);
+    text_flags = window.AddText(win_width - 400, 100+14*4+6*2, "...", 14);
 }
 
 void Debugger::DrawBackground(SDL_Renderer* renderer)
@@ -131,6 +141,23 @@ void Debugger::Detach()
     }
 }
 
+void Debugger::UpdateCpuData()
+{
+    std::stringstream stream_register;
+    std::string string_flags = "";
+    stream_register << "A: " << std::left << std::setw(3) << utility::int_to_hex(debug_data.cpu_data.registers[(int)RegId::A]->get()) << " X: " << std::left << std::setw(3) << utility::int_to_hex(debug_data.cpu_data.registers[(int)RegId::X]->get()) << " Y: " << std::left << std::setw(3) << utility::int_to_hex(debug_data.cpu_data.registers[(int)RegId::Y]->get()) << " P: " << std::left << std::setw(3) << utility::int_to_hex(debug_data.cpu_data.registers[(int)RegId::P]->get()) << " SP: " << std::left << std::setw(3) << utility::int_to_hex(debug_data.cpu_data.registers[(int)RegId::SP]->get()) << " PC: " << std::left << std::setw(4) << utility::int_to_hex(debug_data.cpu_data.registers[(int)RegId::PC]->get());
+    text_registers->SetText(stream_register.str());
+
+    for (int i = 0; i < (int)flags::Flags::NUM_FLAGS; i++)
+    {
+        if ((flags::Flags)i == flags::Flags::UNUSED)
+            continue;
+        string_flags += flags::to_string((flags::Flags)i) + "=" + std::to_string((int)debug_data.cpu_data.registers[(int)RegId::P]->get_flag((flags::Flags)i));
+        string_flags += "  ";
+    }
+    text_flags->SetText(string_flags);
+}
+
 void Debugger::Open()
 {
     Attach();
@@ -147,6 +174,7 @@ void Debugger::Update()
     static RunningStatus last_running_status = RunningStatus::NOT_RUNNING;
     if (*debug_mode == true)
     {
+        
         if (SDL_GetTicks() - last_update > 3000)
         {
             std::stringstream stream;
@@ -163,6 +191,14 @@ void Debugger::Update()
             {
                 std::string title = "NES Emulator (debugging)";
                 SDL_SetWindowTitle(window_main, title.c_str());
+            }
+        }
+        if (asm_list->IsActive() && debug_data.signal == DebuggerSignal::PAUSE)
+        {
+            if (debug_data.cpu_data.update)
+            {
+                debug_data.cpu_data.update = false;
+                UpdateCpuData();
             }
         }
     }

@@ -19,6 +19,14 @@ enum class DebuggerSignal
 	CONTINUE
 };
 
+class Register;
+
+struct CpuData
+{
+	Register* registers[6];
+	bool update = false;
+};
+
 struct DebugData
 {
 	DebugData()
@@ -31,6 +39,8 @@ struct DebugData
 	bool mirror = false;
 	std::set<int> breakpoints;
 	Breakpoint breakpoint[0x10000];
+
+	CpuData cpu_data;
 
 	DebuggerSignal signal = DebuggerSignal::CLEAR;
 	int step = 0;
@@ -66,10 +76,12 @@ class Debugger
 {
 private:
 	
-	static const int win_width = 1000;
+	static const int win_width = 750;
 	static const int win_height = 700;
 
 	Text *text_status;
+	Text* text_registers;
+	Text* text_flags;
 	Button* button_attach;
 	Button* button_breakpoint_toggle;
 	Button* button_continue;
@@ -93,6 +105,8 @@ public:
 	void Update();
 	void Attach();
 	void Detach();
+	void UpdateCpuData();
+	
 
 	DebugData debug_data;
 	MachineStatus *machine_status;

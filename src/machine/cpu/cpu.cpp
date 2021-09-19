@@ -366,12 +366,15 @@ bool Cpu::HandleDebugMode(bool *generate_string, int old_pc)
 			if (force_cursor_red)
 			{
 				debug_data->force_cursor = old_pc;
+				debug_data->cpu_data.update = true;
 				force_cursor_red = false;
 			}
 				
 			debug_data->signal = DebuggerSignal::PAUSE;
 			debug_data->breakpoint_hit = old_pc;
 			debug_data->hit = debug_data->breakpoint_hit;
+
+			SendCpuDataToDebugger();
 		}
 		if (debug_data->signal == DebuggerSignal::CONTINUE)
 		{
@@ -410,9 +413,11 @@ bool Cpu::HandleDebugMode(bool *generate_string, int old_pc)
 			if (force_cursor)
 			{
 				debug_data->force_cursor = old_pc;
+				debug_data->cpu_data.update = true;
 				force_cursor = false;
 			}
 			debug_data->hit = old_pc;
+			SendCpuDataToDebugger();
 			return false;
 		}
 	}
@@ -492,6 +497,12 @@ void Cpu::ExecuteInstruction(Bus *bus)
 uint64_t Cpu::GetCycles()
 {
 	return cycle_counter;
+}
+
+void Cpu::SendCpuDataToDebugger()
+{
+	for (int i = 0; i < (int)RegId::NUM_REGISTERS; i++)
+		debug_data->cpu_data.registers[i] = registers[i];
 }
 
 void Cpu::AddCycles(uint32_t num)
