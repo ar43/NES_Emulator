@@ -7,6 +7,7 @@
 #include <iomanip>
 #include <sstream>
 #include "asm_list.h"
+#include "textbox.h"
 #include "../cpu/register.h"
 #include "../../utility/utility.h"
 
@@ -24,7 +25,9 @@ void Debugger::Init(SDL_Window* window_main)
     button_step = window.AddButton(100,550,173,21, "Step In", std::bind(&Debugger::StepIn, this));
     button_step_over = window.AddButton(100,600,173,21, "Step Over", std::bind(&Debugger::StepOver, this));
     window.AddCheckbox(100, 51, "Some stuff here", std::bind(&Debugger::Checkbox1Click, this, std::placeholders::_1));
-    window.AddTextbox(100, 650, 173, "sdfsdf");
+    textbox_goto = window.AddTextbox(100, 650, 173, "");
+    button_goto = window.AddButton(285, 650, 0, 18, "Go to", std::bind(&Debugger::Goto, this));
+    //window.AddTextbox(300, 650, 173, "second");
     asm_list = window.AddAsmList(10, 100, 300, 22,-1,&debug_data);
     this->window_main = window_main;
 
@@ -35,6 +38,33 @@ void Debugger::Init(SDL_Window* window_main)
     text_registers = window.AddText(win_width - 400, 100+14*2+6, stream.str(), 14);
     window.AddText(win_width - 400, 100+14*3+6*2, "Flags", 14);
     text_flags = window.AddText(win_width - 400, 100+14*4+6*2, "...", 14);
+}
+
+void Debugger::Goto()
+{
+    if (!textbox_goto->GetText().empty() && textbox_goto->GetText().size() < 8)
+    {
+        std::string text = textbox_goto->GetText();
+        char * p;
+        long n = strtoul( text.c_str(), & p, 16 ); 
+        if ( * p != 0 ) 
+        {  
+            SDL_ShowSimpleMessageBox(0, "Input error", "Input a valid hex address", this->window.GetWindow());
+        }    
+        else 
+        {  
+            if (n > 0xffff)
+                n = 0xffff;
+            else if (n < 0)
+                n = 0;
+            asm_list->InitCursor((int)n, false, true);
+            asm_list->Update();
+        }
+    }
+    else
+    {
+        SDL_ShowSimpleMessageBox(0, "Input error", "Input a valid hex address", this->window.GetWindow());
+    }
 }
 
 void Debugger::DrawBackground(SDL_Renderer* renderer)

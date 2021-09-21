@@ -28,7 +28,7 @@ void Input::Poll(MachineStatus *machine_status, UserInterface *ui)
             logger::PrintLine(logger::LogType::INFO, "Exiting");
 			machine_status->running = RunningStatus::NOT_RUNNING;
         }
-        else if (e.type == SDL_KEYDOWN) 
+        else if (e.type == SDL_KEYDOWN && ui->window.IsFocused()) 
         {
 			switch (e.key.keysym.sym)
 			{
@@ -132,7 +132,7 @@ void Input::Poll(MachineStatus *machine_status, UserInterface *ui)
 				break;
 			}
         }
-		else if (e.type == SDL_KEYUP)
+		else if (e.type == SDL_KEYUP && ui->window.IsFocused())
 		{
 			switch (e.key.keysym.sym)
 			{
@@ -233,7 +233,7 @@ void Input::HandleMenuBar(MachineStatus *machine_status, UserInterface* ui, WORD
 		}
 		case (WORD)MenuBarID::DEBUG:
 		{
-			ui->debugger.window.Toggle();
+			ui->debugger.window.Show();
 			break;
 		}
 		default: break;

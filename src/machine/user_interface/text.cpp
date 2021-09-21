@@ -12,6 +12,17 @@ void Text::SetText(std::string text, bool offset, int w, int h)
     this->text = text;
     if (text == "")
         text = " ";
+
+    if (render_limit > 0)
+    {
+        int limiter = text.size();
+        while (SimulateWidth(text) > render_limit)
+        {
+            limiter--;
+            text = text.substr(text.size() - limiter, limiter);
+        }
+    }
+
     if (texture != NULL)
         SDL_DestroyTexture(texture);
 
@@ -53,4 +64,16 @@ int Text::GetHeight()
 int Text::GetWidth()
 {
     return w;
+}
+
+int Text::SimulateWidth(std::string in_text)
+{
+    if (GetText().size() > 0)
+    {
+        int w, h;
+        TTF_SizeText(this->font, in_text.c_str(), &w, &h);
+        return w;
+    }
+    else
+        return 0;
 }

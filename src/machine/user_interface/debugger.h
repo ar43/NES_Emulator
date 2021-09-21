@@ -87,12 +87,15 @@ private:
 	Button* button_continue;
 	Button* button_step;
 	Button* button_step_over;
+	Button* button_goto;
+	Textbox* textbox_goto;
 	AsmList* asm_list;
 	SDL_Window* window_main;
 
 public:
 	Window window;
 	void Init(SDL_Window* window_main);
+	void Goto();
 	void DrawBackground(SDL_Renderer* renderer);
 	void Continue();
 	void StepIn();

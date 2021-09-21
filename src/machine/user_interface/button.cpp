@@ -6,10 +6,17 @@ Button::Button(SDL_Renderer *renderer, int x, int y, int w, int h, std::string t
 {
 	this->renderer = renderer;
 	this->text = text;
-	SetRect(x, y, w, h);
+	
 	SetColor(0xb1, 0xb1, 0xb1);
 	text_obj = new Text(renderer, x, y, text,true,w,h);
+	if (w == 0)
+	{
+		w = text_obj->SimulateWidth(text_obj->GetText())+10;
+		delete text_obj;
+		text_obj = new Text(renderer, x, y, text,true,w,h);
+	}
 	this->OnClick = OnClick;
+	SetRect(x, y, w, h);
 }
 
 bool Button::HandleEvent(SDL_Event* e, Uint32* current_active_element)

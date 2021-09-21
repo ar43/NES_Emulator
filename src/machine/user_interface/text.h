@@ -14,6 +14,7 @@ private:
 	TTF_Font* font;
 
 	int size = 16;
+	
 	int w = 0;
 	int h = 0;
 public:
@@ -42,4 +43,6 @@ public:
 	std::string GetText();
 	int GetHeight();
 	int GetWidth();
+	int SimulateWidth(std::string in_text);
+	int render_limit = 0;
 };

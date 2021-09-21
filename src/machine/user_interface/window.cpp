@@ -166,13 +166,34 @@ void Window::HandleEvent(SDL_Event* e)
     if (!focus)
         return;
     int i = 0;
+    Element* current = nullptr;
     for (auto ele : elements)
     {
         if (!ele->HandleEvent(e, &current_active_element))
             i++;
+        if (ele->GetId() == current_active_element)
+            current = ele.get();
     }
     if (i == elements.size())
         current_active_element = -1;
+
+    if (SDL_IsTextInputActive()) //if current active element is not textbox, stop text input
+    {
+        if (current == nullptr)
+        {
+            SDL_StopTextInput();
+        }
+        else
+        {
+            if(Textbox* v = dynamic_cast<Textbox*>(current)) 
+            {
+            }
+            else
+            {
+                SDL_StopTextInput();
+            }
+        }
+    }
 }
 
 void Window::Update()
