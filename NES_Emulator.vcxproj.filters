@@ -246,6 +246,9 @@
     <ClCompile Include="src\machine\user_interface\asm_list.cpp">
       <Filter>Source Files\Machine\UserInterface\Units</Filter>
     </ClCompile>
+    <ClCompile Include="src\machine\user_interface\textbox.cpp">
+      <Filter>Source Files\Machine\UserInterface\Units</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\logger\logger.h">
@@ -393,6 +396,9 @@
       <Filter>Header Files\Machine\UserInterface\Units</Filter>
     </ClInclude>
     <ClInclude Include="src\machine\user_interface\asm_list.h">
+      <Filter>Header Files\Machine\UserInterface\Units</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machine\user_interface\textbox.h">
       <Filter>Header Files\Machine\UserInterface\Units</Filter>
     </ClInclude>
   </ItemGroup>

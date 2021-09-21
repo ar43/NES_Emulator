@@ -2,7 +2,7 @@
 #include "../../logger/logger.h"
 #include <SDL_ttf.h>
 
-void Text::Render()
+void Text::Render(Uint32* current_active_element)
 {
     SDL_RenderCopy( renderer, texture, NULL, GetRect() );
 }
@@ -10,10 +10,12 @@ void Text::Render()
 void Text::SetText(std::string text, bool offset, int w, int h)
 {
     this->text = text;
+    if (text == "")
+        text = " ";
     if (texture != NULL)
         SDL_DestroyTexture(texture);
 
-    SDL_Surface* textSurface = TTF_RenderText_Blended(this->font, GetText().c_str(), {GetColor()->r,GetColor()->g,GetColor()->b,GetColor()->a});
+    SDL_Surface* textSurface = TTF_RenderText_Blended(this->font, text.c_str(), {GetColor()->r,GetColor()->g,GetColor()->b,GetColor()->a});
     if( textSurface == NULL )
     {
         logger::PrintLine(logger::LogType::FATAL_ERROR, "Unable to create text surface: " + std::string(TTF_GetError()));
@@ -32,7 +34,8 @@ void Text::SetText(std::string text, bool offset, int w, int h)
             else
                 SetRect(GetRect()->x, GetRect()->y, textSurface->w, textSurface->h);
         }
-
+        this->w = textSurface->w;
+        this->h = textSurface->h;
         SDL_FreeSurface( textSurface );
     }
 }
@@ -40,4 +43,14 @@ void Text::SetText(std::string text, bool offset, int w, int h)
 std::string Text::GetText()
 {
     return text;
+}
+
+int Text::GetHeight()
+{
+    return h;
+}
+
+int Text::GetWidth()
+{
+    return w;
 }

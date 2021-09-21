@@ -9,6 +9,7 @@
 #include "list.h"
 #include "asm_list.h"
 #include "debugger.h"
+#include "textbox.h"
 
 void Window::Toggle()
 {
@@ -47,9 +48,16 @@ List* Window::AddList(int x, int y, int w, int h)
 
 AsmList* Window::AddAsmList(int x, int y, int w, int h, int cursor, DebugData* debug_data)
 {
-    auto list = std::shared_ptr<AsmList>(new AsmList(GetRenderer(), x, y, w, h, cursor, debug_data, &current_active_list));
+    auto list = std::shared_ptr<AsmList>(new AsmList(GetRenderer(), x, y, w, h, cursor, debug_data));
     elements.push_back(list);
     return list.get();
+}
+
+Textbox* Window::AddTextbox(int x, int y, int w, std::string text)
+{
+    auto textbox = std::shared_ptr<Textbox>(new Textbox(GetRenderer(), x, y, w, text));
+    elements.push_back(textbox);
+    return textbox.get();
 }
 
 void Window::HandleWindowEvent(SDL_Event* e, bool *request_exit)
@@ -72,6 +80,7 @@ void Window::HandleWindowEvent(SDL_Event* e, bool *request_exit)
             //Window disappeared
         case SDL_WINDOWEVENT_HIDDEN:
             shown = false;
+            current_active_element = -1;
             if(OnClose)
                 OnClose();
             break;
@@ -101,11 +110,13 @@ void Window::HandleWindowEvent(SDL_Event* e, bool *request_exit)
         case SDL_WINDOWEVENT_FOCUS_LOST:
             focus = false;
             logger::PrintLine(logger::LogType::DEBUG, "Focus OFF for window id " + std::to_string(window_id));
+            //current_active_element = -1;
             break;
 
             //Window minimized
         case SDL_WINDOWEVENT_MINIMIZED:
             minimized = true;
+            //current_active_element = -1;
             break;
 
             //Window maxized
@@ -154,10 +165,14 @@ void Window::HandleEvent(SDL_Event* e)
 {
     if (!focus)
         return;
+    int i = 0;
     for (auto ele : elements)
     {
-        ele->HandleEvent(e);
+        if (!ele->HandleEvent(e, &current_active_element))
+            i++;
     }
+    if (i == elements.size())
+        current_active_element = -1;
 }
 
 void Window::Update()
@@ -178,7 +193,7 @@ void Window::Update()
 
     for (auto ele : elements)
     {
-        ele->Render();
+        ele->Render(&current_active_element);
     }
 
     SDL_RenderPresent(renderer);

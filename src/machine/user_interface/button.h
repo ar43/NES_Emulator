@@ -15,8 +15,8 @@ private:
 	bool pressed = false;
 public:
 	Button(SDL_Renderer *renderer, int x, int y, int w, int h, std::string text, std::function<void()> OnClick);
-	void HandleEvent(SDL_Event* e);
-	void Render();
+	bool HandleEvent(SDL_Event* e, Uint32 *current_active_element);
+	void Render(Uint32* current_active_element);
 	//void (*OnClick)() = nullptr;
 	std::function<void()> OnClick;
 

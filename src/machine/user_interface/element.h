@@ -30,6 +30,6 @@ public:
 	void SetActive(bool active);
 	bool IsActive();
 	SDL_Color* GetColor();
-	virtual void HandleEvent(SDL_Event* e) = 0;
-	virtual void Render() = 0;
+	virtual bool HandleEvent(SDL_Event* e, Uint32* current_active_element) = 0;
+	virtual void Render(Uint32* current_active_element) = 0;
 };

@@ -19,6 +19,6 @@ public:
 		SetRect(x, y, w, h * 14);
 		elements = new Text * [h];
 	}
-	void HandleEvent(SDL_Event* e);
-	void Render();
+	bool HandleEvent(SDL_Event* e, Uint32 *current_active_element);
+	void Render(Uint32* current_active_element);
 };

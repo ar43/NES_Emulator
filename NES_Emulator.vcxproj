@@ -188,6 +188,7 @@
     <ClCompile Include="src\machine\user_interface\list.cpp" />
     <ClCompile Include="src\machine\user_interface\menu_bar.cpp" />
     <ClCompile Include="src\machine\user_interface\text.cpp" />
+    <ClCompile Include="src\machine\user_interface\textbox.cpp" />
     <ClCompile Include="src\machine\user_interface\user_interface.cpp" />
     <ClCompile Include="src\machine\user_interface\window.cpp" />
     <ClCompile Include="src\main.cpp" />
@@ -240,6 +241,7 @@
     <ClInclude Include="src\machine\user_interface\list.h" />
     <ClInclude Include="src\machine\user_interface\menu_bar.h" />
     <ClInclude Include="src\machine\user_interface\text.h" />
+    <ClInclude Include="src\machine\user_interface\textbox.h" />
     <ClInclude Include="src\machine\user_interface\user_interface.h" />
     <ClInclude Include="src\machine\user_interface\window.h" />
     <ClInclude Include="src\timing\frame.h" />

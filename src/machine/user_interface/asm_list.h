@@ -33,13 +33,13 @@ private:
 
 public:
 	int cursor;
-	Uint32* current_active_list;
-	AsmList(SDL_Renderer* renderer, int x, int y, int w, int h, int cursor, DebugData* debug_data, Uint32* current_active_list);
+
+	AsmList(SDL_Renderer* renderer, int x, int y, int w, int h, int cursor, DebugData* debug_data);
 	void RenderSlider(SDL_Rect *rect_slider);
-	void HandleEvent(SDL_Event* e);
+	bool HandleEvent(SDL_Event* e, Uint32 *current_active_element);
 	void Update();
 	void InitCursor(int start_loc, bool down = false, bool force = false);
-	void Render();
+	void Render(Uint32* current_active_element);
 	void ScrollUp(int speed);
 	void ScrollDown(int speed);
 	void FindStartAndEnd();

@@ -24,6 +24,7 @@ void Debugger::Init(SDL_Window* window_main)
     button_step = window.AddButton(100,550,173,21, "Step In", std::bind(&Debugger::StepIn, this));
     button_step_over = window.AddButton(100,600,173,21, "Step Over", std::bind(&Debugger::StepOver, this));
     window.AddCheckbox(100, 51, "Some stuff here", std::bind(&Debugger::Checkbox1Click, this, std::placeholders::_1));
+    window.AddTextbox(100, 650, 173, "sdfsdf");
     asm_list = window.AddAsmList(10, 100, 300, 22,-1,&debug_data);
     this->window_main = window_main;
 

@@ -12,8 +12,9 @@ Button::Button(SDL_Renderer *renderer, int x, int y, int w, int h, std::string t
 	this->OnClick = OnClick;
 }
 
-void Button::HandleEvent(SDL_Event* e)
+bool Button::HandleEvent(SDL_Event* e, Uint32* current_active_element)
 {
+	bool retvalue = false;
 	if (pressed && e->type == SDL_MOUSEMOTION)
 	{
 		SDL_Point point = { e->motion.x,e->motion.y };
@@ -40,12 +41,15 @@ void Button::HandleEvent(SDL_Event* e)
 	{
 		//logger::PrintLine(logger::LogType::DEBUG, "zzz");
 		SDL_Point point = { e->motion.x,e->motion.y };
-		if(SDL_PointInRect(&point, GetRect()))
+		if (SDL_PointInRect(&point, GetRect()))
 			pressed = true;
+		else
+			retvalue = false;
 	}
+	return retvalue;
 }
 
-void Button::Render()
+void Button::Render(Uint32* current_active_element)
 {
 	SDL_Color final_color = {GetColor()->r,GetColor()->g,GetColor()->b,GetColor()->a};
 	if (pressed && IsActive())
@@ -57,7 +61,7 @@ void Button::Render()
 	SDL_SetRenderDrawColor(renderer, final_color.r, final_color.g, final_color.b, final_color.a);
 	SDL_RenderFillRect(renderer, GetRect());
 	if (text_obj != nullptr)
-		text_obj->Render();
+		text_obj->Render(current_active_element);
 }
 
 void Button::SetActive(bool active)

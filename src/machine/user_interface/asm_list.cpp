@@ -17,7 +17,7 @@ bool AsmList::CanScrollDown()
 	return true;
 }
 
-AsmList::AsmList(SDL_Renderer* renderer, int x, int y, int w, int h, int cursor, DebugData* debug_data, Uint32* current_active_list)
+AsmList::AsmList(SDL_Renderer* renderer, int x, int y, int w, int h, int cursor, DebugData* debug_data)
 {
 	static int asm_offset = 12;
 	this->SetActive(false);
@@ -27,7 +27,6 @@ AsmList::AsmList(SDL_Renderer* renderer, int x, int y, int w, int h, int cursor,
 	this->cursor = cursor;
 	this->num_elements = h;
 	this->debug_data = debug_data;
-	this->current_active_list = current_active_list;
 	this->can_scroll_down = new bool[h];
 	/*status_string = "";
 	selected_string = "";*/
@@ -50,7 +49,7 @@ void AsmList::RenderSlider(SDL_Rect *rect_slider)
 	SDL_RenderFillRect(renderer, rect_slider);
 }
 
-void AsmList::Render()
+void AsmList::Render(Uint32* current_active_element)
 {
 	SDL_SetRenderDrawColor(renderer, 0xff, 0xff, 0xff, 0xff);
 	SDL_RenderFillRect(renderer, GetRect());
@@ -120,7 +119,7 @@ void AsmList::Render()
 					SDL_SetRenderDrawColor(renderer, 94, 86, 86, 0xff);
 				SDL_RenderFillRect(renderer, &rect_breakpoint_inner);
 			}
-			elements[i].text->Render();
+			elements[i].text->Render(current_active_element);
 		}
 		RenderSlider(&rect_slider);
 
@@ -191,11 +190,12 @@ void AsmList::SetSelected(int selected)
 	this->selected = selected;
 }
 
-void AsmList::HandleEvent(SDL_Event* e)
+bool AsmList::HandleEvent(SDL_Event* e, Uint32* current_active_element)
 {
 	static SDL_Rect rect_up = { GetRect()->x + GetRect()->w,GetRect()->y,AsmList::slider_w,AsmList::slider_w };
 	static SDL_Rect rect_down = { GetRect()->x + GetRect()->w,GetRect()->y+GetRect()->h-AsmList::slider_w,AsmList::slider_w,AsmList::slider_w };
 	static SDL_Rect rect_slider_body = { GetRect()->x + GetRect()->w,GetRect()->y,AsmList::slider_w,GetRect()->h };
+	bool retvalue = true;
 
 	if (pressed && e->type == SDL_MOUSEMOTION)
 	{
@@ -211,7 +211,7 @@ void AsmList::HandleEvent(SDL_Event* e)
 			pressed = false;
 			if (IsActive())
 			{
-				*current_active_list = GetId();
+				*current_active_element = GetId();
 			}
 			//logger::PrintLine(logger::LogType::DEBUG, "Button #" + std::to_string(GetId()) + " clicked");
 		}
@@ -220,8 +220,10 @@ void AsmList::HandleEvent(SDL_Event* e)
 	{
 		//logger::PrintLine(logger::LogType::DEBUG, "zzz");
 		SDL_Point point = { e->motion.x,e->motion.y };
-		if((SDL_PointInRect(&point, GetRect()) || SDL_PointInRect(&point,&rect_slider_body)))
+		if ((SDL_PointInRect(&point, GetRect()) || SDL_PointInRect(&point, &rect_slider_body)))
 			pressed = true;
+		else
+			retvalue = false;
 
 		if (IsActive())
 		{
@@ -250,7 +252,7 @@ void AsmList::HandleEvent(SDL_Event* e)
 				
 		}
 	}
-	else if(e->type == SDL_MOUSEWHEEL && *current_active_list == GetId() && IsActive())
+	else if(e->type == SDL_MOUSEWHEEL && *current_active_element == GetId() && IsActive())
 	{
 		if(e->wheel.y > 0) // scroll up
 		{
@@ -261,7 +263,7 @@ void AsmList::HandleEvent(SDL_Event* e)
 			ScrollDown(1);
 		}
 	}
-	else if (e->type == SDL_KEYDOWN && *current_active_list == GetId() && IsActive())
+	else if (e->type == SDL_KEYDOWN && *current_active_element == GetId() && IsActive())
 	{
 		switch (e->key.keysym.sym)
 		{
@@ -279,6 +281,7 @@ void AsmList::HandleEvent(SDL_Event* e)
 			
 		}
 	}
+	return retvalue;
 }
 
 void AsmList::Update()

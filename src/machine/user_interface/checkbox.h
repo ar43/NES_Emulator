@@ -19,8 +19,8 @@ private:
 	int h = 14;
 public:
 	Checkbox(SDL_Renderer *renderer, int x, int y, std::string text, std::function<void(bool*)> OnClick);
-	void HandleEvent(SDL_Event* e);
-	void Render();
+	bool HandleEvent(SDL_Event* e, Uint32 *current_active_element);
+	void Render(Uint32* current_active_element);
 	//void (*OnClick)(bool *new_state) = nullptr;
 	std::function<void(bool*)> OnClick;
 

@@ -14,6 +14,8 @@ private:
 	TTF_Font* font;
 
 	int size = 16;
+	int w = 0;
+	int h = 0;
 public:
 	Text(SDL_Renderer *renderer, int x, int y, std::string text, int size)
 	{
@@ -34,8 +36,10 @@ public:
 		SetPosition(x, y);
 		SetText(text, offset,w,h);
 	}
-	void HandleEvent(SDL_Event* e) {};
-	void Render();
+	bool HandleEvent(SDL_Event* e, Uint32* current_active_element) { return false; };
+	void Render(Uint32* current_active_element);
 	void SetText(std::string text, bool offset = false, int w = 0, int h = 0);
 	std::string GetText();
+	int GetHeight();
+	int GetWidth();
 };

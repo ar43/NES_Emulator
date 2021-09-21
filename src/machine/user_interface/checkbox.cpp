@@ -33,8 +33,9 @@ void Checkbox::InitTexture()
 	}
 }
 
-void Checkbox::HandleEvent(SDL_Event* e)
+bool Checkbox::HandleEvent(SDL_Event* e, Uint32* current_active_element)
 {
+	bool retvalue = false;
 	if (pressed && e->type == SDL_MOUSEMOTION)
 	{
 		SDL_Point point = { e->motion.x,e->motion.y };
@@ -62,12 +63,15 @@ void Checkbox::HandleEvent(SDL_Event* e)
 	{
 		//logger::PrintLine(logger::LogType::DEBUG, "zzz");
 		SDL_Point point = { e->motion.x,e->motion.y };
-		if(SDL_PointInRect(&point, GetRect()))
+		if (SDL_PointInRect(&point, GetRect()))
 			pressed = true;
+		else
+			retvalue = false;
 	}
+	return retvalue;
 }
 
-void Checkbox::Render()
+void Checkbox::Render(Uint32* current_active_element)
 {
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xff);
 	SDL_Rect rect = { GetRect()->x - 1,GetRect()->y - 1, 16, 16 };
@@ -86,5 +90,5 @@ void Checkbox::Render()
 		SDL_RenderCopy(renderer, texture, NULL, &rect);
 	}
 	if (text_obj != nullptr)
-		text_obj->Render();
+		text_obj->Render(current_active_element);
 }
