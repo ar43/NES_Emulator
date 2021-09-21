@@ -18,15 +18,18 @@ void Debugger::Init(SDL_Window* window_main)
     window.OnClose = std::bind(&Debugger::Close,this);
     window.OnUpdate = std::bind(&Debugger::Update, this);
     window.DrawHook = std::bind(&Debugger::DrawBackground, this, std::placeholders::_1);
+    
     text_status = window.AddText(3, win_height-12, "Status: Game is not running", 12);
     button_attach = window.AddButton(10,50,73,21,"Attach", std::bind(&Debugger::Attach, this));
-    button_breakpoint_toggle = window.AddButton(100,450,173,21,"Toggle breakpoint", std::bind(&Debugger::ToggleBreakpoint, this));
+    button_breakpoint_toggle = window.AddButton(100,450,173,21,"Toggle breakpoint", std::bind(&Debugger::ToggleBreakpoint, this, 0));
     button_continue = window.AddButton(100,500,173,21, "Continue", std::bind(&Debugger::Continue, this));
     button_step = window.AddButton(100,550,173,21, "Step In", std::bind(&Debugger::StepIn, this));
     button_step_over = window.AddButton(100,600,173,21, "Step Over", std::bind(&Debugger::StepOver, this));
     window.AddCheckbox(100, 51, "Some stuff here", std::bind(&Debugger::Checkbox1Click, this, std::placeholders::_1));
     textbox_goto = window.AddTextbox(100, 650, 173, "");
     button_goto = window.AddButton(285, 650, 0, 18, "Go to", std::bind(&Debugger::Goto, this));
+    textbox_bp = window.AddTextbox(100, 700, 173, "");
+    button_bp = window.AddButton(285, 700, 0, 18, "Toggle breakpoint", std::bind(&Debugger::ToggleBreakpointText, this));
     //window.AddTextbox(300, 650, 173, "second");
     asm_list = window.AddAsmList(10, 100, 300, 22,-1,&debug_data);
     this->window_main = window_main;
@@ -59,6 +62,31 @@ void Debugger::Goto()
                 n = 0;
             asm_list->InitCursor((int)n, false, true);
             asm_list->Update();
+        }
+    }
+    else
+    {
+        SDL_ShowSimpleMessageBox(0, "Input error", "Input a valid hex address", this->window.GetWindow());
+    }
+}
+
+void Debugger::ToggleBreakpointText()
+{
+    if (!textbox_bp->GetText().empty() && textbox_bp->GetText().size() < 8)
+    {
+        std::string text = textbox_bp->GetText();
+        char * p;
+        long n = strtoul( text.c_str(), & p, 16 ); 
+        if ( * p != 0 ) 
+        {  
+            SDL_ShowSimpleMessageBox(0, "Input error", "Input a valid hex address", this->window.GetWindow());
+        }    
+        else 
+        {  
+            if (n > 0xffff || n < 0x8000)
+                SDL_ShowSimpleMessageBox(0, "Input error", "Input a valid hex address", this->window.GetWindow());
+            else
+                ToggleBreakpoint((int)n);
         }
     }
     else
@@ -102,9 +130,14 @@ void Debugger::Button1Click()
     text_status->SetText("Changed");
 }
 
-void Debugger::ToggleBreakpoint()
+void Debugger::ToggleBreakpoint(int loc)
 {
+
     int selected = asm_list->GetSelected();
+
+    if (loc != 0)
+        selected = loc;
+
     if (selected >= 0x8000 && selected <= 0xffff)
     {
         Breakpoint* breakpoint = &debug_data.breakpoint[asm_list->GetSelected()];

@@ -77,7 +77,7 @@ class Debugger
 private:
 	
 	static const int win_width = 750;
-	static const int win_height = 700;
+	static const int win_height = 750;
 
 	Text *text_status;
 	Text* text_registers;
@@ -88,20 +88,25 @@ private:
 	Button* button_step;
 	Button* button_step_over;
 	Button* button_goto;
+	Button* button_bp;
+	
 	Textbox* textbox_goto;
+	Textbox* textbox_bp;
 	AsmList* asm_list;
 	SDL_Window* window_main;
 
 public:
 	Window window;
+	
 	void Init(SDL_Window* window_main);
 	void Goto();
+	void ToggleBreakpointText();
 	void DrawBackground(SDL_Renderer* renderer);
 	void Continue();
 	void StepIn();
 	void StepOver();
 	void Button1Click();
-	void ToggleBreakpoint();
+	void ToggleBreakpoint(int loc = 0);
 	void Checkbox1Click(bool *new_state);
 	void Open();
 	void Close();
