@@ -503,6 +503,7 @@ void Cpu::SendCpuDataToDebugger()
 {
 	for (int i = 0; i < (int)RegId::NUM_REGISTERS; i++)
 		debug_data->cpu_data.registers[i] = registers[i];
+	debug_data->cpu_data.cycles = GetCycles();
 }
 
 void Cpu::AddCycles(uint32_t num)

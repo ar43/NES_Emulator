@@ -11,6 +11,14 @@
 #include "debugger.h"
 #include "textbox.h"
 
+void Window::Show()
+{
+    if (!IsShown())
+        SDL_ShowWindow(window);
+    else
+        SDL_RaiseWindow(window);
+}
+
 void Window::Toggle()
 {
     if (shown)

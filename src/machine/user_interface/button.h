@@ -17,6 +17,7 @@ public:
 	Button(SDL_Renderer *renderer, int x, int y, int w, int h, std::string text, std::function<void()> OnClick);
 	bool HandleEvent(SDL_Event* e, Uint32 *current_active_element);
 	void Render(Uint32* current_active_element);
+	int GetWidth();
 	//void (*OnClick)() = nullptr;
 	std::function<void()> OnClick;
 

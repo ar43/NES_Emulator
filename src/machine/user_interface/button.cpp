@@ -71,6 +71,11 @@ void Button::Render(Uint32* current_active_element)
 		text_obj->Render(current_active_element);
 }
 
+int Button::GetWidth()
+{
+	return GetRect()->w;
+}
+
 void Button::SetActive(bool active)
 {
 	Element::SetActive(active);

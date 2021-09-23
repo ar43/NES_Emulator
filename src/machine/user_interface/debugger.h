@@ -24,6 +24,7 @@ class Register;
 struct CpuData
 {
 	Register* registers[6];
+	uint64_t cycles;
 	bool update = false;
 };
 
@@ -77,11 +78,13 @@ class Debugger
 private:
 	
 	static const int win_width = 750;
-	static const int win_height = 750;
+	static const int win_height = 500;
 
 	Text *text_status;
 	Text* text_registers;
 	Text* text_flags;
+	Text* text_cycles;
+
 	Button* button_attach;
 	Button* button_breakpoint_toggle;
 	Button* button_continue;

@@ -38,7 +38,7 @@ public:
 	bool IsShown() { return shown; }
 	bool IsMinimized() { return minimized; }
 
-	void Show() { SDL_ShowWindow(window); }
+	void Show();
 	void Hide() { SDL_HideWindow(window); }
 	void Toggle();
 
