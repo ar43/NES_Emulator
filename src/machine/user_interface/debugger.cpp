@@ -14,6 +14,8 @@
 
 void Debugger::Init(SDL_Window* window_main)
 {
+    this->window_main = window_main;
+
     window.Init("Debugger", win_width, win_height, win_width, win_height, SDL_WINDOW_HIDDEN);
     window.OnOpen = std::bind(&Debugger::Open,this);
     window.OnClose = std::bind(&Debugger::Close,this);
@@ -28,7 +30,7 @@ void Debugger::Init(SDL_Window* window_main)
     button_step_over = window.AddButton(10+button_attach->GetWidth()+30+button_continue->GetWidth()+10+button_step->GetWidth()+10,10,0,21, "Step Over", std::bind(&Debugger::StepOver, this));
     button_breakpoint_toggle = window.AddButton(10+button_attach->GetWidth()+30+button_continue->GetWidth()+10+button_step->GetWidth()+10+button_step_over->GetWidth()+10,10,0,21,"Toggle breakpoint", std::bind(&Debugger::ToggleBreakpoint, this, 0));
     
-    window.AddCheckbox(win_width-300, 450, "Enable saving and loading data", std::bind(&Debugger::Checkbox1Click, this, std::placeholders::_1));
+    window.AddCheckbox(win_width-300, 480, "Enable saving and loading data", std::bind(&Debugger::Checkbox1Click, this, std::placeholders::_1));
     textbox_goto = window.AddTextbox(10, 400, 173, "");
     button_goto = window.AddButton(195, 400, 0, 18, "Go to", std::bind(&Debugger::Goto, this));
     //textbox_bp = window.AddTextbox(100, 700, 173, "");
@@ -36,8 +38,10 @@ void Debugger::Init(SDL_Window* window_main)
 
     //window.AddTextbox(300, 650, 173, "second");
     asm_list = window.AddAsmList(10, 60, 300, 22,-1,&debug_data);
-    list_breakpoints = window.AddList(win_width - 300, 350, 100, 4, &debug_data.breakpoints_draw);
-    this->window_main = window_main;
+
+    window.AddText(win_width - 200, 330, "Breakpoints: ", 14);
+    list_breakpoints = window.AddList(win_width - 200, 350, 100, 4, &debug_data.breakpoints_draw);
+    button_remove_bp = window.AddButton(win_width - 80, 350, 0, 21, "Remove", std::bind(&Debugger::RemoveBreakpoint, this));
 
     std::stringstream stream;
     text_cycles = window.AddText(win_width - 400, 60, "CPU Data", 14);
@@ -46,6 +50,20 @@ void Debugger::Init(SDL_Window* window_main)
     text_registers = window.AddText(win_width - 400, 60+14*2+6, stream.str(), 14);
     window.AddText(win_width - 400, 60+14*3+6*2, "Flags", 14);
     text_flags = window.AddText(win_width - 400, 60+14*4+6*2, "...", 14);
+}
+
+void Debugger::RemoveBreakpoint()
+{
+    std::string out = list_breakpoints->GetSelectedText();
+    if (!out.empty())
+    {
+        int bp = 0;
+        std::string hex_num = out.substr(0, 4);
+        std::stringstream ss;
+        ss << std::hex << hex_num;
+        ss >> bp;
+        ToggleBreakpoint(bp);
+    }
 }
 
 void Debugger::Goto()

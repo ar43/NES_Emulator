@@ -110,6 +110,19 @@ void List::SetSelected(int selected)
 	this->selected = selected;
 }
 
+std::string List::GetSelectedText()
+{
+	if (selected >= 0 && selected < (int)data->size())
+	{
+		std::string txt = data->at(selected);
+		return txt;
+	}
+	else
+	{
+		return "";
+	}
+}
+
 bool List::HandleEvent(SDL_Event* e, Uint32* current_active_element)
 {
 	SDL_Rect rect_up = { GetRect()->x + GetRect()->w,GetRect()->y,List::slider_w,List::slider_w };

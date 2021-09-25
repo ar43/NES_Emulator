@@ -95,6 +95,7 @@ private:
 	Button* button_step;
 	Button* button_step_over;
 	Button* button_goto;
+	Button* button_remove_bp;
 	Button* button_bp;
 	
 	Textbox* textbox_goto;
@@ -107,6 +108,7 @@ public:
 	Window window;
 	
 	void Init(SDL_Window* window_main);
+	void RemoveBreakpoint();
 	void Goto();
 	void ToggleBreakpointText();
 	void DrawBackground(SDL_Renderer* renderer);

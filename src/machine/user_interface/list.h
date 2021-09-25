@@ -43,4 +43,5 @@ public:
 	void ScrollDown(int speed);
 	int GetSelected();
 	void SetSelected(int selected);
+	std::string GetSelectedText();
 };
