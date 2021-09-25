@@ -99,10 +99,10 @@ void AsmList::Render(Uint32* current_active_element)
 			if (elements[i].number == selected)
 			{
 				SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xff);
-				SDL_RenderDrawLine(renderer, GetRect()->x , rect_selected.y, GetRect()->x+GetRect()->w, rect_selected.y);
-				SDL_RenderDrawLine(renderer, GetRect()->x , rect_selected.y+AsmList::font_size, GetRect()->x+GetRect()->w, rect_selected.y+AsmList::font_size);
+				SDL_RenderDrawLine(renderer, GetRect()->x , rect_selected.y, GetRect()->x+GetRect()->w-1, rect_selected.y);
+				SDL_RenderDrawLine(renderer, GetRect()->x , rect_selected.y+AsmList::font_size, GetRect()->x+GetRect()->w-1, rect_selected.y+AsmList::font_size);
 				SDL_RenderDrawLine(renderer, GetRect()->x , rect_selected.y, GetRect()->x, rect_selected.y+AsmList::font_size);
-				SDL_RenderDrawLine(renderer, GetRect()->x+GetRect()->w , rect_selected.y, GetRect()->x+GetRect()->w, rect_selected.y+AsmList::font_size);
+				SDL_RenderDrawLine(renderer, GetRect()->x+GetRect()->w-1 , rect_selected.y, GetRect()->x+GetRect()->w-1, rect_selected.y+AsmList::font_size);
 
 				//selected_string = " Selected " + utility::int_to_hex(selected) + ".";
 			}

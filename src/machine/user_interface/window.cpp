@@ -47,9 +47,9 @@ void Window::AddCheckbox(int x, int y, std::string text, std::function<void(bool
     elements.push_back(checkbox);
 }
 
-List* Window::AddList(int x, int y, int w, int h)
+List* Window::AddList(int x, int y, int w, int h, std::vector<std::string>* data)
 {
-    auto list = std::shared_ptr<List>(new List(GetRenderer(), x, y, w, h));
+    auto list = std::shared_ptr<List>(new List(GetRenderer(), x, y, w, h, data));
     elements.push_back(list);
     return list.get();
 }

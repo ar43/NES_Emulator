@@ -7,6 +7,7 @@
 #include <iomanip>
 #include <sstream>
 #include "asm_list.h"
+#include "list.h"
 #include "textbox.h"
 #include "../cpu/register.h"
 #include "../../utility/utility.h"
@@ -35,6 +36,7 @@ void Debugger::Init(SDL_Window* window_main)
 
     //window.AddTextbox(300, 650, 173, "second");
     asm_list = window.AddAsmList(10, 60, 300, 22,-1,&debug_data);
+    list_breakpoints = window.AddList(win_width - 300, 350, 100, 4, &debug_data.breakpoints_draw);
     this->window_main = window_main;
 
     std::stringstream stream;
@@ -148,13 +150,18 @@ void Debugger::ToggleBreakpoint(int loc)
         {
             *breakpoint = Breakpoint::ACTIVE;
             debug_data.breakpoints.insert(selected);
+            debug_data.UpdateBreakpoints();
         }
         else
         {
             *breakpoint = Breakpoint::INACTIVE;
             auto iter = debug_data.breakpoints.find(selected);
             debug_data.breakpoints.erase(iter);
+            debug_data.UpdateBreakpoints();
         }
+        list_breakpoints->SetActive(true);
+        list_breakpoints->Update();
+        
     }
 }
 
@@ -226,6 +233,7 @@ void Debugger::Detach()
         debug_data.Clear();
         asm_list->cursor = -1;
         asm_list->SetActive(false);
+        list_breakpoints->SetActive(false);
 
         button_continue->SetActive(false);
         button_step->SetActive(false);
@@ -304,5 +312,14 @@ void Debugger::Update()
         Detach();
     }
     last_running_status = machine_status->running;
+}
+
+void DebugData::UpdateBreakpoints()
+{
+    breakpoints_draw.clear();
+    for (auto i : breakpoints)
+    {
+        breakpoints_draw.push_back(utility::int_to_hex(i));
+    }
 }
 

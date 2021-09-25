@@ -38,8 +38,10 @@ struct DebugData
 	int known_bytes = 0;
 	int all_bytes = 0x8000;
 	bool mirror = false;
+
 	std::set<int> breakpoints;
 	Breakpoint breakpoint[0x10000];
+	std::vector<std::string> breakpoints_draw;
 
 	CpuData cpu_data;
 
@@ -66,6 +68,8 @@ struct DebugData
 		hit = 0;
 		mirror = false;
 	}
+
+	void UpdateBreakpoints();
 };
 
 class Text;
@@ -96,6 +100,7 @@ private:
 	Textbox* textbox_goto;
 	Textbox* textbox_bp;
 	AsmList* asm_list;
+	List* list_breakpoints;
 	SDL_Window* window_main;
 
 public:

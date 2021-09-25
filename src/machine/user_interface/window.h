@@ -45,7 +45,7 @@ public:
 	Button* AddButton(int x, int y, int w, int h, std::string text, std::function<void()> OnClick);
 	Text* AddText(int x, int y, std::string text, int size);
 	void AddCheckbox(int x, int y, std::string text, std::function<void(bool*)> OnClick);
-	List* AddList(int x, int y, int w, int h);
+	List* AddList(int x, int y, int w, int h, std::vector<std::string>* data);
 	AsmList* AddAsmList(int x, int y, int w, int h, int cursor, DebugData* debug_data);
 	Textbox* AddTextbox(int x, int y, int w, std::string text);
 
