@@ -35,6 +35,7 @@ struct DebugData
 		Clear();
 	}
 	std::array<std::string, 0x10000> code;
+	std::array<bool, 0x10000> is_subroutine;
 	int known_bytes = 0;
 	int all_bytes = 0x8000;
 	bool mirror = false;
@@ -59,6 +60,7 @@ struct DebugData
 		{
 			code[i].clear();
 			breakpoint[i] = Breakpoint::INACTIVE;
+			is_subroutine[i] = false;
 		}
 		breakpoints.clear();
 		signal = DebuggerSignal::CLEAR;

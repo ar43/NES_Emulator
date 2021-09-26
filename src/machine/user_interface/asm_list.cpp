@@ -292,6 +292,7 @@ void AsmList::Update()
 	}
 	int counter = cursor;
 	bool prot = false;
+	bool prot2 = false;
 	FindStartAndEnd();
 	for (int i = 0; i < num_elements; i++)
 	{
@@ -308,6 +309,16 @@ void AsmList::Update()
 					can_scroll_down[i] = true;
 					break;
 				}
+				if (debug_data->is_subroutine[j] && !prot2)
+				{
+					prot2 = true;
+					elements[i].text->SetText("SUBROUTINE " + utility::int_to_hex(j));
+					prot = true;
+					elements[i].number = -1;
+					counter = j;
+					can_scroll_down[i] = true;
+					break;
+				}
 				elements[i].text->SetText(debug_data->code[j]);
 				std::string hex_num = debug_data->code[j].substr(0, 4);
 				std::stringstream ss;
@@ -315,6 +326,7 @@ void AsmList::Update()
 				ss >> elements[i].number;
 				counter = j + 1;
 				prot = false;
+				prot2 = false;
 				can_scroll_down[i] = true;
 				break;
 			}

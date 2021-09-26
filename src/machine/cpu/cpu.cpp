@@ -231,11 +231,17 @@ int Cpu::ResolveAddressing(Bus* bus, Instruction* ins, bool generate_string)
 	}
 }
 
-void Cpu::GenerateDebugString(int old_pc, Instruction *instruction)
+void Cpu::GenerateDebugString(int old_pc, Instruction *instruction, int value)
 {
 	std::stringstream ss;
 	ss << utility::int_to_hex(old_pc) << "  " << std::setw(13) << std::left << GetFetchBuffer() << instruction->name << " " << std::setw(28) << std::left << output_string;
 	debug_data->code[old_pc] = ss.str();
+
+	if (instruction->opcode == 0x20) // jsr
+	{
+		debug_data->is_subroutine[value] = true;
+	}
+
 	debug_data->known_bytes += registers[(size_t)RegId::PC]->get() - old_pc;
 	if (debug_data->mirror)
 	{
@@ -481,7 +487,7 @@ void Cpu::ExecuteInstruction(Bus *bus)
 
 	if (generate_string)
 	{
-		GenerateDebugString(old_pc, instruction);
+		GenerateDebugString(old_pc, instruction, value);
 	}
 
 	instruction->func(this, bus, value, instruction->mode);

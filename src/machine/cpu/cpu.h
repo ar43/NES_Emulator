@@ -72,7 +72,7 @@ private:
 	
 	bool debug_mode = false;
 	DebugData* debug_data;
-	void GenerateDebugString(int old_pc, Instruction *instruction);
+	void GenerateDebugString(int old_pc, Instruction *instruction, int value);
 
 	void AddDMACycles(Bus *bus);
 
