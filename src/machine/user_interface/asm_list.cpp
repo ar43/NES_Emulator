@@ -302,7 +302,16 @@ void AsmList::Update()
 			{
 				if (i > 0 && debug_data->code[j - 1].empty() && debug_data->code[j - 2].empty() && debug_data->code[j - 3].empty() && !prot)
 				{
-					elements[i].text->SetText("...");
+					
+					int c = 0;
+					for (int z = j-1; z >= 0x8000; z--)
+					{
+						if (!debug_data->code[z].empty())
+							break;
+						else
+							c++;
+					}
+					elements[i].text->SetText("=|= Unknown " + std::to_string(c) + " bytes of data =|=");
 					elements[i].number = -1;
 					counter = j;
 					prot = true;
@@ -312,7 +321,7 @@ void AsmList::Update()
 				if (debug_data->is_subroutine[j] && !prot2)
 				{
 					prot2 = true;
-					elements[i].text->SetText("SUBROUTINE " + utility::int_to_hex(j));
+					elements[i].text->SetText(">>> SUBROUTINE " + utility::int_to_hex(j,true) + " <<<");
 					prot = true;
 					elements[i].number = -1;
 					counter = j;
