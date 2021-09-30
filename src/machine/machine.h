@@ -39,4 +39,8 @@ private:
 
 	bool LoadCartridge(NesData* nes_data);
 	void InitStatus();
+	void LoadSettings();
+	void SaveSettings();
+
+	void Stop();
 };

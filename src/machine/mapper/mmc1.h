@@ -56,8 +56,8 @@ public:
 	bool WritePPU(size_t loc, uint8_t byte);
 	int ReadPPU(size_t loc);
 	bool* rebuild_pixels;
-	void SaveRAM(std::string name);
-	void LoadRAM(std::string name);
+	void SaveRAM(std::string md5);
+	void LoadRAM(std::string md5);
 	void ClearRegisters()
 	{
 		control_register = 0x0C;

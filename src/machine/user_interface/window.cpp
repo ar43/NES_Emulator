@@ -41,9 +41,9 @@ Text *Window::AddText(int x, int y, std::string text, int size)
     return txt.get();
 }
 
-void Window::AddCheckbox(int x, int y, std::string text, std::function<void(bool*)> OnClick)
+void Window::AddCheckbox(int x, int y, std::string text, bool start_state, std::function<void(bool*)> OnClick)
 {
-    auto checkbox = std::shared_ptr<Checkbox>(new Checkbox(GetRenderer(), x, y, text, OnClick));
+    auto checkbox = std::shared_ptr<Checkbox>(new Checkbox(GetRenderer(), x, y, text, start_state, OnClick));
     elements.push_back(checkbox);
 }
 

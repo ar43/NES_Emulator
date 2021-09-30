@@ -11,6 +11,7 @@
 #include <filesystem>
 #include <sstream>
 #include <algorithm>
+#include "misc/constants.h"
 
 #define HI_NIBBLE(b) (((b) >> 4) & 0x0F)
 
@@ -21,6 +22,7 @@ Machine::Machine()
 
 void Machine::Init()
 {
+	LoadSettings();
 	ui.Init();
 	cpu.Init(&ui.debugger.debug_data, &ui.debugger.debug_mode);
 	bus.AttachComponents(&cpu, input.joypad, &apu, &ppu);
@@ -28,6 +30,32 @@ void Machine::Init()
 	apu.Init(&bus.irq_pending, &status.volume);
 	ppu.force_render = &status.force_render;
 	ui.debugger.machine_status = &this->status;
+}
+
+inline const char * const BoolToString(bool b)
+{
+	return b ? "true" : "false";
+}
+
+void Machine::LoadSettings()
+{
+	const auto MAX_SETTINGS_LEN = 256;
+	static char buffer[MAX_SETTINGS_LEN] = { 0 };
+
+	GetPrivateProfileStringA("Debugging", "EnableSavingAndLoading", "true", buffer, MAX_SETTINGS_LEN, CONFIG_PATH);
+	std::string temp(buffer);
+	if (temp == "true")
+		ui.debugger.enable_save_load = true;
+	else
+		ui.debugger.enable_save_load = false;
+}
+
+void Machine::SaveSettings()
+{
+	if (!WritePrivateProfileStringA("Debugging", "EnableSavingAndLoading", BoolToString(ui.debugger.enable_save_load), CONFIG_PATH))
+	{
+		logger::PrintLine(logger::LogType::WARNING, "Error saving settings " + GetLastError());
+	}
 }
 
 void Machine::LoadROM(std::string path)
@@ -148,13 +176,14 @@ bool Machine::LoadCartridge(NesData *nes_data)
 
 	//int initial_pc = cpu_data[0xFFFD]*256+cpu_data[0xFFFC];
 	bus.AttachMapper(mapper.get());
-	mapper->LoadRAM(nes_data->file_name);
+	mapper->LoadRAM(nes_data->md5);
 	if(mapper->GetNumber() != nes_data->header.mapper_num)
 		logger::PrintLine(logger::LogType::FATAL_ERROR, "Mapper number " + std::to_string(mapper->GetNumber()) + "does not match the header number " + std::to_string(nes_data->header.mapper_num));
 	logger::PrintLine(logger::LogType::INFO, "Mapper name: " + mapper->name);
 
 	ui.debugger.mapper = mapper->GetNumber();
 	ui.debugger.debug_data.mirror = mapper->debugger_mirroring;
+	ui.debugger.debug_data.md5 = nes_data->md5;
 
 	return true;
 }
@@ -192,7 +221,7 @@ void Machine::InitStatus()
 
 void Machine::UnloadROM()
 {
-	mapper->SaveRAM(nes_data->file_name);
+	mapper->SaveRAM(nes_data->md5);
 	status.reset = ResetType::HARD;
 	ppu.display.Clear();
 	SDL_SetWindowTitle(ui.window.GetWindow(), "NES Emulator (unloaded)");
@@ -264,6 +293,14 @@ void Machine::Run()
 			SDL_Delay(10);
 		}
 	}
+
+	Stop();
+}
+
+void Machine::Stop()
+{
+	ui.debugger.Detach();
+	SaveSettings();
 }
 
 bool Machine::ParseINES(std::string path)
@@ -280,6 +317,23 @@ bool Machine::ParseINES(std::string path)
 		logger::PrintLine(logger::LogType::INTERNAL_ERROR, "File does not exist!");
 		return false;
 	}
+
+	ifs.seekg (0, ifs.end);
+	size_t size = (size_t)ifs.tellg();
+	ifs.seekg(0, std::ios::beg);
+
+	std::vector<char> buffer(size);
+	std::string md5;
+	if (ifs.read(buffer.data(), size))
+	{
+		size_t out = std::hash<std::string_view>()(std::string_view(buffer.data(), size));
+		logger::PrintLine(logger::LogType::DEBUG, "MD5 Hash: " + std::to_string(out));
+		md5 = std::to_string(out);
+	}
+
+	ifs.clear();
+	ifs.seekg(0);
+	
 	
 	char header[16];
 	ifs.read(header, 16);
@@ -295,12 +349,16 @@ bool Machine::ParseINES(std::string path)
 		ifs.close();
 		return false;
 	}
+
 	nes_data = std::unique_ptr<NesData>(new NesData());
+
+	
 
 	std::filesystem::path p(path);
 	std::stringstream ss;
 	ss << p.stem();
 	nes_data->file_name = ss.str();
+	nes_data->md5 = md5;
 	nes_data->file_name.erase(std::remove(nes_data->file_name.begin(), nes_data->file_name.end(), '\"'), nes_data->file_name.end());
 	if (nes_data->file_name.length() <= 0)
 		logger::PrintLine(logger::LogType::FATAL_ERROR, "Empty filename");

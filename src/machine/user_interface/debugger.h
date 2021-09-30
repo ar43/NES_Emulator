@@ -53,6 +53,8 @@ struct DebugData
 	int breakpoint_hit = 0;
 	int hit = 0;
 
+	std::string md5;
+
 	void Clear()
 	{
 		known_bytes = 0;
@@ -69,6 +71,7 @@ struct DebugData
 		breakpoint_hit = 0;
 		hit = 0;
 		mirror = false;
+		UpdateBreakpoints();
 	}
 
 	void UpdateBreakpoints();
@@ -124,6 +127,8 @@ public:
 	void Close();
 	void Update();
 	void Attach();
+	void SaveData();
+	void LoadData();
 	void Detach();
 	void UpdateCpuData();
 	
@@ -132,5 +137,6 @@ public:
 	MachineStatus *machine_status;
 	bool* debug_mode = nullptr;
 	int mapper = -1;
+	bool enable_save_load = true;
 };
 

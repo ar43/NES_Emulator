@@ -31,5 +31,7 @@ constexpr int APU_DMC_FREQ_TABLE[] = { 428, 380, 340, 320, 286, 254, 226, 214, 1
 constexpr size_t PALETTE_SIZE = 192;
 
 constexpr auto BATTERY_PATH = "data/battery";
+constexpr auto DEBUG_PATH = "data/debugger";
 constexpr auto FONT_PATH = "data/ui/Consolas.ttf";
 constexpr auto CHECKMARK_PATH = "data/ui/checkmark2.png";
+constexpr auto CONFIG_PATH = "data/config.ini";

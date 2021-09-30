@@ -3,7 +3,7 @@
 #include "../../logger/logger.h"
 #include "text.h"
 
-Checkbox::Checkbox(SDL_Renderer *renderer, int x, int y, std::string text, std::function<void(bool*)> OnClick)
+Checkbox::Checkbox(SDL_Renderer *renderer, int x, int y, std::string text, bool start_state, std::function<void(bool*)> OnClick)
 {
 	this->renderer = renderer;
 	InitTexture();
@@ -12,6 +12,7 @@ Checkbox::Checkbox(SDL_Renderer *renderer, int x, int y, std::string text, std::
 	SetColor(0xff, 0xff, 0xff);
 	text_obj = new Text(renderer, x+19, y, text, 16);
 	this->OnClick = OnClick;
+	this->state = start_state;
 }
 
 void Checkbox::InitTexture()

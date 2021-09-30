@@ -5,6 +5,7 @@
 #include "window.h"
 #include <SDL_syswm.h>
 #include <SDL_ttf.h>
+#include <filesystem>
 
 void UserInterface::InitSDL()
 {
@@ -63,6 +64,8 @@ HWND UserInterface::GetSDLWinHandle(SDL_Window* win)
 
 std::string UserInterface::GetROMPath(SDL_Window *window)
 {
+    auto current_path = std::filesystem::current_path();
+
     wchar_t buffer[256] = { 0 };
     wchar_t loc[256] = { 0 };
 
@@ -84,6 +87,8 @@ std::string UserInterface::GetROMPath(SDL_Window *window)
     data.Flags = OFN_PATHMUSTEXIST|OFN_FILEMUSTEXIST ;
 
     GetOpenFileName(&data);
+
+    std::filesystem::current_path(current_path);
 
     return utility::ConvertWideToUtf8(std::wstring(data.lpstrFile));
 }

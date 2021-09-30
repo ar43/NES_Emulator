@@ -8,6 +8,8 @@ roms/
 
 #EMU specific folders
 data/battery/
+data/debugger/
+data/config.ini
 
 # User-specific files
 *.rsuser

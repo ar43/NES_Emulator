@@ -11,6 +11,7 @@
 #include "textbox.h"
 #include "../cpu/register.h"
 #include "../../utility/utility.h"
+#include <fstream>
 
 void Debugger::Init(SDL_Window* window_main)
 {
@@ -30,7 +31,7 @@ void Debugger::Init(SDL_Window* window_main)
     button_step_over = window.AddButton(10+button_attach->GetWidth()+30+button_continue->GetWidth()+10+button_step->GetWidth()+10,10,0,21, "Step Over", std::bind(&Debugger::StepOver, this));
     button_breakpoint_toggle = window.AddButton(10+button_attach->GetWidth()+30+button_continue->GetWidth()+10+button_step->GetWidth()+10+button_step_over->GetWidth()+10,10,0,21,"Toggle breakpoint", std::bind(&Debugger::ToggleBreakpoint, this, 0));
     
-    window.AddCheckbox(win_width-300, 480, "Enable saving and loading data", std::bind(&Debugger::Checkbox1Click, this, std::placeholders::_1));
+    window.AddCheckbox(win_width-300, 480, "Enable saving and loading data", enable_save_load, std::bind(&Debugger::Checkbox1Click, this, std::placeholders::_1));
     textbox_goto = window.AddTextbox(10, 400, 173, "");
     button_goto = window.AddButton(195, 400, 0, 18, "Go to", std::bind(&Debugger::Goto, this));
     //textbox_bp = window.AddTextbox(100, 700, 173, "");
@@ -185,14 +186,16 @@ void Debugger::ToggleBreakpoint(int loc)
 
 void Debugger::Checkbox1Click(bool* new_state)
 {
-    if (*new_state == true)
+    /*if (*new_state == true)
     {
         logger::PrintLine(logger::LogType::INFO, "Checked");
     }
     else
     {
         logger::PrintLine(logger::LogType::INFO, "Unchecked");
-    }
+    }*/
+
+    enable_save_load = *new_state;
 }
 
 void Debugger::Attach()
@@ -236,9 +239,66 @@ void Debugger::Attach()
         button_breakpoint_toggle->SetActive(true);
         button_bp->SetActive(true);
         button_goto->SetActive(true);
+        LoadData();
     }
         
 
+}
+
+void Debugger::SaveData()
+{
+    if (!enable_save_load)
+        return;
+
+    std::ofstream ofs(std::string(DEBUG_PATH) + "/" + debug_data.md5 + ".dat", std::ios::binary);
+    ofs << debug_data.known_bytes << std::endl;
+    for(size_t i = 0x8000; i < debug_data.code.size(); i++) 
+    {
+        if (!debug_data.code[i].empty())
+        {
+            if(debug_data.is_subroutine[i])
+                ofs << "+" << debug_data.code[i] << std::endl;
+            else
+                ofs << "-" << debug_data.code[i] << std::endl;
+        }
+        else
+        {
+            ofs << std::endl;
+        }
+    }
+    logger::PrintLine(logger::LogType::INFO, "Saved debugger data");
+}
+
+void Debugger::LoadData()
+{
+    if (!enable_save_load)
+        return;
+
+    std::ifstream ifs(std::string(DEBUG_PATH) + "/" + debug_data.md5 + ".dat", std::ios::binary);
+    if (!ifs.is_open())
+    {
+        return;
+    }
+    std::string line;
+    std::getline(ifs, line);
+    debug_data.known_bytes = stoi(line);
+    int i = 0x8000;
+    while (std::getline(ifs, line))
+    {
+        if (!line.empty())
+        {
+            debug_data.code[i] = line.substr(1,line.size());
+            if (line[0] == '+')
+                debug_data.is_subroutine[i] = true;
+        }
+        /*else
+        {
+            logger::PrintLine(logger::LogType::DEBUG, "found empty line");
+        }*/
+        i++;
+    }
+
+    logger::PrintLine(logger::LogType::INFO, "Loaded debugger data");
 }
 
 void Debugger::Detach()
@@ -246,6 +306,7 @@ void Debugger::Detach()
     if (*debug_mode == true)
     {
         *debug_mode = false;
+        SaveData();
         text_status->SetText("Status: Detached");
         button_attach->SetActive(true);
         debug_data.Clear();
