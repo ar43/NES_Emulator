@@ -61,8 +61,8 @@ public:
 	bool WritePPU(size_t loc, uint8_t byte);
 	int ReadPPU(size_t loc);
 	bool* rebuild_pixels;
-	void SaveRAM(std::string md5);
-	void LoadRAM(std::string md5);
+	void SaveRAM(std::string hash);
+	void LoadRAM(std::string hash);
 	void TickIRQ();
 	void ClearRegisters()
 	{

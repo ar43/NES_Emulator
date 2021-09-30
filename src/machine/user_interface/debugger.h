@@ -53,7 +53,7 @@ struct DebugData
 	int breakpoint_hit = 0;
 	int hit = 0;
 
-	std::string md5;
+	std::string hash;
 
 	void Clear()
 	{

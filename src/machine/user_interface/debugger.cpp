@@ -250,7 +250,7 @@ void Debugger::SaveData()
     if (!enable_save_load)
         return;
 
-    std::ofstream ofs(std::string(DEBUG_PATH) + "/" + debug_data.md5 + ".dat", std::ios::binary);
+    std::ofstream ofs(std::string(DEBUG_PATH) + "/" + debug_data.hash + ".dat", std::ios::binary);
     ofs << debug_data.known_bytes << std::endl;
     for(size_t i = 0x8000; i < debug_data.code.size(); i++) 
     {
@@ -274,7 +274,7 @@ void Debugger::LoadData()
     if (!enable_save_load)
         return;
 
-    std::ifstream ifs(std::string(DEBUG_PATH) + "/" + debug_data.md5 + ".dat", std::ios::binary);
+    std::ifstream ifs(std::string(DEBUG_PATH) + "/" + debug_data.hash + ".dat", std::ios::binary);
     if (!ifs.is_open())
     {
         return;

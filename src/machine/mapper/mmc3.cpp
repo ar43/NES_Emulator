@@ -3,21 +3,21 @@
 #include "../../utility/utility.h"
 
 
-void Mmc3::SaveRAM(std::string md5)
+void Mmc3::SaveRAM(std::string hash)
 {
 	if (battery)
 	{
-		std::ofstream(std::string(BATTERY_PATH) + "/" + md5 + ".sav", std::ios::binary).write((const char*)prg_ram, sizeof(prg_ram));
+		std::ofstream(std::string(BATTERY_PATH) + "/" + hash + ".sav", std::ios::binary).write((const char*)prg_ram, sizeof(prg_ram));
 		logger::PrintLine(logger::LogType::INFO, "Saved battery data");
 	}
 }
 
-void Mmc3::LoadRAM(std::string md5)
+void Mmc3::LoadRAM(std::string hash)
 {
 	if (battery)
 	{
 		std::filesystem::create_directories(BATTERY_PATH);
-		std::ifstream ifs(std::string(BATTERY_PATH) + "/" + md5 + ".sav", std::ifstream::in | std::ifstream::binary);
+		std::ifstream ifs(std::string(BATTERY_PATH) + "/" + hash + ".sav", std::ifstream::in | std::ifstream::binary);
 		if (!ifs.is_open())
 		{
 			return;

@@ -176,14 +176,14 @@ bool Machine::LoadCartridge(NesData *nes_data)
 
 	//int initial_pc = cpu_data[0xFFFD]*256+cpu_data[0xFFFC];
 	bus.AttachMapper(mapper.get());
-	mapper->LoadRAM(nes_data->md5);
+	mapper->LoadRAM(nes_data->hash);
 	if(mapper->GetNumber() != nes_data->header.mapper_num)
 		logger::PrintLine(logger::LogType::FATAL_ERROR, "Mapper number " + std::to_string(mapper->GetNumber()) + "does not match the header number " + std::to_string(nes_data->header.mapper_num));
 	logger::PrintLine(logger::LogType::INFO, "Mapper name: " + mapper->name);
 
 	ui.debugger.mapper = mapper->GetNumber();
 	ui.debugger.debug_data.mirror = mapper->debugger_mirroring;
-	ui.debugger.debug_data.md5 = nes_data->md5;
+	ui.debugger.debug_data.hash = nes_data->hash;
 
 	return true;
 }
@@ -221,7 +221,7 @@ void Machine::InitStatus()
 
 void Machine::UnloadROM()
 {
-	mapper->SaveRAM(nes_data->md5);
+	mapper->SaveRAM(nes_data->hash);
 	status.reset = ResetType::HARD;
 	ppu.display.Clear();
 	SDL_SetWindowTitle(ui.window.GetWindow(), "NES Emulator (unloaded)");
@@ -323,12 +323,12 @@ bool Machine::ParseINES(std::string path)
 	ifs.seekg(0, std::ios::beg);
 
 	std::vector<char> buffer(size);
-	std::string md5;
+	std::string hash;
 	if (ifs.read(buffer.data(), size))
 	{
 		size_t out = std::hash<std::string_view>()(std::string_view(buffer.data(), size));
-		logger::PrintLine(logger::LogType::DEBUG, "MD5 Hash: " + std::to_string(out));
-		md5 = std::to_string(out);
+		logger::PrintLine(logger::LogType::DEBUG, "ROM Hash: " + std::to_string(out));
+		hash = std::to_string(out);
 	}
 
 	ifs.clear();
@@ -358,7 +358,7 @@ bool Machine::ParseINES(std::string path)
 	std::stringstream ss;
 	ss << p.stem();
 	nes_data->file_name = ss.str();
-	nes_data->md5 = md5;
+	nes_data->hash = hash;
 	nes_data->file_name.erase(std::remove(nes_data->file_name.begin(), nes_data->file_name.end(), '\"'), nes_data->file_name.end());
 	if (nes_data->file_name.length() <= 0)
 		logger::PrintLine(logger::LogType::FATAL_ERROR, "Empty filename");

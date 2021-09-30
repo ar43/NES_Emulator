@@ -40,7 +40,7 @@ struct NesData
 	std::vector<std::shared_ptr<char>> prg_rom;
 	std::vector<std::shared_ptr<char>> chr_rom;
 	std::string file_name = "empty";
-	std::string md5;
+	std::string hash;
 	//std::vector<std::unique_ptr<uint8_t>> playchoice_instrom; this is useless
 	//std::vector<std::unique_ptr<uint8_t>> playchoice_prom;   this is useless
 };
