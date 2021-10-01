@@ -43,3 +43,27 @@ void Joypad::Clear()
 {
 	state = 0;
 }
+
+std::string Joypad::ButtonToString(JoypadButtons button)
+{
+	switch (button)
+	{
+	case JoypadButtons::A:
+		return "A";
+	case JoypadButtons::B:
+		return "B";
+	case JoypadButtons::SELECT:
+		return "SELECT";
+	case JoypadButtons::START:
+		return "START";
+	case JoypadButtons::UP:
+		return "UP";
+	case JoypadButtons::DOWN:
+		return "DOWN";
+	case JoypadButtons::LEFT:
+		return "LEFT";
+	case JoypadButtons::RIGHT:
+		return "RIGHT";
+	default: return "error";
+	}
+}

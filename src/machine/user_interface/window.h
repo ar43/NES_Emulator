@@ -54,7 +54,7 @@ public:
 	void Update();
 	SDL_Window* GetWindow();
 	SDL_Renderer* GetRenderer();
-	void HandleWindowEvent(SDL_Event* e, bool *request_exit);
+	void HandleWindowEvent(SDL_Event* e, bool *request_exit = nullptr);
 	//void (*DrawHook)(SDL_Renderer* renderer) = nullptr;
 	std::function<void(SDL_Renderer*)> DrawHook;
 	std::function<void()> OnOpen;

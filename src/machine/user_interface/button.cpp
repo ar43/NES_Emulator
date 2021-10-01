@@ -6,8 +6,8 @@ Button::Button(SDL_Renderer *renderer, int x, int y, int w, int h, std::string t
 {
 	this->renderer = renderer;
 	this->text = text;
-	
-	SetColor(0xb1, 0xb1, 0xb1);
+
+	SetColor(base_color, base_color, base_color);
 	text_obj = new Text(renderer, x, y, text,true,w,h);
 	if (w == 0)
 	{
@@ -22,15 +22,27 @@ Button::Button(SDL_Renderer *renderer, int x, int y, int w, int h, std::string t
 bool Button::HandleEvent(SDL_Event* e, Uint32* current_active_element)
 {
 	bool retvalue = false;
+	SDL_Point point = { e->motion.x,e->motion.y };
+
+	if (e->type == SDL_MOUSEMOTION)
+	{
+		if (SDL_PointInRect(&point, GetRect()))
+		{
+			hover = true;
+		}
+		else
+		{
+			hover = false;
+		}
+	}
+
 	if (pressed && e->type == SDL_MOUSEMOTION)
 	{
-		SDL_Point point = { e->motion.x,e->motion.y };
 		if (!SDL_PointInRect(&point, GetRect()))
 			pressed = false;
 	}
 	else if (e->type == SDL_MOUSEBUTTONUP && e->button.button == SDL_BUTTON_LEFT)
 	{
-		SDL_Point point = { e->motion.x,e->motion.y };
 		if (pressed && SDL_PointInRect(&point, GetRect()))
 		{
 			pressed = false;
@@ -47,7 +59,6 @@ bool Button::HandleEvent(SDL_Event* e, Uint32* current_active_element)
 	else if (e->type == SDL_MOUSEBUTTONDOWN && e->button.button == SDL_BUTTON_LEFT)
 	{
 		//logger::PrintLine(logger::LogType::DEBUG, "zzz");
-		SDL_Point point = { e->motion.x,e->motion.y };
 		if (SDL_PointInRect(&point, GetRect()))
 			pressed = true;
 		else
@@ -59,14 +70,29 @@ bool Button::HandleEvent(SDL_Event* e, Uint32* current_active_element)
 void Button::Render(Uint32* current_active_element)
 {
 	SDL_Color final_color = {GetColor()->r,GetColor()->g,GetColor()->b,GetColor()->a};
+	SDL_Color outer_color = {0,0,0,GetColor()->a};
+	SDL_Rect inner = { GetRect()->x + 1,GetRect()->y + 1,GetRect()->w - 2,GetRect()->h - 2 };
 	if (pressed && IsActive())
 	{
 		final_color.r -= 0x10;
 		final_color.g -= 0x10;
 		final_color.b -= 0x10;
+		outer_color.r = final_color.r;
+		outer_color.g = final_color.g;
+		outer_color.b = final_color.b;
 	}
-	SDL_SetRenderDrawColor(renderer, final_color.r, final_color.g, final_color.b, final_color.a);
+	else if (hover && IsActive())
+	{
+		outer_color.r = 52;
+		outer_color.g = 119;
+		outer_color.b = 235;
+	}
+	SDL_SetRenderDrawColor(renderer, outer_color.r, outer_color.g, outer_color.b, outer_color.a);
+	if(!IsActive())
+		SDL_SetRenderDrawColor(renderer, final_color.r, final_color.g, final_color.b, final_color.a);
 	SDL_RenderFillRect(renderer, GetRect());
+	SDL_SetRenderDrawColor(renderer, final_color.r, final_color.g, final_color.b, final_color.a);
+	SDL_RenderFillRect(renderer, &inner);
 	if (text_obj != nullptr)
 		text_obj->Render(current_active_element);
 }
@@ -87,7 +113,7 @@ void Button::SetActive(bool active)
 	}
 	else
 	{
-		SetColor(0xb1, 0xb1, 0xb1);
+		SetColor(base_color, base_color, base_color);
 		text_obj->SetColor(0, 0, 0);
 		text_obj->SetText(text);
 	}

@@ -23,6 +23,7 @@ Machine::Machine()
 void Machine::Init()
 {
 	LoadSettings();
+	ui.controls.keymaps = input.keymaps;
 	ui.Init();
 	cpu.Init(&ui.debugger.debug_data, &ui.debugger.debug_mode);
 	bus.AttachComponents(&cpu, input.joypad, &apu, &ppu);

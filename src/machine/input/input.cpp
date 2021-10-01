@@ -7,6 +7,27 @@
 #include "../user_interface/user_interface.h"
 #include <SDL_syswm.h>
 
+Input::Input()
+{
+	keymaps[0][(int)JoypadButtons::A] = SDLK_x;
+	keymaps[0][(int)JoypadButtons::B] = SDLK_y;
+	keymaps[0][(int)JoypadButtons::RIGHT] = SDLK_RIGHT;
+	keymaps[0][(int)JoypadButtons::LEFT] = SDLK_LEFT;
+	keymaps[0][(int)JoypadButtons::DOWN] = SDLK_DOWN;
+	keymaps[0][(int)JoypadButtons::UP] = SDLK_UP;
+	keymaps[0][(int)JoypadButtons::SELECT] = SDLK_BACKSPACE;
+	keymaps[0][(int)JoypadButtons::START] = SDLK_RETURN;
+
+	keymaps[1][(int)JoypadButtons::A] = SDLK_k;
+	keymaps[1][(int)JoypadButtons::B] = SDLK_j;
+	keymaps[1][(int)JoypadButtons::RIGHT] = SDLK_d;
+	keymaps[1][(int)JoypadButtons::LEFT] = SDLK_a;
+	keymaps[1][(int)JoypadButtons::DOWN] = SDLK_s;
+	keymaps[1][(int)JoypadButtons::UP] = SDLK_w;
+	keymaps[1][(int)JoypadButtons::SELECT] = SDLK_i;
+	keymaps[1][(int)JoypadButtons::START] = SDLK_u;
+}
+
 void Input::Poll(MachineStatus *machine_status, UserInterface *ui)
 {
     while (SDL_PollEvent(&e) != 0)
@@ -16,11 +37,13 @@ void Input::Poll(MachineStatus *machine_status, UserInterface *ui)
 		if (e.type == SDL_WINDOWEVENT)
 		{
 			ui->window.HandleWindowEvent(&e, &request_exit);
-			ui->debugger.window.HandleWindowEvent(&e, nullptr);
+			ui->debugger.window.HandleWindowEvent(&e);
+			ui->controls.window.HandleWindowEvent(&e);
 		}
 		else
 		{
 			ui->debugger.window.HandleEvent(&e);
+			ui->controls.window.HandleEvent(&e);
 		}
 
         if (e.type == SDL_QUIT || request_exit)
@@ -30,57 +53,12 @@ void Input::Poll(MachineStatus *machine_status, UserInterface *ui)
         }
         else if (e.type == SDL_KEYDOWN && ui->window.IsFocused()) 
         {
-			switch (e.key.keysym.sym)
-			{
-			case SDLK_ESCAPE:
+			if (e.key.keysym.sym == SDLK_ESCAPE)
 			{
 				logger::PrintLine(logger::LogType::INFO, "Exiting");
 				machine_status->running = RunningStatus::NOT_RUNNING;
-				break;
 			}
-
-			case SDLK_RETURN:
-			{
-				joypad[0].SetState(JoypadButtons::START);
-				break;
-			}
-			case SDLK_BACKSPACE:
-			{
-				joypad[0].SetState(JoypadButtons::SELECT);
-				break;
-			}
-			case SDLK_UP:
-			{
-				joypad[0].SetState(JoypadButtons::UP);
-				break;
-			}
-			case SDLK_DOWN:
-			{
-				joypad[0].SetState(JoypadButtons::DOWN);
-				break;
-			}
-			case SDLK_LEFT:
-			{
-				joypad[0].SetState(JoypadButtons::LEFT);
-				break;
-			}
-			case SDLK_RIGHT:
-			{
-				joypad[0].SetState(JoypadButtons::RIGHT);
-				break;
-			}
-			case SDLK_y:
-			{
-				joypad[0].SetState(JoypadButtons::B);
-				break;
-			}
-			case SDLK_x:
-			{
-				joypad[0].SetState(JoypadButtons::A);
-				break;
-			}
-
-			case SDLK_F1:
+			else if (e.key.keysym.sym == SDLK_F1)
 			{
 				if (machine_status->paused == false)
 				{
@@ -93,29 +71,21 @@ void Input::Poll(MachineStatus *machine_status, UserInterface *ui)
 					joypad[0].Clear();
 					joypad[1].Clear();
 				}
-				break;
 			}
-
-			case SDLK_F2:
+			else if (e.key.keysym.sym == SDLK_F2)
 			{
 				bool* pnt = machine_status->speedup;
 				*pnt = !*pnt;
-				break;
 			}
-
-			case SDLK_F3:
+			else if (e.key.keysym.sym == SDLK_F3)
 			{
 				machine_status->reset = ResetType::NORMAL;
-				break;
 			}
-
-			case SDLK_F4:
+			else if (e.key.keysym.sym == SDLK_F4)
 			{
 				machine_status->force_render = !machine_status->force_render;
-				break;
 			}
-
-			case SDLK_F5:
+			else if (e.key.keysym.sym == SDLK_F5)
 			{
 				if (!(*machine_status->mute))
 				{
@@ -125,61 +95,42 @@ void Input::Poll(MachineStatus *machine_status, UserInterface *ui)
 				{
 					*machine_status->mute = false;
 				}
-				break;
 			}
-
-			default:
-				break;
+			else
+			{
+				bool out = false;
+				for (int j = 0; j < 2; j++)
+				{
+					for (int i = 0; i < Joypad::num_keys; i++)
+					{
+						if (e.key.keysym.sym == keymaps[j][i])
+						{
+							joypad[j].SetState((JoypadButtons)i);
+							out = true;
+							break;
+						}
+					}
+					if (out)
+						break;
+				}
 			}
         }
 		else if (e.type == SDL_KEYUP && ui->window.IsFocused())
 		{
-			switch (e.key.keysym.sym)
+			bool out = false;
+			for (int j = 0; j < 2; j++)
 			{
-
-			case SDLK_RETURN:
-			{
-				joypad[0].ResetState(JoypadButtons::START);
-				break;
-			}
-			case SDLK_BACKSPACE:
-			{
-				joypad[0].ResetState(JoypadButtons::SELECT);
-				break;
-			}
-			case SDLK_UP:
-			{
-				joypad[0].ResetState(JoypadButtons::UP);
-				break;
-			}
-			case SDLK_DOWN:
-			{
-				joypad[0].ResetState(JoypadButtons::DOWN);
-				break;
-			}
-			case SDLK_LEFT:
-			{
-				joypad[0].ResetState(JoypadButtons::LEFT);
-				break;
-			}
-			case SDLK_RIGHT:
-			{
-				joypad[0].ResetState(JoypadButtons::RIGHT);
-				break;
-			}
-			case SDLK_y:
-			{
-				joypad[0].ResetState(JoypadButtons::B);
-				break;
-			}
-			case SDLK_x:
-			{
-				joypad[0].ResetState(JoypadButtons::A);
-				break;
-			}
-
-			default:
-				break;
+				for (int i = 0; i < Joypad::num_keys; i++)
+				{
+					if (e.key.keysym.sym == keymaps[j][i])
+					{
+						joypad[j].ResetState((JoypadButtons)i);
+						out = true;
+						break;
+					}
+				}
+				if (out)
+					break;
 			}
 		}
 		else if (e.type == SDL_SYSWMEVENT)
@@ -234,6 +185,11 @@ void Input::HandleMenuBar(MachineStatus *machine_status, UserInterface* ui, WORD
 		case (WORD)MenuBarID::DEBUG:
 		{
 			ui->debugger.window.Show();
+			break;
+		}
+		case (WORD)MenuBarID::CONTROLS:
+		{
+			ui->controls.window.Show();
 			break;
 		}
 		default: break;

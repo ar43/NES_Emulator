@@ -249,6 +249,9 @@
     <ClCompile Include="src\machine\user_interface\textbox.cpp">
       <Filter>Source Files\Machine\UserInterface\Units</Filter>
     </ClCompile>
+    <ClCompile Include="src\machine\user_interface\controls.cpp">
+      <Filter>Source Files\Machine\UserInterface</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\logger\logger.h">
@@ -400,6 +403,9 @@
     </ClInclude>
     <ClInclude Include="src\machine\user_interface\textbox.h">
       <Filter>Header Files\Machine\UserInterface\Units</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machine\user_interface\controls.h">
+      <Filter>Header Files\Machine\UserInterface</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -4,6 +4,7 @@
 #include <string>
 #include "menu_bar.h"
 #include "debugger.h"
+#include "controls.h"
 
 class Window;
 
@@ -26,4 +27,5 @@ public:
 
 	MenuBar menu_bar;
 	Debugger debugger;
+	Controls controls;
 };
