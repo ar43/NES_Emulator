@@ -4,6 +4,7 @@
 #include "window.h"
 
 class Button;
+struct MachineStatus;
 
 class Controls
 {
@@ -13,6 +14,7 @@ private:
 
 	Button* button_keymap[2][8];
 	void OnButtonClick(int joynum, int butnum);
+	void Refresh(bool cancel = false);
 public:
 	Window window;
 
@@ -22,6 +24,8 @@ public:
 	void Close();
 	void Update();
 
-	SDL_KeyCode (* keymaps)[8];
+	SDL_Keycode (* keymaps)[8];
+
+	MachineStatus *machine_status;
 	
 };

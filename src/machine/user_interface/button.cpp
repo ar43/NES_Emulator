@@ -14,9 +14,17 @@ Button::Button(SDL_Renderer *renderer, int x, int y, int w, int h, std::string t
 		w = text_obj->SimulateWidth(text_obj->GetText())+10;
 		delete text_obj;
 		text_obj = new Text(renderer, x, y, text,true,w,h);
+		//text_obj->SetText(text, true, w, h);
 	}
 	this->OnClick = OnClick;
 	SetRect(x, y, w, h);
+}
+
+void Button::SetText(std::string text)
+{
+	//text_obj->SetText(text, true, GetRect()->w, GetRect()->h);
+	delete text_obj;
+	text_obj = new Text(this->renderer, GetRect()->x, GetRect()->y, text,true,GetRect()->w,GetRect()->h);
 }
 
 bool Button::HandleEvent(SDL_Event* e, Uint32* current_active_element)
@@ -63,6 +71,16 @@ bool Button::HandleEvent(SDL_Event* e, Uint32* current_active_element)
 			pressed = true;
 		else
 			retvalue = false;
+	}
+
+	if (listen)
+	{
+		if (e->type == SDL_KEYDOWN)
+		{
+			key = e->key.keysym.sym;
+			read = true;
+			listen = false;
+		}
 	}
 	return retvalue;
 }

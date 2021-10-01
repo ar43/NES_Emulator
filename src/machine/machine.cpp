@@ -31,6 +31,7 @@ void Machine::Init()
 	apu.Init(&bus.irq_pending, &status.volume);
 	ppu.force_render = &status.force_render;
 	ui.debugger.machine_status = &this->status;
+	ui.controls.machine_status = &this->status;
 }
 
 inline const char * const BoolToString(bool b)
@@ -49,6 +50,20 @@ void Machine::LoadSettings()
 		ui.debugger.enable_save_load = true;
 	else
 		ui.debugger.enable_save_load = false;
+
+	for (int j = 0; j < 2; j++)
+	{
+		for (int i = 0; i < Joypad::num_keys; i++)
+		{
+			std::string key = std::to_string((int)input.keymaps[j][i]);
+			std::string loc = "Joypad" + std::to_string(j) + "_" + Joypad::ButtonToString((JoypadButtons)i);
+			GetPrivateProfileStringA("Controls", loc.c_str(), key.c_str(), buffer, MAX_SETTINGS_LEN, CONFIG_PATH);
+			std::string temp2(buffer);
+			input.keymaps[j][i] = (SDL_Keycode)stoi(temp2);
+		}
+	}
+	
+
 }
 
 void Machine::SaveSettings()
@@ -56,6 +71,15 @@ void Machine::SaveSettings()
 	if (!WritePrivateProfileStringA("Debugging", "EnableSavingAndLoading", BoolToString(ui.debugger.enable_save_load), CONFIG_PATH))
 	{
 		logger::PrintLine(logger::LogType::WARNING, "Error saving settings " + GetLastError());
+	}
+	for (int j = 0; j < 2; j++)
+	{
+		for (int i = 0; i < Joypad::num_keys; i++)
+		{
+			std::string key = std::to_string((int)input.keymaps[j][i]);
+			std::string loc = "Joypad" + std::to_string(j) + "_" + Joypad::ButtonToString((JoypadButtons)i);
+			WritePrivateProfileStringA("Controls", loc.c_str(), key.c_str(), CONFIG_PATH);
+		}
 	}
 }
 

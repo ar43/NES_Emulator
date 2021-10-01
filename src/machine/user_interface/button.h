@@ -18,6 +18,7 @@ private:
 	const static Uint8 base_color = 0xd1;
 public:
 	Button(SDL_Renderer *renderer, int x, int y, int w, int h, std::string text, std::function<void()> OnClick);
+	void SetText(std::string text);
 	bool HandleEvent(SDL_Event* e, Uint32 *current_active_element);
 	void Render(Uint32* current_active_element);
 	int GetWidth();
@@ -25,4 +26,7 @@ public:
 	std::function<void()> OnClick;
 
 	void SetActive(bool active);
+	bool listen = false;
+	bool read = false;
+	SDL_Keycode key;
 };
