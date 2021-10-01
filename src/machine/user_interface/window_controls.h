@@ -6,7 +6,7 @@
 class Button;
 struct MachineStatus;
 
-class Controls
+class WindowControls
 {
 private:
 	static const int win_width = 240;

@@ -82,7 +82,7 @@ class Button;
 struct MachineStatus;
 class AsmList;
 
-class Debugger
+class WindowDebugger
 {
 private:
 	

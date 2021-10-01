@@ -1,4 +1,4 @@
-#include "debugger.h"
+#include "window_debugger.h"
 #include "../../logger/logger.h"
 #include "text.h"
 #include "button.h"
@@ -13,36 +13,36 @@
 #include "../../utility/utility.h"
 #include <fstream>
 
-void Debugger::Init(SDL_Window* window_main)
+void WindowDebugger::Init(SDL_Window* window_main)
 {
     this->window_main = window_main;
 
     window.Init("Debugger", win_width, win_height, win_width, win_height, SDL_WINDOW_HIDDEN);
-    window.OnOpen = std::bind(&Debugger::Open,this);
-    window.OnClose = std::bind(&Debugger::Close,this);
-    window.OnUpdate = std::bind(&Debugger::Update, this);
-    window.DrawHook = std::bind(&Debugger::DrawBackground, this, std::placeholders::_1);
+    window.OnOpen = std::bind(&WindowDebugger::Open,this);
+    window.OnClose = std::bind(&WindowDebugger::Close,this);
+    window.OnUpdate = std::bind(&WindowDebugger::Update, this);
+    window.DrawHook = std::bind(&WindowDebugger::DrawBackground, this, std::placeholders::_1);
     
     text_status = window.AddText(3, win_height-12, "Status: Game is not running", 12);
 
-    button_attach = window.AddButton(10,10,0,21,"Attach", std::bind(&Debugger::Attach, this));
-    button_continue = window.AddButton(10+button_attach->GetWidth()+30,10,0,21, "Continue", std::bind(&Debugger::Continue, this));
-    button_step = window.AddButton(10+button_attach->GetWidth()+30+button_continue->GetWidth()+10,10,0,21, "Step In", std::bind(&Debugger::StepIn, this));
-    button_step_over = window.AddButton(10+button_attach->GetWidth()+30+button_continue->GetWidth()+10+button_step->GetWidth()+10,10,0,21, "Step Over", std::bind(&Debugger::StepOver, this));
-    button_breakpoint_toggle = window.AddButton(10+button_attach->GetWidth()+30+button_continue->GetWidth()+10+button_step->GetWidth()+10+button_step_over->GetWidth()+10,10,0,21,"Toggle breakpoint", std::bind(&Debugger::ToggleBreakpoint, this, 0));
+    button_attach = window.AddButton(10,10,0,21,"Attach", std::bind(&WindowDebugger::Attach, this));
+    button_continue = window.AddButton(10+button_attach->GetWidth()+30,10,0,21, "Continue", std::bind(&WindowDebugger::Continue, this));
+    button_step = window.AddButton(10+button_attach->GetWidth()+30+button_continue->GetWidth()+10,10,0,21, "Step In", std::bind(&WindowDebugger::StepIn, this));
+    button_step_over = window.AddButton(10+button_attach->GetWidth()+30+button_continue->GetWidth()+10+button_step->GetWidth()+10,10,0,21, "Step Over", std::bind(&WindowDebugger::StepOver, this));
+    button_breakpoint_toggle = window.AddButton(10+button_attach->GetWidth()+30+button_continue->GetWidth()+10+button_step->GetWidth()+10+button_step_over->GetWidth()+10,10,0,21,"Toggle breakpoint", std::bind(&WindowDebugger::ToggleBreakpoint, this, 0));
     
-    window.AddCheckbox(win_width-300, 480, "Enable saving and loading data", enable_save_load, std::bind(&Debugger::Checkbox1Click, this, std::placeholders::_1));
+    window.AddCheckbox(win_width-300, 480, "Enable saving and loading data", enable_save_load, std::bind(&WindowDebugger::Checkbox1Click, this, std::placeholders::_1));
     textbox_goto = window.AddTextbox(10, 400, 173, "");
-    button_goto = window.AddButton(195, 400, 0, 18, "Go to", std::bind(&Debugger::Goto, this));
+    button_goto = window.AddButton(195, 400, 0, 18, "Go to", std::bind(&WindowDebugger::Goto, this));
     //textbox_bp = window.AddTextbox(100, 700, 173, "");
-    button_bp = window.AddButton(195, 420, 0, 18, "Toggle breakpoint", std::bind(&Debugger::ToggleBreakpointText, this));
+    button_bp = window.AddButton(195, 420, 0, 18, "Toggle breakpoint", std::bind(&WindowDebugger::ToggleBreakpointText, this));
 
     //window.AddTextbox(300, 650, 173, "second");
     asm_list = window.AddAsmList(10, 60, 300, 22,-1,&debug_data);
 
     window.AddText(win_width - 200, 330, "Breakpoints: ", 14);
     list_breakpoints = window.AddList(win_width - 200, 350, 100, 4, &debug_data.breakpoints_draw);
-    button_remove_bp = window.AddButton(win_width - 80, 350, 0, 21, "Remove", std::bind(&Debugger::RemoveBreakpoint, this));
+    button_remove_bp = window.AddButton(win_width - 80, 350, 0, 21, "Remove", std::bind(&WindowDebugger::RemoveBreakpoint, this));
 
     std::stringstream stream;
     text_cycles = window.AddText(win_width - 400, 60, "CPU Data", 14);
@@ -53,7 +53,7 @@ void Debugger::Init(SDL_Window* window_main)
     text_flags = window.AddText(win_width - 400, 60+14*4+6*2, "...", 14);
 }
 
-void Debugger::RemoveBreakpoint()
+void WindowDebugger::RemoveBreakpoint()
 {
     std::string out = list_breakpoints->GetSelectedText();
     if (!out.empty())
@@ -67,7 +67,7 @@ void Debugger::RemoveBreakpoint()
     }
 }
 
-void Debugger::Goto()
+void WindowDebugger::Goto()
 {
     if (!textbox_goto->GetText().empty() && textbox_goto->GetText().size() < 8)
     {
@@ -94,7 +94,7 @@ void Debugger::Goto()
     }
 }
 
-void Debugger::ToggleBreakpointText()
+void WindowDebugger::ToggleBreakpointText()
 {
     if (!textbox_goto->GetText().empty() && textbox_goto->GetText().size() < 8)
     {
@@ -119,20 +119,20 @@ void Debugger::ToggleBreakpointText()
     }
 }
 
-void Debugger::DrawBackground(SDL_Renderer* renderer)
+void WindowDebugger::DrawBackground(SDL_Renderer* renderer)
 {
     /*SDL_Rect rect = { win_width-50,0,50,50 };
     SDL_SetRenderDrawColor(renderer, 0xff, 0, 0, 255);
     SDL_RenderFillRect(renderer, &rect);*/
 }
 
-void Debugger::Continue()
+void WindowDebugger::Continue()
 {
     debug_data.signal = DebuggerSignal::CONTINUE;
     machine_status->paused = false;
 }
 
-void Debugger::StepIn()
+void WindowDebugger::StepIn()
 {
     if (debug_data.signal == DebuggerSignal::PAUSE)
     {
@@ -140,7 +140,7 @@ void Debugger::StepIn()
     }
 }
 
-void Debugger::StepOver()
+void WindowDebugger::StepOver()
 {
     if (debug_data.signal == DebuggerSignal::PAUSE)
     {
@@ -148,13 +148,13 @@ void Debugger::StepOver()
     }
 }
 
-void Debugger::Button1Click()
+void WindowDebugger::Button1Click()
 {
     logger::PrintLine(logger::LogType::INFO, "placeholder button click");
     text_status->SetText("Changed");
 }
 
-void Debugger::ToggleBreakpoint(int loc)
+void WindowDebugger::ToggleBreakpoint(int loc)
 {
 
     int selected = asm_list->GetSelected();
@@ -184,7 +184,7 @@ void Debugger::ToggleBreakpoint(int loc)
     }
 }
 
-void Debugger::Checkbox1Click(bool* new_state)
+void WindowDebugger::Checkbox1Click(bool* new_state)
 {
     /*if (*new_state == true)
     {
@@ -198,7 +198,7 @@ void Debugger::Checkbox1Click(bool* new_state)
     enable_save_load = *new_state;
 }
 
-void Debugger::Attach()
+void WindowDebugger::Attach()
 {
     if (machine_status->running == RunningStatus::RUNNING)
     {
@@ -245,7 +245,7 @@ void Debugger::Attach()
 
 }
 
-void Debugger::SaveData()
+void WindowDebugger::SaveData()
 {
     if (!enable_save_load)
         return;
@@ -269,7 +269,7 @@ void Debugger::SaveData()
     logger::PrintLine(logger::LogType::INFO, "Saved debugger data");
 }
 
-void Debugger::LoadData()
+void WindowDebugger::LoadData()
 {
     if (!enable_save_load)
         return;
@@ -301,7 +301,7 @@ void Debugger::LoadData()
     logger::PrintLine(logger::LogType::INFO, "Loaded debugger data");
 }
 
-void Debugger::Detach()
+void WindowDebugger::Detach()
 {
     if (*debug_mode == true)
     {
@@ -323,7 +323,7 @@ void Debugger::Detach()
     }
 }
 
-void Debugger::UpdateCpuData()
+void WindowDebugger::UpdateCpuData()
 {
     std::stringstream stream_register;
     std::string string_flags = "";
@@ -341,17 +341,17 @@ void Debugger::UpdateCpuData()
     text_flags->SetText(string_flags);
 }
 
-void Debugger::Open()
+void WindowDebugger::Open()
 {
     Attach();
 }
 
-void Debugger::Close()
+void WindowDebugger::Close()
 {
     Detach();
 }
 
-void Debugger::Update()
+void WindowDebugger::Update()
 {
     static int last_update = SDL_GetTicks();
     static RunningStatus last_running_status = RunningStatus::NOT_RUNNING;

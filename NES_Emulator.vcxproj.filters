@@ -222,9 +222,6 @@
     <ClCompile Include="src\machine\user_interface\menu_bar.cpp">
       <Filter>Source Files\Machine\UserInterface</Filter>
     </ClCompile>
-    <ClCompile Include="src\machine\user_interface\debugger.cpp">
-      <Filter>Source Files\Machine\UserInterface</Filter>
-    </ClCompile>
     <ClCompile Include="src\machine\user_interface\window.cpp">
       <Filter>Source Files\Machine\UserInterface\Units</Filter>
     </ClCompile>
@@ -249,7 +246,10 @@
     <ClCompile Include="src\machine\user_interface\textbox.cpp">
       <Filter>Source Files\Machine\UserInterface\Units</Filter>
     </ClCompile>
-    <ClCompile Include="src\machine\user_interface\controls.cpp">
+    <ClCompile Include="src\machine\user_interface\window_controls.cpp">
+      <Filter>Source Files\Machine\UserInterface</Filter>
+    </ClCompile>
+    <ClCompile Include="src\machine\user_interface\window_debugger.cpp">
       <Filter>Source Files\Machine\UserInterface</Filter>
     </ClCompile>
   </ItemGroup>
@@ -377,9 +377,6 @@
     <ClInclude Include="src\machine\user_interface\menu_bar.h">
       <Filter>Header Files\Machine\UserInterface</Filter>
     </ClInclude>
-    <ClInclude Include="src\machine\user_interface\debugger.h">
-      <Filter>Header Files\Machine\UserInterface</Filter>
-    </ClInclude>
     <ClInclude Include="src\machine\user_interface\window.h">
       <Filter>Header Files\Machine\UserInterface\Units</Filter>
     </ClInclude>
@@ -404,7 +401,10 @@
     <ClInclude Include="src\machine\user_interface\textbox.h">
       <Filter>Header Files\Machine\UserInterface\Units</Filter>
     </ClInclude>
-    <ClInclude Include="src\machine\user_interface\controls.h">
+    <ClInclude Include="src\machine\user_interface\window_controls.h">
+      <Filter>Header Files\Machine\UserInterface</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machine\user_interface\window_debugger.h">
       <Filter>Header Files\Machine\UserInterface</Filter>
     </ClInclude>
   </ItemGroup>

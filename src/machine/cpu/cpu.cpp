@@ -3,7 +3,7 @@
 #include "../../utility/utility.h"
 #include "../bus/bus.h"
 #include "../misc/machine_status.h"
-#include "../user_interface/debugger.h"
+#include "../user_interface/window_debugger.h"
 #include <iostream>
 #include <sstream>
 #include <iomanip>

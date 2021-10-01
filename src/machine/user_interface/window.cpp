@@ -8,7 +8,7 @@
 #include "checkbox.h"
 #include "list.h"
 #include "asm_list.h"
-#include "debugger.h"
+#include "window_debugger.h"
 #include "textbox.h"
 
 void Window::Show()

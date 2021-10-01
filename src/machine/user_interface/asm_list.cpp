@@ -1,6 +1,6 @@
 #include "asm_list.h"
 #include "text.h"
-#include "debugger.h"
+#include "window_debugger.h"
 #include "../../logger/logger.h"
 #include "../../utility/utility.h"
 #include <string>

@@ -3,8 +3,8 @@
 #include <Windows.h>
 #include <string>
 #include "menu_bar.h"
-#include "debugger.h"
-#include "controls.h"
+#include "window_debugger.h"
+#include "window_controls.h"
 
 class Window;
 
@@ -26,6 +26,6 @@ public:
 	uint8_t scale = 4;
 
 	MenuBar menu_bar;
-	Debugger debugger;
-	Controls controls;
+	WindowDebugger debugger;
+	WindowControls controls;
 };

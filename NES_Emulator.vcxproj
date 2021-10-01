@@ -183,8 +183,8 @@
     <ClCompile Include="src\machine\user_interface\asm_list.cpp" />
     <ClCompile Include="src\machine\user_interface\button.cpp" />
     <ClCompile Include="src\machine\user_interface\checkbox.cpp" />
-    <ClCompile Include="src\machine\user_interface\controls.cpp" />
-    <ClCompile Include="src\machine\user_interface\debugger.cpp" />
+    <ClCompile Include="src\machine\user_interface\window_controls.cpp" />
+    <ClCompile Include="src\machine\user_interface\window_debugger.cpp" />
     <ClCompile Include="src\machine\user_interface\element.cpp" />
     <ClCompile Include="src\machine\user_interface\list.cpp" />
     <ClCompile Include="src\machine\user_interface\menu_bar.cpp" />
@@ -237,8 +237,8 @@
     <ClInclude Include="src\machine\user_interface\asm_list.h" />
     <ClInclude Include="src\machine\user_interface\button.h" />
     <ClInclude Include="src\machine\user_interface\checkbox.h" />
-    <ClInclude Include="src\machine\user_interface\controls.h" />
-    <ClInclude Include="src\machine\user_interface\debugger.h" />
+    <ClInclude Include="src\machine\user_interface\window_controls.h" />
+    <ClInclude Include="src\machine\user_interface\window_debugger.h" />
     <ClInclude Include="src\machine\user_interface\element.h" />
     <ClInclude Include="src\machine\user_interface\list.h" />
     <ClInclude Include="src\machine\user_interface\menu_bar.h" />
