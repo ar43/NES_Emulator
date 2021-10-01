@@ -5,6 +5,7 @@
 #include "menu_bar.h"
 #include "window_debugger.h"
 #include "window_controls.h"
+#include "window_about.h"
 
 class Window;
 
@@ -28,4 +29,5 @@ public:
 	MenuBar menu_bar;
 	WindowDebugger debugger;
 	WindowControls controls;
+	WindowAbout about;
 };

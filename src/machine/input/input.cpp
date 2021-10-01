@@ -39,11 +39,13 @@ void Input::Poll(MachineStatus *machine_status, UserInterface *ui)
 			ui->window.HandleWindowEvent(&e, &request_exit);
 			ui->debugger.window.HandleWindowEvent(&e);
 			ui->controls.window.HandleWindowEvent(&e);
+			ui->about.window.HandleWindowEvent(&e);
 		}
 		else
 		{
 			ui->debugger.window.HandleEvent(&e);
 			ui->controls.window.HandleEvent(&e);
+			ui->about.window.HandleEvent(&e);
 		}
 
         if (e.type == SDL_QUIT || request_exit)
@@ -190,6 +192,11 @@ void Input::HandleMenuBar(MachineStatus *machine_status, UserInterface* ui, WORD
 		case (WORD)MenuBarID::CONTROLS:
 		{
 			ui->controls.window.Show();
+			break;
+		}
+		case (WORD)MenuBarID::ABOUT:
+		{
+			ui->about.window.Show();
 			break;
 		}
 		default: break;

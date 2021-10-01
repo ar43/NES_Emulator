@@ -30,12 +30,14 @@ void UserInterface::Init()
     menu_bar.Init(window.GetWindow());
     debugger.Init(window.GetWindow());
     controls.Init(window.GetWindow());
+    about.Init(window.GetWindow());
 }
 
 void UserInterface::UpdateAll()
 {
     debugger.window.Update();
     controls.window.Update();
+    about.window.Update();
 }
 
 void UserInterface::SetScale(uint8_t scale)
